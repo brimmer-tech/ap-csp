@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AP CSP Unit 3 — Algorithms and Programming with MakeCode Arcade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --paper:#F3F0F8; --panel:#FFFFFF; --ink:#241C36; --ink-2:#655B7A; --rule:#D8D1E6;
+  --accent:#6B37BF; --accent-soft:#ECE3FA; --ok:#1E8E5A; --ok-soft:#DDF4E8; --bad:#C23B3B; --bad-soft:#FBE3E3;
+  --screen:#1B1430; --screen-ink:#F2EEFF; --grid:#2A2047; --hi:#FFE08A;
+  --b-sprite:#4C97FF; --b-ctrl:#D54322; --b-game:#8854D0; --b-var:#E74C3C; --b-math:#9B59B6; --b-logic:#1E90FF; --b-loop:#2EBE6B; --b-text:#B49B00; --b-info:#CF6A87;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#15111F; --panel:#1F1930; --ink:#EEE9F8; --ink-2:#AFA5C6; --rule:#352C4C;
+    --accent:#B48CFF; --accent-soft:#2D2149; --ok:#5ED59A; --ok-soft:#163626; --bad:#FF8E8E; --bad-soft:#4A2222;
+    --screen:#0D0A17; --grid:#1E1733; --hi:#7A6410;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#15111F; --panel:#1F1930; --ink:#EEE9F8; --ink-2:#AFA5C6; --rule:#352C4C;
+  --accent:#B48CFF; --accent-soft:#2D2149; --ok:#5ED59A; --ok-soft:#163626; --bad:#FF8E8E; --bad-soft:#4A2222;
+  --screen:#0D0A17; --grid:#1E1733; --hi:#7A6410;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+*{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Nunito","Segoe UI",Helvetica,Arial,sans-serif;font-size:17px;line-height:1.55}
+.px{font-family:"Press Start 2P","Courier New",monospace}
+h1{font-family:"Press Start 2P","Courier New",monospace;font-size:1.25rem;line-height:1.7;margin:0 0 .4rem;color:var(--accent)}
+h2{font-family:"Press Start 2P","Courier New",monospace;font-size:.9rem;line-height:1.6;margin:2.6rem 0 .8rem}
+h3{font-size:1.05rem;margin:1.4rem 0 .4rem;font-weight:700}
+p{margin:.5rem 0}
+.sub{color:var(--ink-2)}
+code{font-family:"Courier New",Menlo,monospace;background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.92em}
+a{color:var(--accent)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--paper);z-index:10}
+.wrap{display:grid;grid-template-columns:230px minmax(0,760px);gap:40px;max-width:1080px;margin:0 auto;padding:28px 20px 80px}
+nav.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start}
+nav.side a{display:block;padding:6px 10px;border-left:3px solid var(--rule);color:var(--ink-2);text-decoration:none;font-size:.95rem}
+nav.side a.on{border-left-color:var(--accent);color:var(--ink);font-weight:700}
+.prog{margin-top:18px;padding:12px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--panel);font-size:.9rem}
+.bar{height:8px;background:var(--rule);border-radius:4px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+main>section{scroll-margin-top:20px}
+.lead{font-size:1.1rem}
+table{border-collapse:collapse;width:100%;margin:.8rem 0;font-size:.95rem}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:700;color:var(--ink-2)}
+.scroll{overflow-x:auto}
+ul{padding-left:1.2rem} li{margin:.3rem 0}
+button{font-family:inherit;font-size:.95rem;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);cursor:pointer}
+button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+
+/* blocks */
+.blocks{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin:.6rem 0;overflow-x:auto}
+.blk{display:block;width:max-content;max-width:100%;color:#fff;border-radius:6px;padding:5px 10px;margin:3px 0;font-weight:700;font-size:.9rem;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.blk .v{display:inline-block;background:rgba(255,255,255,.92);color:#241C36;border-radius:12px;padding:0 8px;margin:0 2px;font-weight:600}
+.blk .bool{display:inline-block;background:rgba(255,255,255,.92);color:#241C36;padding:0 10px;margin:0 2px;clip-path:polygon(10% 0,90% 0,100% 50%,90% 100%,10% 100%,0 50%);font-weight:600}
+.blk.hat{border-radius:16px 16px 6px 6px;padding-top:9px}
+.nest{margin-left:14px;border-left:10px solid;padding-left:6px;border-radius:0 0 0 6px}
+.c-sprite{background:var(--b-sprite)} .c-ctrl{background:var(--b-ctrl)} .c-game{background:var(--b-game)} .c-var{background:var(--b-var)} .c-math{background:var(--b-math)} .c-logic{background:var(--b-logic)} .c-loop{background:var(--b-loop)} .c-text{background:var(--b-text)} .c-info{background:var(--b-info)}
+.nest.c-logic{border-color:var(--b-logic);background:transparent} .nest.c-loop{border-color:var(--b-loop);background:transparent} .nest.c-ctrl{border-color:var(--b-ctrl);background:transparent} .nest.c-game{border-color:var(--b-game);background:transparent}
+pre.ap{margin:.6rem 0;padding:12px 14px;background:var(--screen);color:var(--screen-ink);border-radius:8px;font-family:"Courier New",Menlo,monospace;font-size:.92rem;line-height:1.5;overflow-x:auto}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.two .cap{font-size:.85rem;color:var(--ink-2);margin:0 0 4px}
+
+/* tracer */
+.tracer{border:1px solid var(--rule);border-radius:12px;background:var(--panel);margin:1.2rem 0;overflow:hidden}
+.tracer .q{padding:10px 14px;font-weight:700;border-bottom:1px solid var(--rule);background:var(--accent-soft)}
+.tracer .body{padding:10px 14px 0}
+.tracer .blocks{border:0;padding:0;margin:0}
+.tracer .ans{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px}
+.tracer input[type=text],.tracer select{flex:1 1 180px;min-width:0;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font-family:inherit;font-size:1rem}
+.tracer .out{padding:0 14px 14px;display:none}
+.tracer .out.show{display:block}
+.verdict{padding:8px 12px;border-radius:8px;margin-bottom:8px;font-weight:700}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* robot */
+.robot{border:1px solid var(--rule);border-radius:12px;background:var(--panel);padding:14px 16px;margin:1rem 0}
+.robot .lay{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
+.screen{background:var(--screen);border-radius:10px;padding:10px;display:inline-block;box-shadow:0 0 0 6px var(--grid), 0 0 0 8px var(--rule)}
+.screen svg{display:block;width:240px;height:240px}
+.robot pre.ap{margin:0 0 8px}
+.robot .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.robot select{padding:7px 9px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font-family:inherit;font-size:.95rem}
+.pline{display:block}
+.pline.on{background:var(--hi);color:#241C36;border-radius:3px}
+
+/* widgets */
+.widget{border:1px solid var(--rule);border-radius:12px;background:var(--panel);padding:14px 16px;margin:1.1rem 0}
+.widget .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:.4rem 0}
+.widget label{font-size:.95rem;color:var(--ink-2)}
+.widget input[type=number]{width:84px;padding:7px 9px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font-family:"Courier New",monospace;font-size:1rem}
+.result{font-family:"Courier New",monospace;background:var(--screen);color:var(--screen-ink);padding:10px 12px;border-radius:8px;margin-top:8px;overflow-x:auto;white-space:pre-wrap}
+.dots{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}
+.dot{width:22px;height:22px;border-radius:4px;background:var(--rule)}
+.dot.g{background:var(--accent)} .dot.r{background:var(--hi)}
+
+/* flashcards */
+.deck{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.card{border:2px solid var(--rule);border-radius:10px;background:var(--panel);padding:12px;min-height:92px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;user-select:none}
+.card.flip{background:var(--accent-soft);border-color:var(--accent);font-weight:400;font-size:.92rem}
+
+/* quiz */
+.qz{border:1px solid var(--rule);border-radius:12px;background:var(--panel);padding:14px 16px;margin:1rem 0}
+.qz .stem{font-weight:700}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;margin:6px 0;cursor:pointer}
+.opt input{margin-top:4px}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)} .opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.qz .why{display:none;margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--accent-soft)}
+.qz .why.show{display:block}
+.score{border:1px solid var(--rule);border-radius:12px;padding:14px 16px;background:var(--panel)}
+.topicbar{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:.95rem}
+.topicbar span{width:150px} .topicbar .bar{flex:1;margin:0} .topicbar .bar i{background:var(--accent)}
+
+@media (max-width:820px){
+  .wrap{grid-template-columns:1fr;gap:0;padding:16px 14px 60px}
+  nav.side{position:sticky;top:env(safe-area-inset-top,0px);background:var(--paper);z-index:5;display:flex;gap:6px;overflow-x:auto;padding:8px 0;border-bottom:1px solid var(--rule);margin-bottom:8px}
+  nav.side a{border-left:0;border-bottom:3px solid transparent;white-space:nowrap;padding:6px 8px;font-size:.9rem}
+  nav.side a.on{border-bottom-color:var(--accent)}
+  .prog{display:none}
+  .two{grid-template-columns:1fr}
+  .robot .lay{grid-template-columns:1fr}
+  .screen svg{width:200px;height:200px}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="side" id="nav">
+  <a href="#start" class="on">Start here</a>
+  <a href="#algo">Algorithms</a>
+  <a href="#events">Sprites & events</a>
+  <a href="#vars">Variables</a>
+  <a href="#cond">Conditionals</a>
+  <a href="#rand">Random & mod</a>
+  <a href="#loops">Loops</a>
+  <a href="#proj">Projectiles</a>
+  <a href="#pseudo">AP pseudocode</a>
+  <a href="#traps">Common traps</a>
+  <a href="#vocab">Flashcards</a>
+  <a href="#quiz">Quiz</a>
+  <div class="prog">
+    <div>Tracers solved: <b id="pt">0</b>/<span id="ptn">0</span></div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div>Best quiz score: <b id="pq">—</b></div>
+    <button id="reset" style="margin-top:6px">Reset my progress</button>
+  </div>
+</nav>
+
+<main>
+<section id="start">
+  <h1>AP CSP Unit 3<br>Algorithms &amp; Programming</h1>
+  <p class="sub">MakeCode Arcade curriculum, Days 1–17: algorithms through projectiles.</p>
+  <p class="lead">Each topic has notes, the blocks you used in Arcade, the matching AP exam pseudocode, and a tracer to test yourself. Start with the robot: predict where it ends up, then run the program.</p>
+
+  <div class="robot" id="robot">
+    <h3 style="margin-top:0">Robot tracer</h3>
+    <p class="sub" style="margin-top:0">The robot is the triangle; it points the way it is facing. <code>MOVE_FORWARD</code> moves one square. <code>ROTATE_LEFT</code> and <code>ROTATE_RIGHT</code> turn 90° without moving. <code>CAN_MOVE(forward)</code> is true if the next square is on the grid and not black.</p>
+    <div class="lay">
+      <div class="screen"><svg id="rsvg" viewBox="0 0 250 250" role="img" aria-label="Robot grid"></svg></div>
+      <div>
+        <div class="row"><label for="rprog">Program</label>
+          <select id="rprog">
+            <option value="0">1 — Sequence</option>
+            <option value="1">2 — Repeat</option>
+            <option value="2">3 — Repeat until</option>
+            <option value="3">4 — If inside a loop</option>
+          </select></div>
+        <pre class="ap" id="rcode"></pre>
+        <div class="row">
+          <span>My prediction: click the ending square, then</span>
+          <select id="rface"><option>facing up</option><option>facing right</option><option selected>facing down</option><option>facing left</option></select>
+        </div>
+        <div class="row">
+          <button class="pri" id="rcheck">Run and check</button>
+          <button id="rstep">Step</button>
+          <button id="rreset">Reset robot</button>
+        </div>
+        <div id="rmsg" class="verdict" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="algo">
+  <h2>Algorithms, flowcharts, and debugging</h2>
+  <p class="lead">An algorithm is a finite set of instructions that accomplishes a specific task. Every algorithm is built from three kinds of steps.</p>
+  <div class="scroll"><table>
+    <tr><th>Implementation</th><th>Meaning</th><th>Flowchart shape</th><th>Arcade example</th></tr>
+    <tr><td><b>Sequencing</b></td><td>steps run in order, one after another</td><td>rectangle (process)</td><td><code>set x</code> then <code>change score</code></td></tr>
+    <tr><td><b>Selection</b></td><td>a condition decides which steps run</td><td>diamond (decision)</td><td><code>if score &gt; 10 then … else …</code></td></tr>
+    <tr><td><b>Iteration</b></td><td>steps repeat a set number of times or until a condition is met</td><td>arrow looping back</td><td><code>repeat 4 times</code>, <code>while</code></td></tr>
+  </table></div>
+  <ul>
+    <li>Two algorithms written differently can produce the same result. Two that look almost identical can produce different results or side effects; order matters.</li>
+    <li>New algorithms are built from an idea, by combining existing algorithms, or by modifying one. Reusing tested algorithms saves development time and testing.</li>
+    <li><b>Program documentation</b> describes what code does and how it was developed; <b>comments</b> are documentation written inside the program and do not change how it runs. Document throughout development, not only at the end.</li>
+    <li><b>Debugger mode</b> in MakeCode steps through blocks one at a time so you can watch variable values change.</li>
+    <li><b>Testing</b> means running the program with chosen inputs to confirm it produces the expected outputs.</li>
+  </ul>
+  <h3>Four kinds of errors</h3>
+  <div class="scroll"><table>
+    <tr><th>Error</th><th>What it is</th><th>Example</th></tr>
+    <tr><td>Syntax</td><td>the rules of the language are broken; the program cannot run</td><td>a missing <code>)</code> in JavaScript; a block left with an empty slot</td></tr>
+    <tr><td>Logic</td><td>runs, but does the wrong thing</td><td>checking <code>score &gt; 10</code> when you meant <code>≥ 10</code></td></tr>
+    <tr><td>Run-time</td><td>happens while the program is executing</td><td>dividing by zero; using a sprite that was destroyed</td></tr>
+    <tr><td>Overflow</td><td>a number is outside the range the computer can store</td><td>a score that grows past the largest allowed value</td></tr>
+  </table></div>
+  <div class="tracer" data-id="t1" data-answer="selection" data-topic="Algorithms">
+    <div class="q">Which implementation is this? (sequencing, selection, or iteration)</div>
+    <div class="body"><pre class="ap">IF (age ≥ 13)
+{
+    DISPLAY("Teen")
+}
+ELSE
+{
+    DISPLAY("Kid")
+}</pre></div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>A condition decides which branch runs: that is selection. Sequencing would be plain ordered steps; iteration would repeat.</p></div>
+  </div>
+  <div class="tracer" data-id="t2" data-answer="logic" data-topic="Algorithms">
+    <div class="q">A tip app runs fine but always shows a 2% tip instead of 20%. Which kind of error is that? (syntax, logic, run-time, or overflow)</div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>The program runs without crashing, so it is not a syntax or run-time error. It computes the wrong value (probably <code>bill × 0.02</code>): a logic error.</p></div>
+  </div>
+</section>
+
+<section id="events">
+  <h2>Sprites, events, and the screen</h2>
+  <p>The Arcade screen is 160 pixels wide by 120 pixels tall. <code>x</code> runs 0 to 159 left to right; <code>y</code> runs 0 to 119 <em>top to bottom</em>, so a bigger <code>y</code> is lower on the screen. The center is about (80, 60).</p>
+  <ul>
+    <li>A <b>sprite</b> is an image with a position, velocity, and a <b>kind</b> (Player, Enemy, Food, Projectile). Kinds let <code>on overlap</code> events tell sprites apart.</li>
+    <li>An <b>event</b> is something that happens: A button pressed, two sprites overlap, the game starts. An <b>event handler</b> is the block that waits for that event and runs its inside code when it fires.</li>
+    <li><code>on start</code> runs once when the program loads. <code>on A button pressed</code> runs every time A is pressed. <code>on game update</code> runs over and over, every frame.</li>
+    <li><b>Velocity</b> is speed with direction: <code>vx</code> positive moves right, negative moves left; <code>vy</code> positive moves <em>down</em>, negative moves up. <code>move mySprite with buttons</code> sets velocity from the d-pad.</li>
+    <li>Program <b>input</b> is data sent to the program (button presses, <code>ask for number</code>). <b>Output</b> is data the program sends out (sprite <code>say</code>, <code>splash</code>, score, sound).</li>
+  </ul>
+  <div class="two">
+    <div><p class="cap">MakeCode blocks</p>
+      <div class="blocks">
+        <span class="blk hat c-ctrl">on <span class="v">A</span> button <span class="v">pressed</span></span>
+        <div class="nest c-ctrl">
+          <span class="blk c-sprite">set <span class="v">mySprite</span> position to x <span class="v">80</span> y <span class="v">60</span></span>
+          <span class="blk c-info">change score by <span class="v">1</span></span>
+        </div>
+      </div></div>
+    <div><p class="cap">AP pseudocode has no events; the exam shows the handler body as a procedure</p>
+      <pre class="ap">PROCEDURE onAPressed()
+{
+    SET_POSITION(mySprite, 80, 60)
+    score ← score + 1
+}</pre></div>
+  </div>
+  <div class="tracer" data-id="t3" data-answer="3" data-topic="Events">
+    <div class="q">A player presses A three times, then B once. What is the score?</div>
+    <div class="body"><div class="blocks">
+      <span class="blk hat c-game">on start</span>
+      <div class="nest c-game"><span class="blk c-info">set score to <span class="v">0</span></span></div>
+      <span class="blk hat c-ctrl">on <span class="v">A</span> button <span class="v">pressed</span></span>
+      <div class="nest c-ctrl"><span class="blk c-info">change score by <span class="v">2</span></span></div>
+      <span class="blk hat c-ctrl">on <span class="v">B</span> button <span class="v">pressed</span></span>
+      <div class="nest c-ctrl"><span class="blk c-info">change score by <span class="v">-3</span></span></div>
+    </div></div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p><code>on start</code> runs once (score 0). Each A press adds 2: 6. B subtracts 3: 3.</p></div>
+  </div>
+  <div class="tracer" data-id="t4" data-answer="up and to the right" data-topic="Events">
+    <div class="q">A sprite has <code>vx = 40</code> and <code>vy = -40</code>. Which way does it travel? (up and to the right / up and to the left / down and to the right / down and to the left)</div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>Positive vx is rightward. Negative vy is upward, because y grows downward on the screen.</p></div>
+  </div>
+</section>
+
+<section id="vars">
+  <h2>Variables, data types, and expressions</h2>
+  <p class="lead">A variable is a named container that holds one value at a time; <code>set</code> replaces the value and <code>change by</code> adds to it.</p>
+  <div class="scroll"><table>
+    <tr><th>Type</th><th>Examples</th><th>Arcade blocks</th></tr>
+    <tr><td>Number</td><td><code>0</code>, <code>42</code>, <code>-3</code>, <code>2.5</code></td><td>Math category (purple): <code>+ − × ÷</code>, <code>remainder of</code>, <code>pick random</code></td></tr>
+    <tr><td>String</td><td><code>"Hello"</code>, <code>"20"</code> (text, not a number)</td><td>Text category: <code>join</code>, <code>length of</code>, <code>parse to number</code></td></tr>
+    <tr><td>Boolean</td><td><code>true</code>, <code>false</code></td><td>Logic category (blue): comparisons, <code>and</code>, <code>or</code>, <code>not</code></td></tr>
+    <tr><td>Sprite</td><td><code>mySprite</code></td><td>Sprites category: a variable that holds a sprite object</td></tr>
+  </table></div>
+  <ul>
+    <li>An <b>expression</b> is anything that evaluates to a single value: <code>5</code>, <code>score</code>, <code>score + 1</code>, <code>bill × 0.2</code>.</li>
+    <li><code>set score to score + 1</code> and <code>change score by 1</code> do the same thing. Assignment copies the value <em>at that moment</em>; later changes to the right side do not update it.</li>
+    <li><b>String concatenation</b> joins strings end to end: <code>join("Score: ", score)</code> gives <code>"Score: 7"</code>. A number inside a string is text; <code>"3" + "4"</code> joined is <code>"34"</code>, not 7.</li>
+    <li><code>ask for number</code> and <code>ask for string</code> are inputs. In the 20% Tip App: <code>tip ← bill × 0.20</code>, <code>total ← bill + tip</code>, then <code>splash(join("Total: ", total))</code>.</li>
+    <li>A <b>substring</b> is part of a string; an <b>index</b> is a position number used to reference a character or list element. (AP pseudocode lists start at index 1.)</li>
+  </ul>
+  <div class="tracer" data-id="t5" data-answer="7" data-topic="Variables">
+    <div class="q">What is <code>b</code> at the end?</div>
+    <div class="body"><pre class="ap">a ← 5
+b ← a
+a ← a + 10
+b ← b + 2</pre></div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p><code>b</code> copied 5 from <code>a</code>. Changing <code>a</code> afterward does not change <code>b</code>. Then <code>b</code> becomes 7. (<code>a</code> is 15.)</p></div>
+  </div>
+  <div class="tracer" data-id="t6" data-answer="Total: 24" data-topic="Variables">
+    <div class="q">The user enters 20 for the bill. What does the splash show?</div>
+    <div class="body"><div class="blocks">
+      <span class="blk c-var">set <span class="v">bill</span> to <span class="v">ask for number <span class="v">"Bill?"</span></span></span>
+      <span class="blk c-var">set <span class="v">tip</span> to <span class="v">bill × 0.2</span></span>
+      <span class="blk c-var">set <span class="v">total</span> to <span class="v">bill + tip</span></span>
+      <span class="blk c-game">splash <span class="v">join <span class="v">"Total: "</span> <span class="v">total</span></span></span>
+    </div></div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>tip = 20 × 0.2 = 4; total = 24; join puts the text and the number together.</p></div>
+  </div>
+</section>
+
+<section id="cond">
+  <h2>Booleans, relational operators, and conditionals</h2>
+  <p class="lead">A conditional runs its inside code only when its Boolean condition is true; <code>else</code> runs when it is false, and a nested conditional is one <code>if</code> placed inside another.</p>
+  <div class="scroll"><table>
+    <tr><th>Relational</th><th>Reads as</th><th>Logical</th><th>True when</th></tr>
+    <tr><td><code>=</code> (<code>==</code> in JS)</td><td>equal to</td><td><code>A and B</code></td><td>both are true</td></tr>
+    <tr><td><code>≠</code></td><td>not equal to</td><td><code>A or B</code></td><td>at least one is true</td></tr>
+    <tr><td><code>&gt;</code> <code>&lt;</code></td><td>greater / less than</td><td><code>not A</code></td><td>A is false</td></tr>
+    <tr><td><code>≥</code> <code>≤</code></td><td>greater / less than or equal</td><td></td><td></td></tr>
+  </table></div>
+  <ul>
+    <li>Relational operators compare two values and produce a Boolean. <code>score &gt; 10</code> is either true or false; it is not a number.</li>
+    <li><code>if / else if / else</code>: only the <em>first</em> true branch runs. Order the checks from most specific to least.</li>
+    <li>Nested: <code>if hasTicket then (if age ≥ 18 then adult else child)</code>. The inner <code>if</code> is only reached when the outer one is true.</li>
+    <li><code>not (a = b)</code> is the same as <code>a ≠ b</code>. <code>not (x &gt; 5)</code> is <code>x ≤ 5</code>, not <code>x &lt; 5</code>.</li>
+    <li>In <code>on overlap</code> events, the sprite kinds are a built-in selection: the code only runs for the kinds you chose.</li>
+  </ul>
+  <div class="two">
+    <div><p class="cap">Blocks</p>
+      <div class="blocks">
+        <span class="blk c-logic">if <span class="bool">score ≥ 10</span> then</span>
+        <div class="nest c-logic"><span class="blk c-game">game over <span class="v">WIN</span></span></div>
+        <span class="blk c-logic">else if <span class="bool">lives = 0</span> then</span>
+        <div class="nest c-logic"><span class="blk c-game">game over <span class="v">LOSE</span></span></div>
+        <span class="blk c-logic">else</span>
+        <div class="nest c-logic"><span class="blk c-sprite"><span class="v">mySprite</span> say <span class="v">"Keep going"</span></span></div>
+      </div></div>
+    <div><p class="cap">AP pseudocode</p>
+      <pre class="ap">IF (score ≥ 10)
+{
+    DISPLAY("WIN")
+}
+ELSE
+{
+    IF (lives = 0)
+    {
+        DISPLAY("LOSE")
+    }
+    ELSE
+    {
+        DISPLAY("Keep going")
+    }
+}</pre></div>
+  </div>
+  <div class="tracer" data-id="t7" data-answer="B" data-topic="Conditionals">
+    <div class="q">grade is 85. What letter is displayed?</div>
+    <div class="body"><pre class="ap">IF (grade ≥ 90) { DISPLAY("A") }
+ELSE IF (grade ≥ 80) { DISPLAY("B") }
+ELSE IF (grade ≥ 70) { DISPLAY("C") }
+ELSE { DISPLAY("F") }</pre></div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>85 ≥ 90 is false; 85 ≥ 80 is true, so B prints and the rest is skipped.</p></div>
+  </div>
+  <div class="tracer" data-id="t8" data-answer="false" data-topic="Conditionals">
+    <div class="q">x is 7 and y is 3. Is this expression true or false?</div>
+    <div class="body"><pre class="ap">(x &gt; 5) AND (NOT (y &lt; 5))</pre></div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>x &gt; 5 is true. y &lt; 5 is true, so NOT of it is false. true AND false is false.</p></div>
+  </div>
+  <div class="tracer" data-id="t9" data-answer="child" data-topic="Conditionals">
+    <div class="q">hasTicket is true and age is 12. What displays?</div>
+    <div class="body"><pre class="ap">IF (hasTicket)
+{
+    IF (age ≥ 18) { DISPLAY("adult") }
+    ELSE { DISPLAY("child") }
+}
+ELSE
+{
+    DISPLAY("no entry")
+}</pre></div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>The outer condition is true, so the inner conditional runs. 12 ≥ 18 is false, so the inner else prints child.</p></div>
+  </div>
+</section>
+
+<section id="rand">
+  <h2>Random numbers and the modulus operator</h2>
+  <p><code>pick random 1 to 6</code> (AP: <code>RANDOM(1, 6)</code>) returns a whole number from 1 to 6, <em>including both ends</em>. A coin flip is <code>RANDOM(0, 1)</code> or <code>RANDOM(1, 2)</code>. Computers produce pseudo-random numbers from a formula and a seed, which is why they only look random.</p>
+  <p><b>Modulus</b> (<code>remainder of a ÷ b</code>, AP: <code>a MOD b</code>) gives the remainder after whole-number division. <code>17 MOD 5</code> is 2. It is the standard test for even and odd (<code>n MOD 2 = 0</code> means even) and for wrapping a value around a range.</p>
+  <div class="widget">
+    <h3 style="margin-top:0">Modulus explorer</h3>
+    <div class="row"><label>a <input type="number" id="ma" value="17"></label><label>b <input type="number" id="mb" value="5" min="1"></label></div>
+    <div class="dots" id="mdots"></div>
+    <div class="result" id="mres"></div>
+    <p class="sub" style="margin:.4rem 0 0">Groups of b are filled first; the leftover squares are the remainder.</p>
+  </div>
+  <div class="widget">
+    <h3 style="margin-top:0">Random range checker</h3>
+    <div class="row"><label>RANDOM( <input type="number" id="rlo" value="1"> , <input type="number" id="rhi" value="6"> )</label><button id="rroll">Roll 12 times</button></div>
+    <div class="result" id="rrres"></div>
+  </div>
+  <div class="tracer" data-id="t10" data-answer="3" data-topic="Random & mod">
+    <div class="q">What is <code>23 MOD 4</code>?</div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>4 goes into 23 five times (20), leaving 3.</p></div>
+  </div>
+  <div class="tracer" data-id="t11" data-answer="6" data-topic="Random & mod">
+    <div class="q">How many different values can <code>RANDOM(5, 10)</code> produce?</div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>5, 6, 7, 8, 9, 10: both ends included, so 10 − 5 + 1 = 6 values.</p></div>
+  </div>
+  <div class="tracer" data-id="t12" data-answer="odd" data-topic="Random & mod">
+    <div class="q">n is 31. Does this display even or odd?</div>
+    <div class="body"><pre class="ap">IF (n MOD 2 = 0) { DISPLAY("even") }
+ELSE { DISPLAY("odd") }</pre></div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>31 MOD 2 is 1, not 0, so the else branch runs.</p></div>
+  </div>
+</section>
+
+<section id="loops">
+  <h2>Loops and animation</h2>
+  <p class="lead">Iteration repeats a block of code either a set number of times or until a condition becomes true, and it replaces copy-pasted blocks with one block that runs many times.</p>
+  <div class="scroll"><table>
+    <tr><th>Arcade block</th><th>AP pseudocode</th><th>Notes</th></tr>
+    <tr><td><code>repeat 4 times</code></td><td><code>REPEAT 4 TIMES { }</code></td><td>runs exactly 4 times</td></tr>
+    <tr><td><code>while &lt;condition&gt;</code></td><td><code>REPEAT UNTIL (condition) { }</code></td><td>opposite senses: <code>while</code> runs while true; <code>REPEAT UNTIL</code> runs while false and stops when true</td></tr>
+    <tr><td><code>for index from 0 to 4</code></td><td>(no direct form)</td><td>index takes 0, 1, 2, 3, 4: that is <b>5</b> iterations, because MakeCode includes the end value</td></tr>
+    <tr><td><code>on game update every 500 ms</code></td><td>(event)</td><td>a loop driven by time; used for animation frames and spawning</td></tr>
+    <tr><td><code>forever</code></td><td><code>REPEAT UNTIL (false)</code></td><td>never stops on its own</td></tr>
+  </table></div>
+  <ul>
+    <li>Animation is iteration: change the sprite’s image (or position) a little, pause, repeat.</li>
+    <li>A loop that never reaches its stopping condition is an <b>infinite loop</b>. <code>REPEAT UNTIL (x = 10)</code> with <code>x ← x + 3</code> starting at 0 never hits exactly 10.</li>
+    <li>To trace a loop, make a table with one row per pass: the index or counter, and each variable’s value after the pass.</li>
+  </ul>
+  <div class="two">
+    <div><p class="cap">Blocks</p>
+      <div class="blocks">
+        <span class="blk c-var">set <span class="v">total</span> to <span class="v">0</span></span>
+        <span class="blk c-loop">for <span class="v">index</span> from 0 to <span class="v">3</span></span>
+        <div class="nest c-loop"><span class="blk c-var">change <span class="v">total</span> by <span class="v">index</span></span></div>
+      </div></div>
+    <div><p class="cap">AP pseudocode</p>
+      <pre class="ap">total ← 0
+i ← 0
+REPEAT UNTIL (i &gt; 3)
+{
+    total ← total + i
+    i ← i + 1
+}</pre></div>
+  </div>
+  <div class="tracer" data-id="t13" data-answer="6" data-topic="Loops">
+    <div class="q">What is <code>total</code> after the loop above finishes?</div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>index runs 0, 1, 2, 3 (four passes). 0 + 1 + 2 + 3 = 6.</p></div>
+  </div>
+  <div class="tracer" data-id="t14" data-answer="5" data-topic="Loops">
+    <div class="q">How many times does <code>DISPLAY</code> run?</div>
+    <div class="body"><pre class="ap">count ← 10
+REPEAT UNTIL (count &lt; 1)
+{
+    DISPLAY(count)
+    count ← count − 2
+}</pre></div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>Displays 10, 8, 6, 4, 2 (five times). Then count is 0, 0 &lt; 1 is true, and the loop stops.</p></div>
+  </div>
+  <div class="tracer" data-id="t15" data-answer="24" data-topic="Loops">
+    <div class="q">What is <code>x</code> at the end?</div>
+    <div class="body"><pre class="ap">x ← 3
+REPEAT 3 TIMES
+{
+    x ← x × 2
+}</pre></div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>3 → 6 → 12 → 24.</p></div>
+  </div>
+</section>
+
+<section id="proj">
+  <h2>Projectiles</h2>
+  <p>A <b>projectile</b> is a sprite of kind Projectile that is created with a velocity and is automatically destroyed when it leaves the screen, so you do not have to clean it up. <code>projectile from mySprite with vx 50 vy 0</code> starts at the sprite’s position; <code>projectile from side with vx -50 vy 0</code> starts at the screen edge and moves left.</p>
+  <ul>
+    <li>Positive <code>vx</code> flies right, negative flies left. Positive <code>vy</code> falls down, negative rises. Larger numbers move faster (pixels per second).</li>
+    <li>Projectiles are usually created inside an event (<code>on A button pressed</code>) or a timed loop (<code>on game update every 300 ms</code>) so they keep coming.</li>
+    <li>In Task 2b you put the <code>create projectile</code> block in a <code>for index</code> loop so 13 meteors were made at once, each starting lower by using <code>index</code> in the position: one block instead of thirteen.</li>
+    <li><code>on overlap Player with Projectile</code> is how a hit is detected: a selection event keyed on sprite kinds.</li>
+  </ul>
+  <div class="blocks">
+    <span class="blk hat c-game">on game update every <span class="v">300</span> ms</span>
+    <div class="nest c-game">
+      <span class="blk c-var">set <span class="v">meteor</span> to <span class="v">projectile from side with vx <span class="v">0</span> vy <span class="v">50</span></span></span>
+      <span class="blk c-sprite">set <span class="v">meteor</span> x to <span class="v">pick random 0 to 159</span></span>
+    </div>
+  </div>
+  <div class="tracer" data-id="t16" data-answer="down" data-topic="Projectiles">
+    <div class="q">In the blocks above, which direction do the meteors move? (up, down, left, right)</div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>vx is 0 and vy is positive 50, so they fall straight down from a random x.</p></div>
+  </div>
+  <div class="tracer" data-id="t17" data-answer="13" data-topic="Projectiles">
+    <div class="q">A <code>for index from 0 to 12</code> loop contains one <code>create projectile</code> block. How many projectiles are created each time the loop runs?</div>
+    <div class="ans"><input type="text" aria-label="Your answer"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+    <div class="out"><div class="verdict"></div><p>MakeCode’s for loop includes the end value: 0 through 12 is 13 passes.</p></div>
+  </div>
+</section>
+
+<section id="pseudo">
+  <h2>AP exam pseudocode cheat sheet</h2>
+  <p>The exam does not use MakeCode blocks. It uses the reference-sheet pseudocode below, which maps directly onto what you built.</p>
+  <div class="scroll"><table>
+    <tr><th>AP pseudocode</th><th>Means</th><th>MakeCode block</th></tr>
+    <tr><td><code>a ← expression</code></td><td>assign a value</td><td><code>set a to</code></td></tr>
+    <tr><td><code>DISPLAY(expression)</code></td><td>show a value</td><td><code>say</code>, <code>splash</code>, <code>show long text</code></td></tr>
+    <tr><td><code>INPUT()</code></td><td>get a value from the user</td><td><code>ask for number / string</code></td></tr>
+    <tr><td><code>a MOD b</code></td><td>remainder</td><td><code>remainder of a ÷ b</code></td></tr>
+    <tr><td><code>RANDOM(a, b)</code></td><td>random integer from a to b inclusive</td><td><code>pick random a to b</code></td></tr>
+    <tr><td><code>=  ≠  &gt;  &lt;  ≥  ≤</code></td><td>comparisons (Boolean)</td><td>Logic comparison blocks</td></tr>
+    <tr><td><code>AND  OR  NOT</code></td><td>logical operators</td><td><code>and</code>, <code>or</code>, <code>not</code></td></tr>
+    <tr><td><code>IF (c) { } ELSE { }</code></td><td>selection</td><td><code>if then else</code></td></tr>
+    <tr><td><code>REPEAT n TIMES { }</code></td><td>fixed iteration</td><td><code>repeat n times</code></td></tr>
+    <tr><td><code>REPEAT UNTIL (c) { }</code></td><td>iteration until c is true</td><td><code>while (not c)</code></td></tr>
+    <tr><td><code>MOVE_FORWARD()  ROTATE_LEFT()  ROTATE_RIGHT()  CAN_MOVE(dir)</code></td><td>robot commands</td><td>(robot tracer above)</td></tr>
+  </table></div>
+</section>
+
+<section id="traps">
+  <h2>Common traps</h2>
+  <div class="scroll"><table>
+    <tr><th>Students think</th><th>What is true</th></tr>
+    <tr><td>Bigger y is higher on the screen</td><td>y grows downward: (80, 0) is the top edge, (80, 119) the bottom.</td></tr>
+    <tr><td><code>for index from 0 to 4</code> runs 4 times</td><td>It runs 5 times; MakeCode includes the end value.</td></tr>
+    <tr><td><code>REPEAT UNTIL</code> runs while the condition is true</td><td>It runs while the condition is <em>false</em> and stops once it becomes true. <code>while</code> is the reverse.</td></tr>
+    <tr><td><code>RANDOM(1, 6)</code> cannot give 6</td><td>Both ends are included.</td></tr>
+    <tr><td><code>17 MOD 5</code> is 3.4 or 3</td><td>It is the remainder: 2.</td></tr>
+    <tr><td>In an if / else-if chain, every true branch runs</td><td>Only the first true branch runs.</td></tr>
+    <tr><td><code>NOT (x &gt; 5)</code> means <code>x &lt; 5</code></td><td>It means <code>x ≤ 5</code>.</td></tr>
+    <tr><td>Changing <code>a</code> after <code>b ← a</code> changes <code>b</code></td><td>Assignment copies the value once.</td></tr>
+    <tr><td><code>on start</code> runs every frame</td><td>Once, at load. <code>on game update</code> is the one that repeats.</td></tr>
+    <tr><td>Comments can fix or change behavior</td><td>Comments are ignored when the program runs.</td></tr>
+    <tr><td>A program that runs has no errors</td><td>It may have a logic error: wrong output, no crash.</td></tr>
+    <tr><td><code>ROTATE_LEFT</code> moves the robot</td><td>Rotations only change the facing direction.</td></tr>
+  </table></div>
+</section>
+
+<section id="vocab">
+  <h2>Flashcards</h2>
+  <p class="sub">Tap a card to flip it. <button id="shuffle">Shuffle</button></p>
+  <div class="deck" id="deck"></div>
+</section>
+
+<section id="quiz">
+  <h2>Unit quiz</h2>
+  <p class="sub">Twelve questions in AP style. Pick an answer to see the reasoning; your best score saves.</p>
+  <div id="quizbox"></div>
+  <div class="score" id="scorebox" style="display:none"></div>
+  <p><button class="pri" id="grade">Show my score</button> <button id="requiz">Start over</button></p>
+</section>
+</main>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var KEY='apcsp-u3-v1';
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
+  function save(st){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+  var state=load(); state.solved=state.solved||{}; state.best=state.best||null;
+  function norm(s){ return s.replace(/\s+/g,' ').trim().toLowerCase().replace(/\.$/,''); }
+
+  // ---------- tracers ----------
+  var tracers=Array.prototype.slice.call(document.querySelectorAll('.tracer[data-id]'));
+  var TOTAL=tracers.length+4; document.getElementById('ptn').textContent=TOTAL;
+  tracers.forEach(function(t){
+    var id=t.dataset.id, ans=t.dataset.answer, input=t.querySelector('input'), out=t.querySelector('.out'), v=t.querySelector('.verdict');
+    function show(ok,msg){ out.classList.add('show'); v.className='verdict '+(ok?'ok':'bad'); v.textContent=msg; }
+    if(state.solved[id]){ input.value=ans; show(true,'Solved earlier'); }
+    t.querySelector('.check').addEventListener('click',function(){
+      if(norm(input.value)===norm(ans)){ show(true,'Correct'); state.solved[id]=true; save(state); updateProg(); }
+      else show(false,'Not yet. Expected: '+ans);
+    });
+    t.querySelector('.reveal').addEventListener('click',function(){ show(false,'Answer: '+ans); });
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter') t.querySelector('.check').click(); });
+  });
+  function updateProg(){
+    var n=Object.keys(state.solved).length;
+    document.getElementById('pt').textContent=n;
+    document.getElementById('pbar').style.width=(100*n/TOTAL)+'%';
+  }
+  updateProg();
+  document.getElementById('reset').addEventListener('click',function(){
+    if(confirm('Clear your saved progress on this device?')){ state={solved:{},best:null}; save(state); location.reload(); }
+  });
+
+  // ---------- robot tracer ----------
+  // grid 5x5, row 0 at top. Robot start: col 0,row 4 facing up. dirs: 0 up,1 right,2 down,3 left
+  var walls=[[2,1],[2,2],[2,3]];
+  var progs=[
+    {lines:['MOVE_FORWARD()','MOVE_FORWARD()','ROTATE_RIGHT()','MOVE_FORWARD()'],
+     run:function(){ return [{m:0},{m:1},{r:2},{m:3}]; }},
+    {lines:['REPEAT 3 TIMES','{','    MOVE_FORWARD()','    ROTATE_RIGHT()','}'],
+     run:function(){ var s=[]; for(var i=0;i<3;i++){ s.push({m:2}); s.push({r:3}); } return s; }},
+    {lines:['REPEAT UNTIL (NOT CAN_MOVE(forward))','{','    MOVE_FORWARD()','}','ROTATE_RIGHT()','MOVE_FORWARD()'],
+     run:function(){ return null; }},
+    {lines:['REPEAT 6 TIMES','{','    IF (CAN_MOVE(forward))','    {','        MOVE_FORWARD()','    }','    ELSE','    {','        ROTATE_RIGHT()','    }','}'],
+     run:function(){ return null; }}
+  ];
+  var R={c:0,r:4,d:0}, steps=[], si=0, pred=null, timer=null;
+  var svg=document.getElementById('rsvg'), rcode=document.getElementById('rcode'), rmsg=document.getElementById('rmsg');
+  function isWall(c,r){ return walls.some(function(w){ return w[0]===c&&w[1]===r; }); }
+  function canMove(s){ var dc=[0,1,0,-1][s.d], dr=[-1,0,1,0][s.d], c=s.c+dc, r=s.r+dr; return c>=0&&c<5&&r>=0&&r<5&&!isWall(c,r); }
+  function moveF(s){ if(canMove(s)){ s.c+=[0,1,0,-1][s.d]; s.r+=[-1,0,1,0][s.d]; } }
+  // dynamic programs: compute steps by simulating
+  function buildSteps(p){
+    var s={c:0,r:4,d:0}, out=[];
+    if(p===2){
+      var guard=0; while(canMove(s)&&guard<20){ moveF(s); out.push({m:2}); guard++; } s.d=(s.d+1)%4; out.push({r:4}); moveF(s); out.push({m:5}); return out;
+    }
+    if(p===3){
+      for(var i=0;i<6;i++){ if(canMove(s)){ moveF(s); out.push({m:4}); } else { s.d=(s.d+1)%4; out.push({r:8}); } } return out;
+    }
+    return progs[p].run();
+  }
+  function draw(){
+    var h='';
+    for(var r=0;r<5;r++) for(var c=0;c<5;c++){
+      var fill=isWall(c,r)?'#000':( (pred&&pred.c===c&&pred.r===r)?'var(--hi)':'#2A2047');
+      h+='<rect x="'+(c*50+1)+'" y="'+(r*50+1)+'" width="48" height="48" fill="'+fill+'" stroke="#4a3d6e"/>';
+    }
+    var cx=R.c*50+25, cy=R.r*50+25;
+    h+='<g transform="translate('+cx+','+cy+') rotate('+(R.d*90)+')"><polygon points="0,-16 14,12 0,6 -14,12" fill="#B48CFF" stroke="#fff" stroke-width="2"/></g>';
+    svg.innerHTML=h;
+  }
+  function highlight(i){
+    var spans=rcode.querySelectorAll('.pline'); spans.forEach(function(s){ s.classList.remove('on'); });
+    if(i!=null&&spans[i]) spans[i].classList.add('on');
+  }
+  function loadProg(){
+    var p=parseInt(document.getElementById('rprog').value,10);
+    rcode.innerHTML=progs[p].lines.map(function(l){ return '<span class="pline">'+l.replace(/</g,'&lt;')+'</span>'; }).join('');
+    steps=buildSteps(p); resetRobot();
+  }
+  function resetRobot(){ clearInterval(timer); R={c:0,r:4,d:0}; si=0; highlight(null); draw(); rmsg.style.display='none'; }
+  function doStep(){
+    if(si>=steps.length) return false;
+    var st=steps[si++];
+    if(st.m!=null){ highlight(st.m); moveF(R); } else { highlight(st.r); R.d=(R.d+1)%4; }
+    draw(); return true;
+  }
+  svg.addEventListener('click',function(e){
+    var pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; var p=pt.matrixTransform(svg.getScreenCTM().inverse());
+    var c=Math.floor(p.x/50), r=Math.floor(p.y/50); if(c<0||c>4||r<0||r>4) return;
+    pred={c:c,r:r}; draw();
+  });
+  document.getElementById('rprog').addEventListener('change',function(){ pred=null; loadProg(); });
+  document.getElementById('rreset').addEventListener('click',resetRobot);
+  document.getElementById('rstep').addEventListener('click',function(){ clearInterval(timer); doStep(); });
+  document.getElementById('rcheck').addEventListener('click',function(){
+    if(!pred){ rmsg.style.display='block'; rmsg.className='verdict bad'; rmsg.textContent='Click the square where you think the robot ends up first.'; return; }
+    clearInterval(timer); R={c:0,r:4,d:0}; si=0; draw();
+    var face=document.getElementById('rface').selectedIndex;
+    timer=setInterval(function(){
+      if(!doStep()){
+        clearInterval(timer); highlight(null);
+        var ok=(R.c===pred.c&&R.r===pred.r&&R.d===face);
+        var names=['up','right','down','left'];
+        rmsg.style.display='block'; rmsg.className='verdict '+(ok?'ok':'bad');
+        rmsg.textContent=ok?'Correct: the robot ends there facing '+names[R.d]+'.':'Not quite. The robot ended in the highlighted triangle’s square facing '+names[R.d]+'. Step through it to see why.';
+        if(ok){ state.solved['robot'+document.getElementById('rprog').value]=true; save(state); updateProg(); }
+      }
+    }, 450);
+  });
+  loadProg();
+
+  // ---------- modulus explorer ----------
+  var ma=document.getElementById('ma'), mb=document.getElementById('mb');
+  function drawMod(){
+    var a=parseInt(ma.value,10), b=parseInt(mb.value,10), d=document.getElementById('mdots'), res=document.getElementById('mres');
+    d.innerHTML='';
+    if(isNaN(a)||isNaN(b)||b<1||a<0||a>120){ res.textContent='Use a from 0 to 120 and b of at least 1.'; return; }
+    var q=Math.floor(a/b), rem=a%b;
+    for(var i=0;i<a;i++){ var s=document.createElement('div'); s.className='dot '+(i<q*b?'g':'r'); d.appendChild(s); }
+    res.textContent=a+' MOD '+b+' = '+rem+'      ('+b+' fits '+q+' time'+(q===1?'':'s')+' into '+a+', remainder '+rem+')';
+  }
+  [ma,mb].forEach(function(el){ el.addEventListener('input',drawMod); }); drawMod();
+
+  // ---------- random checker ----------
+  function drawRand(){
+    var lo=parseInt(document.getElementById('rlo').value,10), hi=parseInt(document.getElementById('rhi').value,10), res=document.getElementById('rrres');
+    if(isNaN(lo)||isNaN(hi)||hi<lo){ res.textContent='The second number must be at least the first.'; return; }
+    var out=[]; for(var i=0;i<12;i++) out.push(Math.floor(Math.random()*(hi-lo+1))+lo);
+    res.textContent='RANDOM('+lo+', '+hi+') can give '+(hi-lo+1)+' different values.\nRolls: '+out.join('  ');
+  }
+  document.getElementById('rroll').addEventListener('click',drawRand);
+  ['rlo','rhi'].forEach(function(id){ document.getElementById(id).addEventListener('input',drawRand); }); drawRand();
+
+  // ---------- flashcards ----------
+  var vocab=[
+    ['algorithm','A finite set of instructions that accomplish a specific task.'],
+    ['sequencing','Steps run in the order they are written.'],
+    ['selection','A condition decides which part of the algorithm runs.'],
+    ['iteration','A part of the algorithm repeats a set number of times or until a condition is met.'],
+    ['nested conditional','A conditional statement placed inside another conditional statement.'],
+    ['code statement','A piece of program code that expresses one action to carry out.'],
+    ['expression','A value, variable, operator, or call that evaluates to a single value.'],
+    ['execute','To run a program, script, or command.'],
+    ['behavior','How a program acts while running; often described by how the user interacts with it.'],
+    ['program input','Data sent to a program: button presses, typed text, touch, sound, images.'],
+    ['program output','Data a program sends out: text, images, sound, score.'],
+    ['event','Something that happens, usually tied to an action like a button press.'],
+    ['event handler','Code that waits for one kind of event and runs when it occurs.'],
+    ['program documentation','A written description of what code does and how it was developed.'],
+    ['comment','Documentation written inside the program; ignored when it runs.'],
+    ['syntax error','The rules of the language are broken; the program will not run.'],
+    ['logic error','The program runs but behaves incorrectly or unexpectedly.'],
+    ['run-time error','An error that occurs while the program is executing.'],
+    ['overflow error','A number is outside the range the computer can represent.'],
+    ['testing','Using chosen inputs to confirm the program gives the expected outputs.'],
+    ['variable','A named container that holds one value at a time.'],
+    ['data types','Numbers, strings, Booleans, and lists are the common types.'],
+    ['string','An ordered sequence of characters.'],
+    ['string concatenation','Joining two or more strings end to end into a new string.'],
+    ['substring','Part of an existing string.'],
+    ['index','A number used to reference a position in a string or list.'],
+    ['Boolean value','true or false.'],
+    ['relational operator','=, ≠, <, >, ≤, ≥: compares two values and gives a Boolean.'],
+    ['logical operator','AND, OR, NOT: combine or flip Booleans.'],
+    ['modulus (MOD)','The remainder after whole-number division.'],
+    ['sprite','An image on screen with a position, velocity, and kind.'],
+    ['velocity','Speed with direction: vx (right is positive) and vy (down is positive).'],
+    ['projectile','A sprite made with a velocity that is destroyed automatically off screen.'],
+    ['data abstraction','Giving a collection of data a name so you can use it without its details.']
+  ];
+  var deck=document.getElementById('deck');
+  function buildDeck(list){
+    deck.innerHTML='';
+    list.forEach(function(pair){
+      var c=document.createElement('div'); c.className='card'; c.tabIndex=0; c.textContent=pair[0];
+      function flip(){ c.classList.toggle('flip'); c.textContent=c.classList.contains('flip')?pair[1]:pair[0]; }
+      c.addEventListener('click',flip);
+      c.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); flip(); } });
+      deck.appendChild(c);
+    });
+  }
+  buildDeck(vocab);
+  document.getElementById('shuffle').addEventListener('click',function(){
+    var a=vocab.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } buildDeck(a);
+  });
+
+  // ---------- quiz ----------
+  var Q=[
+    {t:'Algorithms',s:'Which statement about algorithms is true?',o:['Two algorithms that look different cannot produce the same result.','Two algorithms that look similar always produce the same result.','Algorithms can be written in different ways and still accomplish the same task.','An algorithm must be written in a programming language.'],a:2,w:'Different algorithms can reach the same result; similar-looking ones can differ. Algorithms can be expressed in words, flowcharts, or code.'},
+    {t:'Algorithms',s:'A program compiles and runs but the player’s score goes down when it should go up. This is a',o:['syntax error','logic error','run-time error','overflow error'],a:1,w:'It runs, so not syntax; it does not crash, so not run-time; it just computes the wrong thing.'},
+    {t:'Events',s:'Which block runs its code over and over while the game is playing?',o:['on start','on A button pressed','on game update','on overlap'],a:2,w:'on start runs once; the button and overlap handlers run only when those events happen; on game update repeats every frame.'},
+    {t:'Events',s:'A sprite is at (80, 60). After set vy to -30 and no vx, where is it heading?',o:['Toward the top of the screen','Toward the bottom of the screen','To the right','To the left'],a:0,w:'Negative vy moves up because y increases downward in Arcade.'},
+    {t:'Variables',s:'What is displayed?',c:'x ← 4\ny ← x\nx ← 9\nDISPLAY(y)',o:['4','9','13','x'],a:0,w:'y copied the value 4; changing x later does not change y.'},
+    {t:'Variables',s:'score is 7. What does join("Score: ", score) produce?',o:['Score: 7','Score: score','7','an error'],a:0,w:'Concatenation turns the number into text and joins it to the string.'},
+    {t:'Conditionals',s:'temp is 72. What is displayed?',c:'IF (temp > 85) { DISPLAY("hot") }\nELSE IF (temp > 65) { DISPLAY("nice") }\nELSE { DISPLAY("cold") }',o:['hot','nice','cold','nice and cold'],a:1,w:'72 > 85 is false; 72 > 65 is true, so nice is displayed and the chain stops.'},
+    {t:'Conditionals',s:'Which expression is equivalent to NOT (a < 10)?',o:['a > 10','a ≥ 10','a ≤ 10','a ≠ 10'],a:1,w:'The opposite of “less than 10” includes 10 itself.'},
+    {t:'Random & mod',s:'Which expression simulates a fair six-sided die?',o:['RANDOM(0, 6)','RANDOM(1, 6)','RANDOM(1, 5)','RANDOM(6)'],a:1,w:'Both ends are included, so RANDOM(1, 6) gives exactly 1 through 6.'},
+    {t:'Random & mod',s:'What is 29 MOD 6?',o:['4','5','4.83','23'],a:1,w:'6 × 4 = 24, remainder 5.'},
+    {t:'Loops',s:'How many times does this loop run?',c:'for index from 0 to 6\n    change total by 1',o:['5','6','7','infinite'],a:2,w:'MakeCode’s for loop includes the end value: 0, 1, 2, 3, 4, 5, 6 is seven passes.'},
+    {t:'Loops',s:'What is n when this finishes?',c:'n ← 1\nREPEAT UNTIL (n > 20)\n{\n    n ← n × 3\n}',o:['9','18','27','81'],a:2,w:'1 → 3 → 9 → 27. At 27 the condition n > 20 is true and the loop stops.'},
+    {t:'Projectiles',s:'Why use a projectile instead of a regular sprite for a bullet?',o:['Projectiles move faster than sprites.','Projectiles are destroyed automatically when they leave the screen.','Projectiles cannot overlap with other sprites.','Projectiles do not need a velocity.'],a:1,w:'The automatic cleanup is the point; otherwise off-screen sprites pile up.'}
+  ];
+  var box=document.getElementById('quizbox'), picks={};
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+  function buildQuiz(){
+    box.innerHTML=''; picks={};
+    Q.forEach(function(q,i){
+      var d=document.createElement('div'); d.className='qz';
+      var h='<div class="stem">'+(i+1)+'. '+esc(q.s)+'</div>';
+      if(q.c) h+='<pre class="ap">'+esc(q.c)+'</pre>';
+      q.o.forEach(function(o,j){ h+='<label class="opt"><input type="radio" name="q'+i+'" value="'+j+'"><span>'+esc(o)+'</span></label>'; });
+      h+='<div class="why">'+esc(q.w)+'</div>';
+      d.innerHTML=h;
+      d.querySelectorAll('input').forEach(function(r){
+        r.addEventListener('change',function(){
+          var j=parseInt(r.value,10); picks[i]=j;
+          d.querySelectorAll('.opt').forEach(function(o,k){ o.classList.remove('right','wrong'); if(k===q.a) o.classList.add('right'); else if(k===j) o.classList.add('wrong'); });
+          d.querySelector('.why').classList.add('show');
+          d.querySelectorAll('input').forEach(function(x){ x.disabled=true; });
+        });
+      });
+      box.appendChild(d);
+    });
+    document.getElementById('scorebox').style.display='none';
+  }
+  buildQuiz();
+  function showBest(){ document.getElementById('pq').textContent=state.best==null?'—':state.best+'/'+Q.length; }
+  showBest();
+  document.getElementById('grade').addEventListener('click',function(){
+    var n=0, by={};
+    Q.forEach(function(q,i){ by[q.t]=by[q.t]||{n:0,c:0}; by[q.t].n++; if(picks[i]===q.a){ n++; by[q.t].c++; } });
+    var sb=document.getElementById('scorebox'), answered=Object.keys(picks).length;
+    var h='<b>'+n+' of '+Q.length+' correct</b>'+(answered<Q.length?' <span class="sub">('+(Q.length-answered)+' unanswered)</span>':'');
+    Object.keys(by).forEach(function(t){ var b=by[t]; h+='<div class="topicbar"><span>'+t+'</span><div class="bar"><i style="width:'+(100*b.c/b.n)+'%"></i></div><span style="width:40px">'+b.c+'/'+b.n+'</span></div>'; });
+    sb.innerHTML=h; sb.style.display='block';
+    if(state.best==null||n>state.best){ state.best=n; save(state); } showBest();
+  });
+  document.getElementById('requiz').addEventListener('click',buildQuiz);
+
+  // ---------- nav ----------
+  var links=document.querySelectorAll('#nav a'), secs=document.querySelectorAll('main>section');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ links.forEach(function(l){ l.classList.toggle('on', l.getAttribute('href')==='#'+e.target.id); }); } }); },{rootMargin:'-20% 0px -70% 0px'});
+    secs.forEach(function(s){ io.observe(s); });
+  }
+  if(location.hash){ var el=document.getElementById(location.hash.slice(1)); if(el) el.scrollIntoView(); }
+})();
+</script>
+</body>
+</html>
