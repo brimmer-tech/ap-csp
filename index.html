@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AP Computer Science Principles | Brimmer and May</title>
+<meta name="description" content="Study guides for AP Computer Science Principles at Brimmer and May.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #13283D; --ink-soft: #4A5B6C; --paper: #F3F6F8; --panel: #FFFFFF;
+    --line: #D5DDE4; --cobalt: #2F5BEA; --sun: #F5C842; --focus: #F5C842;
+    --csa: #2F5BEA; --csp: #1E8C6E;
+    --science: #1E8C6E; --tech: #2F5BEA; --math: #B4580F; --english: #8A3FB8; --music: #C2306A;
+    --accent: var(--csp);
+    color-scheme: light; box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #E8EEF3; --ink-soft: #A6B4C1; --paper: #0F1C29; --panel: #172838; --line: #2A3E51;
+      --cobalt: #7F9EFF; --csa: #7F9EFF; --csp: #4FC9A6;
+      --science: #4FC9A6; --tech: #7F9EFF; --math: #F0A35E; --english: #C79AF0; --music: #F27BA8;
+      color-scheme: dark;
+    }
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body { margin: 0; background: var(--paper); color: var(--ink);
+    font: 400 1.0625rem/1.6 "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif; }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; border-radius: 6px; }
+  .wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.5rem; }
+  .home { display: inline-block; margin-top: 1.5rem; font-weight: 700; color: var(--ink-soft); text-underline-offset: 4px; }
+  .hero { padding: 2.5rem 0 2.5rem; border-bottom: 2px solid var(--ink); }
+  .kicker { margin: 0 0 0.75rem; font-weight: 700; color: var(--accent); }
+  h1 { margin: 0; font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif; font-weight: 800;
+    font-size: clamp(2.25rem, 6.5vw, 4.5rem); line-height: 0.98; letter-spacing: -0.03em; max-width: 14ch; }
+  .lede { margin: 1.25rem 0 0; font-size: 1.2rem; max-width: 46ch; color: var(--ink-soft); }
+  main section { padding: 2.5rem 0; }
+  h2 { font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif; font-weight: 800;
+    font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.02em; margin: 0 0 1.25rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 1.25rem; }
+  .card { display: grid; grid-template-rows: auto auto 1fr auto; gap: 0.6rem; padding: 1.5rem;
+    background: var(--panel); border: 2px solid var(--line); border-left: 10px solid var(--c, var(--accent));
+    border-radius: 4px 14px 14px 4px; text-decoration: none; transition: border-color 0.15s; }
+  .card:hover { border-color: var(--c, var(--accent)); }
+  .card .tag { font-weight: 700; font-size: 0.95rem; color: var(--c, var(--accent)); }
+  .card h3 { margin: 0; font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif; font-weight: 800;
+    font-size: 1.4rem; line-height: 1.15; }
+  .card p { margin: 0; color: var(--ink-soft); }
+  .go { font-weight: 700; color: var(--c, var(--accent)); text-decoration: underline; text-underline-offset: 4px; }
+  .soon { margin: 1.5rem 0 0; color: var(--ink-soft); }
+  .filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1.5rem; padding: 0; list-style: none; }
+  .filters button { font: inherit; font-weight: 700; padding: 0.45rem 1rem; border-radius: 999px; cursor: pointer;
+    background: transparent; color: var(--ink); border: 2px solid var(--line); }
+  .filters button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .count { margin: 0 0 1rem; color: var(--ink-soft); }
+  [hidden] { display: none !important; }
+  footer { padding: 2rem 0 3rem; color: var(--ink-soft); font-size: 0.95rem; border-top: 1px solid var(--line); }
+  footer p { margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="home" href="https://brimmer-tech.github.io/">Back to home</a>
+  <header class="hero">
+    <p class="kicker">MakeCode Arcade</p>
+    <h1>AP Computer Science Principles</h1>
+    <p class="lede">Study guides and practice for each unit. Use them to review before quizzes and the AP exam.</p>
+  </header>
+  <main>
+    <section aria-labelledby="guides">
+      <h2 id="guides">Study guides</h2>
+      <div class="grid">
+      <a class="card" href="https://brimmer-tech.github.io/ap-csp/unit3.html">
+        <span class="tag">Unit 3</span>
+        <h3>Unit 3 study guide</h3>
+        <p>Review the Unit 3 material from the MakeCode Arcade curriculum with interactive practice.</p>
+        <span class="go">Open the study guide</span>
+      </a>
+      </div>
+      <p class="soon">New units are added here as we reach them in class.</p>
+    </section>
+  </main>
+  <footer><p>Maintained by Mr. Ware, Brimmer and May Computer Science.</p></footer>
+</div>
+
+</body>
+</html>
