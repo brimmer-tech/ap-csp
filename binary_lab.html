@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Binary Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E8EDF2; --panel:#FFFFFF; --ink:#18243A; --muted:#56667D; --line:#C5CFDB;
+  --on:#FFB300; --glow:rgba(255,179,0,.55); --off:#B8C3D1; --on-ink:#3A2A00;
+  --good:#0B7A75; --bad:#C0364A; --accent:#3346C9; --accent-ink:#FFFFFF; --soft:#F1F4F8;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#141B2B; --panel:#1E2840; --ink:#EDF1F7; --muted:#9BABC2; --line:#35425F;
+    --on:#FFC233; --glow:rgba(255,194,51,.5); --off:#3B4866; --on-ink:#2B1F00;
+    --good:#45CDBE; --bad:#FF7F8B; --accent:#8C9BFF; --accent-ink:#10172B; --soft:#26314D;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#141B2B; --panel:#1E2840; --ink:#EDF1F7; --muted:#9BABC2; --line:#35425F;
+  --on:#FFC233; --glow:rgba(255,194,51,.5); --off:#3B4866; --on-ink:#2B1F00;
+  --good:#45CDBE; --bad:#FF7F8B; --accent:#8C9BFF; --accent-ink:#10172B; --soft:#26314D;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.5}
+.wrap{max-width:780px;margin:0 auto;padding:20px 16px 140px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+header h1{font-size:clamp(2rem,7vw,3.2rem);font-weight:800;line-height:1;margin:8px 0 6px;letter-spacing:-.02em}
+header h1.title{display:flex;align-items:center;gap:.25em}
+header .logo{height:1.15em;width:auto;image-rendering:pixelated}
+header p{margin:0;color:var(--muted);max-width:52ch}
+
+nav{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:6px;margin:22px 0 16px}
+nav a{display:block;text-decoration:none;color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:7px 10px;font-weight:600;font-size:.95rem;line-height:1.2}
+nav a .n{display:block;font-size:.78rem;color:var(--muted);font-weight:400}
+nav a[aria-current="page"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+nav a[aria-current="page"] .n{color:var(--bg);opacity:.75}
+nav a.done .n::after{content:" ✓";color:var(--good);font-weight:800}
+nav a[aria-current="page"].done .n::after{color:inherit}
+
+.panel{background:var(--panel);border-radius:18px;padding:22px 20px;margin-bottom:14px;border:1px solid var(--line)}
+.panel h2{font-size:1.5rem;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
+.panel h3{font-size:1.05rem;font-weight:800;margin:0 0 6px}
+.panel p{margin:0 0 12px;max-width:62ch}
+.muted{color:var(--muted)} .small{font-size:.9rem}
+.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+
+.bits{display:grid;gap:6px;max-width:600px;margin:14px auto 8px}
+.bit{appearance:none;border:0;background:none;color:inherit;font:inherit;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 0;border-radius:12px;min-width:0}
+.bit .digit{font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:700;font-size:1.25rem;color:var(--muted)}
+.bit .bulb{width:100%;max-width:54px;aspect-ratio:1;border-radius:50%;background:var(--off);
+  border:3px solid var(--line);transition:background .12s,box-shadow .12s,transform .12s}
+.bit .place{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.85rem;color:var(--muted)}
+.bit[aria-pressed="true"] .bulb{background:var(--on);border-color:var(--on);box-shadow:0 0 22px 4px var(--glow);transform:scale(1.05)}
+.bit[aria-pressed="true"] .digit,.bit[aria-pressed="true"] .place{color:var(--ink)}
+.bit:active .bulb{transform:scale(.94)}
+.bit.hinted .bulb{outline:3px dashed var(--accent);outline-offset:4px;animation:pulse .6s ease 4}
+@keyframes pulse{50%{transform:scale(1.16)}}
+.bits.compact{gap:4px;margin:6px 0}
+.bits.compact .bulb{max-width:32px;border-width:2px}
+.bits.compact .digit{font-size:.95rem}
+.bits.compact .place{font-size:.68rem}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.readout{text-align:center;margin:6px 0 4px}
+.readout .sum{font-family:"JetBrains Mono",ui-monospace,monospace;color:var(--muted);min-height:1.5em;font-size:.95rem}
+.readout .total{font-size:3.4rem;font-weight:800;line-height:1.05}
+
+.task{background:var(--soft);border-radius:14px;padding:14px 16px;margin-top:16px}
+.task .big{font-size:1.35rem;font-weight:800}
+.task.goal{border:2px solid var(--on);margin:14px 0 4px}
+.dots{display:flex;gap:5px;margin:8px 0 0;flex-wrap:wrap}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.dots i.d{background:var(--good)} .dots i.c{background:var(--on)}
+.ok{color:var(--good);font-weight:800} .err{color:var(--bad);font-weight:600}
+.hintrow{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;min-height:2.6em;margin-top:8px}
+.hintmsg{color:var(--accent);font-weight:600}
+
+button.btn{appearance:none;font:inherit;font-weight:600;cursor:pointer;border-radius:10px;padding:9px 16px;
+  border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+button.btn.ghost{background:transparent;color:var(--accent)}
+button.btn.sm{padding:5px 11px;font-size:.9rem}
+button.btn[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+button.btn:disabled{opacity:.45;cursor:default}
+a.btn{display:inline-block;text-decoration:none;font-weight:600;border-radius:10px;padding:9px 16px;border:2px solid var(--accent);color:var(--accent)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center} .center{justify-content:center}
+
+.tiles{display:flex;gap:6px;justify-content:center;margin:18px 0 8px;flex-wrap:wrap}
+.tile{font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:700;font-size:clamp(1.6rem,7vw,2.6rem);
+  width:1.5em;height:1.9em;display:grid;place-items:center;border-radius:10px;background:var(--off);color:var(--ink);border:2px solid var(--line)}
+.tile.one{background:var(--on);border-color:var(--on);color:var(--on-ink);box-shadow:0 0 16px 2px var(--glow)}
+.tile.flip{animation:flip .28s ease}
+@keyframes flip{0%{transform:rotateX(90deg)}100%{transform:none}}
+.log{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.9rem;color:var(--muted);
+  list-style:none;padding:0;margin:10px 0 0;display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center}
+.banner{border:2px solid var(--bad);color:var(--bad);border-radius:12px;padding:10px 14px;margin-top:12px;font-weight:600}
+ul.missions{list-style:none;padding:0;margin:8px 0 0}
+ul.missions li{padding:4px 0 4px 28px;position:relative}
+ul.missions li::before{content:"";position:absolute;left:0;top:.5em;width:16px;height:16px;border-radius:4px;border:2px solid var(--line)}
+ul.missions li.d::before{background:var(--good);border-color:var(--good)}
+ul.missions li.d{color:var(--muted)}
+
+/* adding */
+.addgrid{display:grid;gap:6px;justify-content:center;align-items:center;margin:16px auto 6px}
+.addgrid .lab{font-size:.85rem;color:var(--muted);text-align:right;padding-right:4px}
+.addgrid .cell{font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:700;font-size:1.6rem;text-align:center;height:52px;display:grid;place-items:center;border-radius:8px}
+.addgrid .cell.given{background:var(--soft)}
+.addgrid .rule{grid-column:1/-1;border-top:3px solid var(--ink);height:0}
+.addgrid button{appearance:none;font:inherit;cursor:pointer;color:var(--ink)}
+.addgrid button.ans{font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:700;font-size:1.6rem;height:52px;border-radius:8px;border:2px solid var(--line);background:var(--off)}
+.addgrid button.ans.one{background:var(--on);border-color:var(--on);color:var(--on-ink)}
+.addgrid button.ans.wrong{border-color:var(--bad);border-width:3px}
+.addgrid button.ans.right{border-color:var(--good);border-width:3px}
+.addgrid button.car{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:1rem;height:30px;border-radius:6px;border:2px dashed var(--line);background:transparent;color:var(--accent);font-weight:700}
+.addgrid button.hinted{outline:3px dashed var(--accent);outline-offset:3px;animation:pulse .6s ease 4}
+.rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:8px}
+.rules span{background:var(--soft);border-radius:8px;padding:6px 10px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.88rem}
+
+/* pixels */
+.pxwrap{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;justify-content:center;margin-top:12px}
+.pix{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;width:min(100%,300px);touch-action:none;user-select:none}
+.pix button{aspect-ratio:1;border:1px solid var(--line);border-radius:3px;padding:0;cursor:pointer;min-width:0}
+.pxrows{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.82rem;list-style:none;margin:0;padding:0;min-width:220px}
+.pxrows li{padding:2px 0;white-space:nowrap}
+.pxrows li .r{color:var(--muted);display:inline-block;width:3.2em}
+.pxrows li.m{color:var(--good);font-weight:700}
+.pal{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pal button{appearance:none;font:inherit;cursor:pointer;display:flex;align-items:center;gap:6px;padding:5px 10px 5px 5px;border-radius:10px;border:2px solid var(--line);background:var(--panel);color:var(--ink);font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.85rem}
+.pal button i{width:24px;height:24px;border-radius:6px;border:1px solid var(--line)}
+.pal button[aria-pressed="true"]{border-color:var(--accent);border-width:3px}
+.target{background:var(--soft);border-radius:12px;padding:10px 14px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.88rem}
+.target ol{margin:4px 0 0;padding-left:2.2em}
+
+/* messages */
+.slots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.slot{width:2.1em;height:2.4em;border-radius:8px;border:2px dashed var(--line);display:grid;place-items:center;font-weight:800;font-size:1.4rem;color:var(--muted)}
+.slot.cur{border-color:var(--on);border-style:solid}
+.slot.d{border-style:solid;border-color:var(--good);color:var(--ink)}
+.chart{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:4px;margin-top:8px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.9rem}
+.chart span{background:var(--soft);border-radius:6px;padding:3px 8px;display:flex;justify-content:space-between;gap:6px}
+details summary{cursor:pointer;font-weight:600;color:var(--accent)}
+input[type=text],textarea{font:inherit;color:var(--ink);background:var(--soft);border:2px solid var(--line);border-radius:10px;padding:9px 12px;width:100%}
+textarea{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.9rem;min-height:84px;resize:vertical}
+.out{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.9rem;background:var(--soft);border-radius:10px;padding:10px 12px;
+  word-spacing:.35em;overflow-wrap:anywhere;min-height:2.6em;margin:8px 0;user-select:all;white-space:pre-wrap}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;margin-top:10px}
+.card{background:var(--soft);border-radius:10px;padding:8px;text-align:center;border:2px solid transparent}
+.card .b{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.82rem;display:block;margin-bottom:6px}
+.card input{width:2.4em;text-align:center;font-weight:800;font-size:1.2rem;padding:4px;text-transform:uppercase}
+.card.d{border-color:var(--good)} .card.w{border-color:var(--bad)}
+
+/* game */
+.hud{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:1.2rem}
+.hud .t{font-family:"JetBrains Mono",ui-monospace,monospace}
+.prompt{text-align:center;font-size:1.5rem;font-weight:800;margin:14px 0 4px}
+.answer{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.answer input{width:6.5em;text-align:center;font-size:1.4rem;font-weight:800}
+.shake{animation:shake .25s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.final{text-align:center}
+.final .score{font-size:4rem;font-weight:800;line-height:1}
+
+/* AP check */
+.q{border-top:1px solid var(--line);padding:14px 0}
+.q:first-of-type{border-top:0}
+.q .qt{font-weight:700;margin-bottom:8px}
+.q label{display:flex;gap:10px;align-items:flex-start;padding:6px 8px;border-radius:8px;cursor:pointer}
+.q label:hover{background:var(--soft)}
+.q input{margin-top:.35em;accent-color:var(--accent)}
+.q label.right{background:color-mix(in srgb,var(--good) 18%,transparent)}
+.q label.picked-wrong{background:color-mix(in srgb,var(--bad) 18%,transparent)}
+.q .why{margin-top:6px;font-size:.92rem;color:var(--muted)}
+
+/* hex */
+.swatch{width:100%;height:70px;border-radius:12px;border:1px solid var(--line);margin:8px 0}
+.chan{display:grid;grid-template-columns:4.2em 1fr 2.6em;gap:8px;align-items:center}
+.chan b{font-size:.9rem}
+.chan .hx{font-family:"JetBrains Mono",ui-monospace,monospace;font-weight:700;text-align:right}
+.hexread{display:flex;justify-content:center;gap:28px;font-family:"JetBrains Mono",ui-monospace,monospace;color:var(--muted);font-size:.95rem}
+.sec.focus{outline:3px solid var(--on);outline-offset:6px;border-radius:12px}
+
+/* tour */
+.spot{position:relative;z-index:20;box-shadow:0 0 0 9999px rgba(10,15,30,.55);border-radius:14px}
+.coach{position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:30;width:min(560px,100%);
+  background:var(--panel);border:2px solid var(--on);border-radius:18px 18px 0 0;padding:16px 18px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 30px rgba(0,0,0,.25)}
+.coach .step{font-size:.82rem;color:var(--muted)}
+.coach p{margin:4px 0 12px;font-size:1.05rem}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:480px){.bit .place{font-size:.72rem}.panel{padding:18px 14px}.addgrid .cell,.addgrid button.ans{font-size:1.25rem;height:44px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1 class="title">Binary Lab<img class="logo" src="data:image/png;base64,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" alt="Mr. Ware’s logo" width="129" height="140"></h1>
+    <p>Computers store everything with switches that are either off (0) or on (1). Work through the stations in order to see how.</p>
+  </div>
+  <button class="btn ghost sm" id="tour-open">How to play</button>
+</header>
+
+<nav aria-label="Stations">
+  <a href="#switches" data-v="switches"><span class="n">Station 1</span>Light switches</a>
+  <a href="#counter" data-v="counter"><span class="n">Station 2</span>Counting up</a>
+  <a href="#adding" data-v="adding"><span class="n">Station 3</span>Adding</a>
+  <a href="#messages" data-v="messages"><span class="n">Station 4</span>Secret messages</a>
+  <a href="#pixels" data-v="pixels"><span class="n">Station 5</span>Pixel painter</a>
+  <a href="#game" data-v="game"><span class="n">Station 6</span>Beat the clock</a>
+  <a href="#check" data-v="check"><span class="n">Station 7</span>AP check</a>
+  <a href="#hex" data-v="hex"><span class="n">Bonus</span>Hex codes</a>
+  <a href="#finish" data-v="finish"><span class="n">Finish</span>Send your report</a>
+</nav>
+
+<!-- STATION 1 -->
+<section id="v-switches">
+  <div class="panel">
+    <h2>Light switches</h2>
+    <p>Each bulb is one <strong>bit</strong>. Every bulb is worth a different amount, shown underneath it. Tap bulbs to turn them on until the total matches the challenge in the yellow box.</p>
+    <div class="task goal" aria-live="polite" id="s1goal">
+      <div id="s1task"></div>
+      <div class="dots" id="s1dots"></div>
+    </div>
+    <div class="bits" id="s1bits"></div>
+    <div class="readout" id="s1readout">
+      <div class="sum" id="s1sum">0</div>
+      <div class="total" id="s1total">0</div>
+    </div>
+    <div class="row center"><button class="btn ghost" id="s1reset">Turn all off</button></div>
+    <div class="hintrow"><button class="btn ghost sm" id="s1hint" hidden>Show a hint</button><span class="hintmsg" id="s1hintmsg" aria-live="polite"></span></div>
+  </div>
+  <div class="panel">
+    <h3>Think about it</h3>
+    <p>Look at the numbers under the bulbs from right to left. What is the pattern? If you added a ninth bulb on the left, what would it be worth?</p>
+  </div>
+</section>
+
+<!-- STATION 2 -->
+<section id="v-counter" hidden>
+  <div class="panel">
+    <h2>Counting up</h2>
+    <p>Add 1 over and over and watch which bits change. Counting in binary works like a car odometer, except each digit only goes from 0 to 1 before it rolls over.</p>
+    <div class="row center" id="s2sizes" role="group" aria-label="Number of bits"></div>
+    <div class="tiles" id="s2tiles" aria-live="polite"></div>
+    <div class="readout"><div class="total" id="s2dec">0</div><div class="sum" id="s2flip">&nbsp;</div></div>
+    <div class="row center">
+      <button class="btn" id="s2add">Add 1</button>
+      <button class="btn ghost" id="s2auto" aria-pressed="false">Auto count</button>
+      <button class="btn ghost" id="s2reset">Back to zero</button>
+    </div>
+    <div class="banner" id="s2over" hidden role="alert"></div>
+    <ul class="log" id="s2log" aria-label="Recent counts"></ul>
+    <p class="muted small" id="s2fact" style="text-align:center;margin:12px auto 0"></p>
+  </div>
+  <div class="panel">
+    <h3>Missions</h3>
+    <ul class="missions" id="s2missions">
+      <li data-m="eight">With 4 bits, count from 0 up to 8. How many bits flipped on the step from 7 to 8?</li>
+      <li data-m="over">Keep adding 1 until the counter runs out of room. That is called an overflow.</li>
+      <li data-m="five">Switch to 5 bits and count past 16. How far can 5 bits go?</li>
+    </ul>
+    <p class="muted small" style="margin-top:12px">Every bit you add doubles how many values you can store. That is why 8 bits gives 256 values but 16 bits gives 65,536.</p>
+  </div>
+</section>
+
+<!-- STATION 3 -->
+<section id="v-adding" hidden>
+  <div class="panel">
+    <h2>Adding</h2>
+    <p>You add binary numbers the same way you add regular ones: one column at a time, starting on the right, carrying when a column gets too big. Tap the answer boxes to switch them between 0 and 1. Tap the small boxes on top to write down your carries.</p>
+    <div class="task goal" aria-live="polite" id="adtask"></div>
+    <div class="addgrid" id="adgrid"></div>
+    <div class="row center" style="margin-top:12px" id="adbtns">
+      <button class="btn" id="adcheck">Check my answer</button>
+      <button class="btn ghost" id="adclear">Clear</button>
+    </div>
+    <div class="hintrow"><button class="btn ghost sm" id="adhint" hidden>Show a hint</button><span class="hintmsg" id="adhintmsg" aria-live="polite"></span></div>
+  </div>
+  <div class="panel">
+    <h3>The only four rules you need</h3>
+    <div class="rules">
+      <span>0 + 0 = 0</span><span>0 + 1 = 1</span><span>1 + 1 = 10<br><span class="muted" style="padding:0;background:none">write 0, carry 1</span></span><span>1 + 1 + 1 = 11<br><span class="muted" style="padding:0;background:none">write 1, carry 1</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- STATION 4 -->
+<section id="v-messages" hidden>
+  <div class="panel">
+    <h2>Secret messages</h2>
+    <p>The same bits can stand for letters instead of numbers. A code called ASCII gives every character a number: A is 65, B is 66, and so on. Flip the bits to spell the word, one letter at a time.</p>
+    <div class="task goal" aria-live="polite" id="s3task"></div>
+    <div class="slots" id="s3slots"></div>
+    <div class="bits" id="s3bits"></div>
+    <div class="readout">
+      <div class="sum" id="s3line">00000000 = 0</div>
+      <div class="total" id="s3char">?</div>
+    </div>
+    <div class="hintrow"><button class="btn ghost sm" id="s3hint" hidden>Show a hint</button><span class="hintmsg" id="s3hintmsg" aria-live="polite"></span></div>
+    <details style="margin-top:10px">
+      <summary>ASCII chart</summary>
+      <div class="chart" id="s3chart"></div>
+      <p class="muted small" style="margin-top:8px">Notice anything about the first three bits of every capital letter?</p>
+    </details>
+  </div>
+  <div class="panel">
+    <h3>Write a message for a partner</h3>
+    <p class="small muted">Capital letters and spaces only, up to 24 characters.</p>
+    <input type="text" id="s3in" maxlength="24" placeholder="Type your message" autocomplete="off" aria-label="Your message">
+    <div class="out" id="s3out" aria-live="polite"></div>
+    <div class="row"><button class="btn ghost" id="s3copy">Copy binary</button><span class="small muted" id="s3copied"></span></div>
+  </div>
+  <div class="panel">
+    <h3>Decode a partner’s message</h3>
+    <p class="small muted">Paste or type their binary below, then work out each letter using the chart above.</p>
+    <textarea id="s3paste" aria-label="Binary to decode" placeholder="01001000 01001001"></textarea>
+    <div class="err small" id="s3err" hidden></div>
+    <div class="cards" id="s3cards"></div>
+    <p class="ok" id="s3solved" hidden></p>
+  </div>
+</section>
+
+<!-- STATION 5 -->
+<section id="v-pixels" hidden>
+  <div class="panel">
+    <h2>Pixel painter</h2>
+    <p>A picture is a grid of pixels, and each pixel is stored as bits. With 1 bit per pixel, 0 means white and 1 means dark, so every row of this 8×8 picture is just an 8-bit binary number. This is how sprites are stored in MakeCode Arcade.</p>
+    <div class="task goal" aria-live="polite" id="pxtask"></div>
+    <div class="row" style="margin-top:12px" role="group" aria-label="Bits per pixel">
+      <button class="btn ghost sm" id="pxm1">1 bit per pixel</button>
+      <button class="btn ghost sm" id="pxm2">2 bits per pixel</button>
+      <button class="btn ghost sm" id="pxclear">Clear picture</button>
+    </div>
+    <div class="pal" id="pxpal" hidden role="group" aria-label="Color"></div>
+    <div class="pxwrap">
+      <div class="pix" id="pxgrid" aria-label="Pixel grid"></div>
+      <div>
+        <ul class="pxrows" id="pxrows"></ul>
+        <p class="small" id="pxsize" style="margin:8px 0 0"></p>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Missions</h3>
+    <ul class="missions" id="pxmissions">
+      <li data-m="p0">Decode puzzle 1: draw the picture its binary rows describe.</li>
+      <li data-m="p1">Decode puzzle 2.</li>
+      <li data-m="colors">Switch to 2 bits per pixel and paint with all four colors.</li>
+      <li data-m="q">Answer the question below.</li>
+    </ul>
+    <div class="task" id="pxq">
+      <div style="font-weight:700">Each pixel with 2 bits can be one of 4 colors (00, 01, 10, 11). With 3 bits per pixel, how many colors could each pixel be?</div>
+      <div class="row" style="margin-top:8px" id="pxqbtns"></div>
+      <p class="small" id="pxqmsg" style="margin:8px 0 0" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<!-- STATION 6 -->
+<section id="v-game" hidden>
+  <div class="panel">
+    <h2>Beat the clock</h2>
+    <div id="g-setup">
+      <p>You have 60 seconds. Some questions ask you to build a number with bulbs. Others show you bits and ask for the number. Harder levels are worth more points.</p>
+      <div class="row" id="g-levels" role="group" aria-label="Level"></div>
+      <p class="muted small" id="g-best" style="margin-top:10px"></p>
+      <button class="btn" id="g-start">Start the clock</button>
+    </div>
+    <div id="g-play" hidden>
+      <div class="hud"><span>Score <span id="g-score">0</span></span><span class="t" id="g-time">1:00</span></div>
+      <div class="prompt" id="g-prompt"></div>
+      <div class="bits" id="g-bits"></div>
+      <div class="tiles" id="g-tiles" hidden></div>
+      <div class="answer" id="g-answer" hidden>
+        <input type="text" inputmode="numeric" id="g-in" aria-label="Your answer" autocomplete="off">
+        <button class="btn" id="g-check">Check</button>
+      </div>
+      <p class="sum" id="g-msg" style="text-align:center;min-height:1.5em" aria-live="polite"></p>
+    </div>
+    <div id="g-end" class="final" hidden>
+      <p class="muted">Time’s up. You scored</p>
+      <div class="score" id="g-final">0</div>
+      <p id="g-endmsg"></p>
+      <button class="btn ghost" id="g-again">Play again</button>
+    </div>
+  </div>
+</section>
+
+<!-- STATION 7 -->
+<section id="v-check" hidden>
+  <div class="panel">
+    <h2>AP check</h2>
+    <p>Six questions written the way the AP exam asks about binary. Answer them all, then check your work. Your first try is the score that goes in your report.</p>
+    <div id="ck-qs"></div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="ck-submit">Check my answers</button>
+      <button class="btn ghost" id="ck-retry" hidden>Try again</button>
+    </div>
+    <p class="big ok" id="ck-score" style="margin-top:12px;font-size:1.3rem" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- BONUS -->
+<section id="v-hex" hidden>
+  <div class="panel">
+    <h2>Hex codes</h2>
+    <p>Long strings of bits are hard to read, so programmers split them into groups of 4. Each group of 4 bits can be 0 through 15, and gets one hexadecimal digit: 0–9, then A through F for 10 through 15.</p>
+    <div class="task goal" aria-live="polite" id="hxtask"></div>
+    <div class="sec" id="hxbyte">
+      <div class="bits" id="hxbits"></div>
+      <div class="hexread"><span id="hxn1">0000 = 0</span><span id="hxn2">0000 = 0</span></div>
+      <div class="readout"><div class="total mono" id="hxval">00</div><div class="sum" id="hxdec">decimal 0</div></div>
+    </div>
+    <div class="sec" id="hxcolor" style="margin-top:18px">
+      <h3>Color codes</h3>
+      <p class="small">Web colors like #FF8800 are three bytes: red, green, and blue. Each byte is 8 bits, shown as 2 hex digits.</p>
+      <div class="chan"><b>Red</b><div class="bits compact" id="hxr"></div><span class="hx" id="hxrh">00</span></div>
+      <div class="chan"><b>Green</b><div class="bits compact" id="hxg"></div><span class="hx" id="hxgh">00</span></div>
+      <div class="chan"><b>Blue</b><div class="bits compact" id="hxb"></div><span class="hx" id="hxbh">00</span></div>
+      <div class="swatch" id="hxsw"></div>
+      <div class="readout"><div class="total mono" id="hxcode" style="font-size:2.2rem">#000000</div></div>
+    </div>
+    <div class="hintrow"><button class="btn ghost sm" id="hxhint" hidden>Show a hint</button><span class="hintmsg" id="hxhintmsg" aria-live="polite"></span></div>
+    <details><summary>Hex digit chart</summary><div class="chart" id="hxchart"></div></details>
+  </div>
+</section>
+
+<!-- FINISH -->
+<section id="v-finish" hidden>
+  <div class="panel">
+    <h2>Send your report</h2>
+    <p>Type your name, then send this report to Mr. Ware.</p>
+    <label for="fin-name" class="small">Your full name</label>
+    <input type="text" id="fin-name" maxlength="60" autocomplete="name">
+    <div class="out" id="fin-out" style="word-spacing:normal;margin-top:12px"></div>
+    <div class="row">
+      <button class="btn" id="fin-copy">Copy report</button>
+      <a class="btn" id="fin-mail" target="_blank" rel="noopener">Open in email</a>
+      <span class="small muted" id="fin-msg" aria-live="polite"></span>
+    </div>
+    <p class="small muted" style="margin-top:12px">If the email button doesn’t open your mail app, copy the report and paste it into an email to <span class="mono">dware@brimmer.org</span>.</p>
+  </div>
+</section>
+</div>
+
+<div class="coach" id="coach" hidden role="dialog" aria-label="How to play">
+  <div class="step" id="coach-step"></div>
+  <p id="coach-text"></p>
+  <div class="row">
+    <button class="btn" id="coach-next">Next</button>
+    <button class="btn ghost" id="coach-back">Back</button>
+    <button class="btn ghost" id="coach-skip" style="margin-left:auto">Skip</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)};
+function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function bin(v,n){var s=v.toString(2);while(s.length<n)s="0"+s;return s}
+function hex2(v){var s=v.toString(16).toUpperCase();return s.length<2?"0"+s:s}
+
+/* time in lab: counts while the page is visible */
+var secs=load("binlab-time",0);
+setInterval(function(){if(document.visibilityState==="visible"){secs+=15;save("binlab-time",secs)}},15000);
+
+/* ---------- bulbs ---------- */
+function BitRow(el,n,onChange,opts){
+  opts=opts||{};
+  var value=0,locked=false,btns=[];
+  function build(k){
+    n=k;value=0;btns=[];el.innerHTML="";
+    if(opts.compact)el.classList.add("compact");
+    var nib=opts.nibbles&&n===8;
+    el.style.gridTemplateColumns=nib?"repeat(4,1fr) 12px repeat(4,1fr)":"repeat("+n+",1fr)";
+    for(var i=n-1;i>=0;i--){(function(i){
+      if(nib&&i===3)el.appendChild(document.createElement("span"));
+      var b=document.createElement("button");b.className="bit";b.type="button";
+      b.innerHTML='<span class="digit">0</span><span class="bulb"></span><span class="place">'+(1<<i)+'</span>';
+      b.addEventListener("click",function(){if(locked)return;value^=(1<<i);paint();if(onChange)onChange(value)});
+      btns[i]=b;el.appendChild(b);
+    })(i)}
+    paint();
+  }
+  function paint(){
+    for(var i=0;i<n;i++){var on=!!(value&(1<<i));
+      btns[i].setAttribute("aria-pressed",on?"true":"false");
+      btns[i].setAttribute("aria-label",(1<<i)+" bulb, "+(on?"on":"off"));
+      btns[i].firstChild.textContent=on?"1":"0";}
+  }
+  build(n);
+  return {get:function(){return value},set:function(v){value=v;paint()},build:build,
+    lock:function(x){locked=x},bits:function(){return n},
+    pulse:function(i){var b=btns[i];if(!b)return;b.classList.remove("hinted");void b.offsetWidth;b.classList.add("hinted");setTimeout(function(){b.classList.remove("hinted")},2600)}};
+}
+function bitHint(row,target){
+  var n=row.bits(),cur=row.get();
+  for(var i=n-1;i>=0;i--){
+    var tb=(target>>i)&1,cb=(cur>>i)&1;
+    if(tb!==cb){
+      row.pulse(i);var v=1<<i;
+      if(cb)return "Turn off the "+v+" bulb (it’s flashing). You don’t need it to make "+target+".";
+      var left=target&((v<<1)-1);
+      return "Turn on the "+v+" bulb (it’s flashing). You still need "+left+", and "+v+" is the biggest bulb that fits inside "+left+".";
+    }
+  }
+  return "";
+}
+/* hint button that appears after a short wait on each new challenge */
+function Hint(btn,msg,compute){
+  var t=null;
+  btn.addEventListener("click",function(){msg.textContent=compute()||"You’re there. Look at the total."});
+  return {
+    arm:function(){clearTimeout(t);btn.hidden=true;msg.textContent="";t=setTimeout(function(){btn.hidden=false},15000)},
+    off:function(){clearTimeout(t);btn.hidden=true;msg.textContent=""}
+  };
+}
+
+/* ---------- progress + routing ---------- */
+var done=load("binlab-done",{});
+var views=["switches","counter","adding","messages","pixels","game","check","hex","finish"];
+var required=[["switches","Light switches"],["counter","Counting up"],["adding","Adding"],["messages","Secret messages"],["pixels","Pixel painter"],["game","Beat the clock"],["check","AP check"]];
+function markDone(v){if(done[v])return;done[v]=true;save("binlab-done",done);paintNav()}
+function current(){var c=location.hash.replace("#","");return views.indexOf(c)<0?"switches":c}
+function paintNav(){
+  var cur=current();
+  document.querySelectorAll("nav a").forEach(function(a){
+    var v=a.getAttribute("data-v");
+    if(v===cur)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");
+    a.classList.toggle("done",!!done[v]);
+  });
+  views.forEach(function(v){$("v-"+v).hidden=(v!==cur)});
+  if(cur!=="counter")stopAuto();
+  if(cur==="finish")renderReport();
+  if(cur!=="switches")endTour();
+}
+window.addEventListener("hashchange",paintNav);
+
+/* ---------- Station 1 ---------- */
+var targets=[1,2,3,5,8,13,37,64,100,200,255],s1i=load("binlab-s1",0),s1armed=-1;
+var s1=BitRow($("s1bits"),8,s1update);
+var h1=Hint($("s1hint"),$("s1hintmsg"),function(){return bitHint(s1,targets[s1i])});
+function s1update(v){
+  var parts=[];for(var i=7;i>=0;i--)if(v&(1<<i))parts.push(1<<i);
+  $("s1sum").textContent=parts.length?parts.join(" + "):"all off";
+  $("s1total").textContent=v;
+  s1task();
+}
+function s1task(){
+  var box=$("s1task"),dots="";
+  for(var i=0;i<targets.length;i++)dots+='<i class="'+(i<s1i?"d":i===s1i?"c":"")+'"></i>';
+  $("s1dots").innerHTML=dots;
+  if(s1i>=targets.length){
+    h1.off();
+    box.innerHTML='<div class="big ok">All challenges done</div><p style="margin:6px 0 0">255 is the largest number 8 bits can hold, because every bulb is on. Counting zero, that is 256 different values. Head to Station 2.</p>';
+    markDone("switches");return;
+  }
+  var t=targets[s1i];
+  if(s1.get()===t){
+    h1.off();
+    box.innerHTML='<div class="big ok">'+t+' is '+bin(t,8)+' in binary</div><div class="row" style="margin-top:8px"><button class="btn" id="s1next">Next challenge</button></div>';
+    $("s1next").addEventListener("click",function(){s1i++;save("binlab-s1",s1i);s1.set(0);s1update(0)});
+  }else{
+    if(s1armed!==s1i){s1armed=s1i;h1.arm()}
+    box.innerHTML='<div class="muted small">Challenge '+(s1i+1)+' of '+targets.length+'</div><div class="big">Make the number '+t+'</div>';
+  }
+}
+$("s1reset").addEventListener("click",function(){s1.set(0);s1update(0)});
+s1update(0);
+
+/* ---------- Station 2 ---------- */
+var c={n:4,v:0,timer:null,m:load("binlab-s2",{})};
+[3,4,5,6,8].forEach(function(k){
+  var b=document.createElement("button");b.className="btn ghost";b.type="button";b.textContent=k+" bits";
+  b.addEventListener("click",function(){stopAuto();c.n=k;c.v=0;$("s2log").innerHTML="";$("s2over").hidden=true;$("s2flip").innerHTML="&nbsp;";s2paint(-1)});
+  b.setAttribute("data-k",k);$("s2sizes").appendChild(b);
+});
+function s2paint(prev){
+  var s=bin(c.v,c.n),p=prev<0?null:bin(prev,c.n),h="";
+  for(var i=0;i<c.n;i++)h+='<div class="tile'+(s[i]==="1"?" one":"")+(p&&p[i]!==s[i]?" flip":"")+'">'+s[i]+'</div>';
+  $("s2tiles").innerHTML=h;$("s2dec").textContent=c.v;
+  var max=(1<<c.n);
+  $("s2fact").textContent=c.n+" bits can store "+max+" different values: 0 through "+(max-1)+".";
+  document.querySelectorAll("#s2sizes button").forEach(function(b){b.setAttribute("aria-pressed",+b.getAttribute("data-k")===c.n?"true":"false")});
+  var ms=$("s2missions").children,all=true;
+  for(var j=0;j<ms.length;j++){var ok=!!c.m[ms[j].getAttribute("data-m")];ms[j].classList.toggle("d",ok);if(!ok)all=false}
+  if(all)markDone("counter");
+}
+function s2add(){
+  var prev=c.v,max=(1<<c.n)-1,over=$("s2over");
+  if(c.v===max){
+    c.v=0;over.hidden=false;
+    over.textContent="Overflow! "+bin(max,c.n)+" + 1 needs "+(c.n+1)+" bits, but this counter only has "+c.n+". The extra bit is lost and the count wraps back to zero.";
+    c.m.over=true;stopAuto();
+  }else{c.v++;over.hidden=true}
+  var flipped=0,x=prev^c.v;while(x){flipped+=x&1;x>>=1}
+  $("s2flip").textContent=flipped+(flipped===1?" bit":" bits")+" flipped on that step";
+  if(c.n===4&&c.v===8)c.m.eight=true;
+  if(c.n===5&&c.v>16)c.m.five=true;
+  save("binlab-s2",c.m);
+  var li=document.createElement("li");li.textContent=bin(c.v,c.n)+" = "+c.v;
+  var log=$("s2log");log.appendChild(li);while(log.children.length>8)log.removeChild(log.firstChild);
+  s2paint(prev);
+}
+function stopAuto(){if(c.timer){clearInterval(c.timer);c.timer=null}var b=$("s2auto");if(b){b.setAttribute("aria-pressed","false");b.textContent="Auto count"}}
+$("s2add").addEventListener("click",s2add);
+$("s2auto").addEventListener("click",function(){
+  if(c.timer){stopAuto();return}
+  c.timer=setInterval(s2add,650);this.setAttribute("aria-pressed","true");this.textContent="Pause";
+});
+$("s2reset").addEventListener("click",function(){stopAuto();var p=c.v;c.v=0;$("s2over").hidden=true;$("s2flip").innerHTML="&nbsp;";s2paint(p)});
+s2paint(-1);
+
+/* ---------- Station 3: adding ---------- */
+var addP=[[5,6],[3,1],[9,6],[7,7],[12,10]],AN=4;
+var ad={i:load("binlab-add",0),ans:[],car:[],solved:false,ansBtns:[]};
+var hA=Hint($("adhint"),$("adhintmsg"),adHint);
+function adNew(){ad.ans=[0,0,0,0,0];ad.car=[0,0,0,0,0];ad.solved=false;adRender(true);hA.arm()}
+function adRender(fresh){
+  var grid=$("adgrid"),task=$("adtask"),dots="";
+  for(var k=0;k<addP.length;k++)dots+='<i class="'+(k<ad.i?"d":k===ad.i?"c":"")+'"></i>';
+  if(ad.i>=addP.length){
+    grid.innerHTML="";$("adbtns").hidden=true;hA.off();
+    task.innerHTML='<div class="big ok">All five problems done</div><p style="margin:6px 0 0">Computers add exactly this way, one column at a time, using circuits called adders.</p><div class="dots">'+dots+'</div>';
+    markDone("adding");return;
+  }
+  $("adbtns").hidden=false;
+  var a=addP[ad.i][0],b=addP[ad.i][1],sum=a+b;
+  if(ad.solved){
+    var note=sum>15?'<p style="margin:6px 0 0">This answer needed a 5th bit. A computer that only keeps 4 bits would store '+bin(sum&15,4)+', which is '+(sum&15)+'. That’s overflow, just like in Station 2.</p>':'';
+    task.innerHTML='<div class="big ok">'+bin(a,4)+' + '+bin(b,4)+' = '+bin(sum,5)+'</div><div>That’s '+a+' + '+b+' = '+sum+'.</div>'+note+'<div class="row" style="margin-top:8px"><button class="btn" id="adnext">Next problem</button></div><div class="dots">'+dots+'</div>';
+    $("adnext").addEventListener("click",function(){ad.i++;save("binlab-add",ad.i);adNew()});
+  }else if(fresh){
+    task.innerHTML='<div class="muted small">Problem '+(ad.i+1)+' of '+addP.length+'</div><div class="big">Add '+bin(a,4)+' + '+bin(b,4)+'</div><div class="small muted">(That’s '+a+' + '+b+'. Work it out in binary.)</div><div class="dots">'+dots+'</div>';
+  }
+  grid.innerHTML="";grid.style.gridTemplateColumns="64px repeat("+(AN+1)+",minmax(0,48px))";
+  function lab(t){var s=document.createElement("div");s.className="lab";s.textContent=t;grid.appendChild(s)}
+  function cell(t,cls){var s=document.createElement("div");s.className="cell "+(cls||"");s.textContent=t;grid.appendChild(s)}
+  lab("carries");
+  for(var p=AN;p>=0;p--){(function(p){
+    if(p===0){grid.appendChild(document.createElement("span"));return}
+    var bt=document.createElement("button");bt.type="button";bt.className="car";bt.textContent=ad.car[p]?"1":"";
+    bt.setAttribute("aria-label","Carry into the "+(1<<p)+"s column: "+(ad.car[p]?"1":"empty"));
+    bt.addEventListener("click",function(){if(ad.solved)return;ad.car[p]^=1;adRender(false)});
+    grid.appendChild(bt);
+  })(p)}
+  lab("");for(p=AN;p>=0;p--)p===AN?cell(""):cell((a>>p)&1,"given");
+  lab("+");for(p=AN;p>=0;p--)p===AN?cell(""):cell((b>>p)&1,"given");
+  var r=document.createElement("div");r.className="rule";grid.appendChild(r);
+  lab("answer");ad.ansBtns=[];
+  for(p=AN;p>=0;p--){(function(p){
+    var bt=document.createElement("button");bt.type="button";bt.className="ans"+(ad.ans[p]?" one":"");
+    if(ad.solved)bt.classList.add("right");
+    bt.textContent=ad.ans[p];bt.setAttribute("aria-label",(1<<p)+"s column answer: "+ad.ans[p]);
+    bt.addEventListener("click",function(){if(ad.solved)return;ad.ans[p]^=1;adRender(false)});
+    ad.ansBtns[p]=bt;grid.appendChild(bt);
+  })(p)}
+}
+function adCheck(){
+  if(ad.i>=addP.length||ad.solved)return;
+  var sum=addP[ad.i][0]+addP[ad.i][1],wrong=0;
+  for(var p=0;p<=AN;p++){var ok=ad.ans[p]===((sum>>p)&1);ad.ansBtns[p].classList.toggle("wrong",!ok);if(!ok)wrong++}
+  if(!wrong){ad.solved=true;hA.off();adRender(false)}
+  else $("adhintmsg").textContent=wrong+(wrong===1?" box is":" boxes are")+" not right yet (outlined in red). Start from the right-hand column.";
+}
+function adHint(){
+  if(ad.i>=addP.length)return "";
+  var a=addP[ad.i][0],b=addP[ad.i][1],sum=a+b;
+  for(var p=0;p<=AN;p++){
+    if(ad.ans[p]!==((sum>>p)&1)){
+      var mask=(1<<p)-1,cin=((a&mask)+(b&mask))>>p,ab=(a>>p)&1,bb=(b>>p)&1,tot=ab+bb+cin;
+      var bt=ad.ansBtns[p];bt.classList.remove("hinted");void bt.offsetWidth;bt.classList.add("hinted");
+      var parts=p===AN?"This column only has the "+cin+" carried in":"In the "+(1<<p)+"s column (flashing): "+ab+" + "+bb+(cin?" + the carried 1":"");
+      return parts+" = "+tot+", which is "+bin(tot,tot>1?2:1)+" in binary. Write "+(tot&1)+(tot>1?" and carry 1 to the next column.":".");
+    }
+  }
+  return "Every box is right. Press Check my answer.";
+}
+$("adcheck").addEventListener("click",adCheck);
+$("adclear").addEventListener("click",function(){if(ad.solved)return;ad.ans=[0,0,0,0,0];ad.car=[0,0,0,0,0];adRender(false)});
+adNew();
+
+/* ---------- Station 4: messages ---------- */
+var words=["HI","CODE","BINARY"],w={i:0,pos:0,busy:false};
+var s3=BitRow($("s3bits"),8,s3update);
+var h3=Hint($("s3hint"),$("s3hintmsg"),function(){var wd=words[w.i];return w.pos<wd.length?bitHint(s3,wd.charCodeAt(w.pos)):""});
+(function(){var h='<span><b>space</b>32</span>';for(var k=65;k<=90;k++)h+="<span><b>"+String.fromCharCode(k)+"</b>"+k+"</span>";$("s3chart").innerHTML=h})();
+function s3slots(){
+  var word=words[w.i],h="";
+  for(var i=0;i<word.length;i++)h+='<div class="slot'+(i<w.pos?" d":i===w.pos?" cur":"")+'">'+(i<w.pos?word[i]:"")+'</div>';
+  $("s3slots").innerHTML=h;
+}
+function s3task(){
+  var word=words[w.i],box=$("s3task");
+  if(w.pos>=word.length){
+    h3.off();
+    var last=w.i>=words.length-1;
+    box.innerHTML='<div class="big ok">You spelled '+word+'</div>'+(last?'<p style="margin:6px 0 0">That is every word. Now write your own message below and trade with a partner.</p>':'<div class="row" style="margin-top:8px"><button class="btn" id="s3next">Next word</button></div>');
+    markDone("messages");
+    if(!last)$("s3next").addEventListener("click",function(){w.i++;w.pos=0;s3.set(0);h3.arm();s3update(0)});
+  }else{
+    var ch=word[w.pos];
+    box.innerHTML='<div class="muted small">Word: '+word+'</div><div class="big">Make the letter '+ch+'</div><div class="small muted">'+ch+' is number '+ch.charCodeAt(0)+' in ASCII.</div>';
+  }
+}
+function s3update(v){
+  $("s3line").textContent=bin(v,8)+" = "+v;
+  $("s3char").textContent=v===32?"space":(v>32&&v<127)?String.fromCharCode(v):"?";
+  var word=words[w.i];
+  if(!w.busy&&w.pos<word.length&&v===word.charCodeAt(w.pos)){
+    w.busy=true;s3.lock(true);w.pos++;s3slots();$("s3hintmsg").textContent="";
+    setTimeout(function(){w.busy=false;s3.lock(false);s3.set(0);if(w.pos<words[w.i].length)h3.arm();s3update(0)},800);
+    return;
+  }
+  s3slots();if(!w.busy)s3task();
+}
+h3.arm();s3update(0);
+
+$("s3in").addEventListener("input",function(){
+  var t=this.value.toUpperCase().replace(/[^A-Z ]/g,"");if(t!==this.value)this.value=t;
+  var out=[];for(var i=0;i<t.length;i++)out.push(bin(t.charCodeAt(i),8));
+  $("s3out").textContent=out.join(" ");$("s3copied").textContent="";
+});
+function copyText(text,el,note){
+  function fallback(){var r=document.createRange();r.selectNodeContents(el);var s=window.getSelection();s.removeAllRanges();s.addRange(r);note.textContent="Selected. Press Ctrl+C or Cmd+C to copy."}
+  try{navigator.clipboard.writeText(text).then(function(){note.textContent="Copied"},fallback)}catch(e){fallback()}
+}
+$("s3copy").addEventListener("click",function(){
+  var t=$("s3out").textContent;if(!t){$("s3copied").textContent="Type a message first.";return}
+  copyText(t,$("s3out"),$("s3copied"));
+});
+$("s3paste").addEventListener("input",function(){
+  var raw=this.value.replace(/[^01]/g,""),err=$("s3err"),cards=$("s3cards"),solved=$("s3solved");
+  cards.innerHTML="";solved.hidden=true;err.hidden=true;
+  if(!raw)return;
+  if(raw.length%8!==0){err.hidden=false;err.textContent="That is "+raw.length+" bits. Every letter needs exactly 8, so check for a missing or extra digit.";return}
+  var bytes=raw.match(/.{8}/g).slice(0,40);
+  bytes.forEach(function(b){
+    var code=parseInt(b,2),card=document.createElement("div");card.className="card";
+    card.innerHTML='<span class="b">'+b+'</span><span class="b muted">= '+code+'</span>';
+    var inp=document.createElement("input");inp.type="text";inp.maxLength=1;inp.setAttribute("aria-label","Letter for "+b);inp.setAttribute("autocomplete","off");
+    inp.addEventListener("input",function(){
+      var g=inp.value.toUpperCase();card.classList.remove("d","w");
+      if(g==="")return;
+      if(g.charCodeAt(0)===code){card.classList.add("d");var nx=card.nextElementSibling;if(nx)nx.querySelector("input").focus()}
+      else card.classList.add("w");
+      if(cards.querySelectorAll(".card.d").length===bytes.length){
+        solved.hidden=false;solved.textContent="Decoded: "+bytes.map(function(x){return String.fromCharCode(parseInt(x,2))}).join("");
+      }
+    });
+    card.appendChild(inp);cards.appendChild(card);
+  });
+});
+
+/* ---------- Station 5: pixels ---------- */
+var PAL=["#FFFFFF","#E23D5B","#FFC233","#18243A"],PALN=["white","red","yellow","dark blue"];
+var puzzles=[
+  ["01100110","11111111","11111111","11111111","01111110","00111100","00011000","00000000"],
+  ["00111100","01000010","10100101","10000001","10100101","10011001","01000010","00111100"]
+];
+var px={mode:1,g:new Array(64).fill(0),color:3,p:load("binlab-pxp",0),m:load("binlab-pxm",{}),drag:null,cells:[]};
+(function(){
+  var grid=$("pxgrid");
+  for(var i=0;i<64;i++){
+    var b=document.createElement("button");b.type="button";b.dataset.cell=i;
+    px.cells.push(b);grid.appendChild(b);
+  }
+  function setCell(i,v){if(px.g[i]===v)return;px.g[i]=v;pxPaint()}
+  grid.addEventListener("pointerdown",function(e){
+    var t=e.target.closest("[data-cell]");if(!t)return;e.preventDefault();
+    var i=+t.dataset.cell,v=px.mode===1?1-px.g[i]:(px.g[i]===px.color?0:px.color);
+    px.drag=v;setCell(i,v);
+  });
+  grid.addEventListener("pointermove",function(e){
+    if(px.drag===null)return;
+    var el=document.elementFromPoint(e.clientX,e.clientY);
+    if(el&&el.dataset&&el.dataset.cell!==undefined)setCell(+el.dataset.cell,px.drag);
+  });
+  window.addEventListener("pointerup",function(){px.drag=null});
+  grid.addEventListener("click",function(e){
+    if(e.detail!==0)return;/* keyboard only */
+    var t=e.target.closest("[data-cell]");if(!t)return;var i=+t.dataset.cell;
+    setCell(i,px.mode===1?1-px.g[i]:(px.g[i]===px.color?0:px.color));
+  });
+  PAL.forEach(function(col,k){
+    var b=document.createElement("button");b.type="button";b.innerHTML='<i style="background:'+col+'"></i>'+bin(k,2)+' '+PALN[k];
+    b.addEventListener("click",function(){px.color=k;pxPaint()});$("pxpal").appendChild(b);
+  });
+  [3,6,8,9].forEach(function(n){
+    var b=document.createElement("button");b.className="btn ghost sm";b.type="button";b.textContent=n;
+    b.addEventListener("click",function(){
+      if(n===8){px.m.q=true;save("binlab-pxm",px.m);$("pxqmsg").innerHTML='<span class="ok">Right.</span> Each extra bit doubles the choices: 2, 4, 8. Real photos use 24 bits per pixel, which gives over 16 million colors.'}
+      else $("pxqmsg").innerHTML='<span class="err">Not quite.</span> List every 3-bit pattern: 000, 001, 010… How many are there?';
+      pxPaint();
+    });
+    $("pxqbtns").appendChild(b);
+  });
+})();
+function pxSetMode(m){
+  if(m===px.mode)return;
+  px.g=px.g.map(function(v){return m===2?(v?3:0):(v?1:0)});
+  px.mode=m;pxPaint();
+}
+function rowBits(r){
+  var s=[];for(var c=0;c<8;c++){var v=px.g[r*8+c];s.push(px.mode===1?String(v):bin(v,2))}
+  return px.mode===1?s.join(""):s.join(" ");
+}
+function pxPaint(){
+  for(var i=0;i<64;i++){var v=px.g[i],b=px.cells[i];
+    b.style.background=px.mode===1?(v?PAL[3]:PAL[0]):PAL[v];
+    b.setAttribute("aria-label","Row "+(Math.floor(i/8)+1)+", column "+(i%8+1)+": "+(px.mode===1?v:bin(v,2)));}
+  $("pxm1").setAttribute("aria-pressed",px.mode===1?"true":"false");
+  $("pxm2").setAttribute("aria-pressed",px.mode===2?"true":"false");
+  $("pxpal").hidden=px.mode!==2;
+  Array.prototype.forEach.call($("pxpal").children,function(b,k){b.setAttribute("aria-pressed",k===px.color?"true":"false")});
+  var puz=px.p<puzzles.length?puzzles[px.p]:null,rows="",match=px.mode===1&&!!puz;
+  for(var r=0;r<8;r++){
+    var bits=rowBits(r),m=puz&&px.mode===1&&bits===puz[r];
+    if(!m)match=false;
+    rows+='<li class="'+(m?"m":"")+'"><span class="r">row '+(r+1)+'</span>'+bits+(px.mode===1?" = "+parseInt(bits,2):"")+(m?" ✓":"")+'</li>';
+  }
+  $("pxrows").innerHTML=rows;
+  $("pxsize").innerHTML="64 pixels × "+px.mode+(px.mode===1?" bit":" bits")+" = <strong>"+(64*px.mode)+" bits</strong> to store this picture";
+  if(px.mode===2){var seen={};px.g.forEach(function(v){seen[v]=1});if(Object.keys(seen).length===4&&!px.m.colors){px.m.colors=true;save("binlab-pxm",px.m)}}
+  var task=$("pxtask");
+  if(puz&&match){
+    px.m["p"+px.p]=true;save("binlab-pxm",px.m);
+    task.innerHTML='<div class="big ok">Puzzle '+(px.p+1)+' decoded</div><div class="row" style="margin-top:8px"><button class="btn" id="pxnext">'+(px.p+1<puzzles.length?"Next puzzle":"Done with puzzles")+'</button></div>';
+    $("pxnext").addEventListener("click",function(){px.p++;save("binlab-pxp",px.p);px.g=new Array(64).fill(0);pxPaint()});
+  }else if(puz){
+    task.innerHTML='<div class="muted small">Puzzle '+(px.p+1)+' of '+puzzles.length+'</div><div class="big">Draw the picture these rows describe</div>'+
+      (px.mode!==1?'<p class="err small" style="margin:4px 0">Switch back to 1 bit per pixel for puzzles.</p>':'')+
+      '<div class="target"><ol>'+puz.map(function(r){return "<li>"+r+"</li>"}).join("")+'</ol></div><p class="small muted" style="margin:6px 0 0">A 1 means color that pixel in. Rows you get right turn green.</p>';
+  }else{
+    task.innerHTML=px.m.colors?'<div class="big ok">Puzzles done</div><div>Draw anything you like. Try a sprite for a game.</div>':
+      '<div class="big">Now try 2 bits per pixel</div><div>Switch modes and paint with all four colors. Watch how the size of the picture changes.</div>';
+  }
+  var ms=$("pxmissions").children,all=true;
+  for(var j=0;j<ms.length;j++){var ok=!!px.m[ms[j].getAttribute("data-m")];ms[j].classList.toggle("d",ok);if(!ok)all=false}
+  if(all)markDone("pixels");
+}
+$("pxm1").addEventListener("click",function(){pxSetMode(1)});
+$("pxm2").addEventListener("click",function(){pxSetMode(2)});
+$("pxclear").addEventListener("click",function(){px.g=new Array(64).fill(0);pxPaint()});
+pxPaint();
+
+/* ---------- Station 6: game ---------- */
+var levels=[{n:4,pts:1,name:"4 bits"},{n:6,pts:2,name:"6 bits"},{n:8,pts:3,name:"8 bits"}];
+var g={lv:0,score:0,left:60,timer:null,q:null,streak:0,best:load("binlab-best",{})};
+var gbits=BitRow($("g-bits"),4,function(v){if(g.q&&g.q.type==="make"&&v===g.q.val)gCorrect()});
+levels.forEach(function(L,i){
+  var b=document.createElement("button");b.className="btn ghost";b.type="button";
+  b.textContent=L.name+" ("+L.pts+(L.pts===1?" point":" points")+" each)";
+  b.addEventListener("click",function(){g.lv=i;gSetup()});$("g-levels").appendChild(b);
+});
+function gSetup(){
+  var bs=$("g-levels").children;for(var i=0;i<bs.length;i++)bs[i].setAttribute("aria-pressed",i===g.lv?"true":"false");
+  var best=g.best[levels[g.lv].n];
+  $("g-best").textContent=best?"Your best at this level: "+best:"No score at this level yet.";
+}
+function show(which){["setup","play","end"].forEach(function(k){$("g-"+k).hidden=(k!==which)})}
+function gStart(){
+  g.score=0;g.left=60;g.streak=0;$("g-score").textContent="0";$("g-time").textContent="1:00";$("g-msg").textContent="";
+  gbits.build(levels[g.lv].n);show("play");gNext();
+  clearInterval(g.timer);
+  g.timer=setInterval(function(){
+    g.left--;$("g-time").textContent="0:"+(g.left<10?"0":"")+g.left;
+    if(g.left<=0)gEnd();
+  },1000);
+}
+function gNext(){
+  var n=levels[g.lv].n,max=(1<<n)-1,val,prev=g.q?g.q.val:-1;
+  do{val=1+Math.floor(Math.random()*max)}while(val===prev);
+  var type=Math.random()<.5?"make":"read";g.q={type:type,val:val};
+  var make=type==="make";
+  $("g-bits").hidden=!make;$("g-tiles").hidden=make;$("g-answer").hidden=make;
+  if(make){gbits.set(0);$("g-prompt").textContent="Make "+val}
+  else{
+    var s=bin(val,n),h="";for(var i=0;i<n;i++)h+='<div class="tile'+(s[i]==="1"?" one":"")+'">'+s[i]+'</div>';
+    $("g-tiles").innerHTML=h;$("g-prompt").textContent="What number is this?";
+    var inp=$("g-in");inp.value="";inp.focus();
+  }
+}
+function gCorrect(){
+  g.score+=levels[g.lv].pts;g.streak++;$("g-score").textContent=g.score;
+  $("g-msg").textContent=g.streak>=3?g.streak+" in a row":"Correct";
+  $("g-msg").className="sum ok";gNext();
+}
+function gCheck(){
+  if(!g.q||g.q.type!=="read")return;
+  var inp=$("g-in"),v=parseInt(inp.value,10);
+  if(v===g.q.val){gCorrect();return}
+  g.streak=0;$("g-msg").textContent="Not that one. Add up the place values of the 1s.";$("g-msg").className="sum err";
+  inp.classList.remove("shake");void inp.offsetWidth;inp.classList.add("shake");inp.select();
+}
+function gEnd(){
+  clearInterval(g.timer);g.q=null;
+  var n=levels[g.lv].n,old=g.best[n]||0;
+  $("g-final").textContent=g.score;
+  if(g.score>old){g.best[n]=g.score;save("binlab-best",g.best);$("g-endmsg").textContent=old?"New personal best. Your old one was "+old+".":"That is your first score at "+levels[g.lv].name+".";}
+  else $("g-endmsg").textContent="Your best at "+levels[g.lv].name+" is "+old+".";
+  markDone("game");show("end");
+}
+$("g-start").addEventListener("click",gStart);
+$("g-check").addEventListener("click",gCheck);
+$("g-in").addEventListener("keydown",function(e){if(e.key==="Enter")gCheck()});
+$("g-again").addEventListener("click",function(){gSetup();show("setup")});
+
+gSetup();
+
+/* ---------- Station 7: AP check ---------- */
+var QS=[
+  {q:"How many different values can be represented using 6 bits?",o:["6","12","36","64"],a:3,
+   why:"Each bit doubles the number of values: 2 × 2 × 2 × 2 × 2 × 2 = 64."},
+  {q:"Which of the following is the binary representation of the decimal number 13?",o:["1011","1101","1110","0111"],a:1,
+   why:"1101 = 8 + 4 + 0 + 1 = 13."},
+  {q:"A program stores whole numbers using 4 bits. It adds 1 to the value 1111. Which best describes what happens?",
+   o:["The result 10000 is stored correctly.","An overflow error occurs because the result needs more than 4 bits.","A round-off error occurs because the result is rounded to the nearest whole number.","The value stays 1111 because it is already the largest value."],a:1,
+   why:"1111 + 1 = 10000, which needs 5 bits. With only 4 bits, the result can’t be stored correctly. That’s an overflow error."},
+  {q:"Which of the following is the largest value?",o:["Binary 1011","Decimal 11","Binary 1100","Decimal 9"],a:2,
+   why:"Binary 1100 = 8 + 4 = 12. Binary 1011 = 11, so it ties with decimal 11, and both are smaller than 12."},
+  {q:"A school gives each of its 300 students a unique ID number stored in binary. What is the fewest number of bits needed?",o:["8","9","10","300"],a:1,
+   why:"8 bits give only 256 values, which isn’t enough. 9 bits give 512 values, which is enough for 300."},
+  {q:"A byte stores the bits 01000001. Which of these could it represent?",
+   o:["Only the number 65","Only the letter A","The number 65 or the letter A, depending on how the program uses it","Neither, because a byte must be converted to decimal first"],a:2,
+   why:"Bits don’t have meaning on their own. The same 01000001 is 65 as a number and A in ASCII. The program decides how to read it."}
+];
+var ck={res:load("binlab-check",{first:null,best:0}),order:[],picked:{}};
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function ckRender(){
+  ck.picked={};var box=$("ck-qs");box.innerHTML="";
+  ck.order=QS.map(function(q){return shuffle(q.o.map(function(_,k){return k}))});
+  QS.forEach(function(q,i){
+    var d=document.createElement("div");d.className="q";
+    var t=document.createElement("div");t.className="qt";t.textContent=(i+1)+". "+q.q;d.appendChild(t);
+    ck.order[i].forEach(function(k){
+      var l=document.createElement("label"),r=document.createElement("input");
+      r.type="radio";r.name="ck"+i;r.value=k;
+      r.addEventListener("change",function(){ck.picked[i]=k});
+      l.appendChild(r);l.appendChild(document.createTextNode(q.o[k]));l.dataset.k=k;d.appendChild(l);
+    });
+    var why=document.createElement("div");why.className="why";why.hidden=true;why.textContent=q.why;d.appendChild(why);
+    box.appendChild(d);
+  });
+  $("ck-submit").hidden=false;$("ck-retry").hidden=true;$("ck-score").textContent="";
+  if(ck.res.first!==null)$("ck-score").textContent="First try: "+ck.res.first+" of "+QS.length+". Best: "+ck.res.best+" of "+QS.length+".";
+}
+$("ck-submit").addEventListener("click",function(){
+  var missing=QS.filter(function(_,i){return ck.picked[i]===undefined}).length;
+  if(missing){$("ck-score").textContent="Answer all six first ("+missing+" left).";$("ck-score").className="err";return}
+  var score=0,qs=$("ck-qs").children;
+  QS.forEach(function(q,i){
+    var ok=ck.picked[i]===q.a;if(ok)score++;
+    Array.prototype.forEach.call(qs[i].querySelectorAll("label"),function(l){
+      var k=+l.dataset.k;l.querySelector("input").disabled=true;
+      if(k===q.a)l.classList.add("right");else if(k===ck.picked[i])l.classList.add("picked-wrong");
+    });
+    qs[i].querySelector(".why").hidden=false;
+  });
+  if(ck.res.first===null)ck.res.first=score;
+  ck.res.best=Math.max(ck.res.best,score);save("binlab-check",ck.res);
+  $("ck-score").className="ok";
+  $("ck-score").textContent="You got "+score+" of "+QS.length+"."+(score===QS.length?" Perfect.":" Read the explanations, then try again.");
+  $("ck-submit").hidden=true;$("ck-retry").hidden=false;
+  markDone("check");
+});
+$("ck-retry").addEventListener("click",function(){ckRender();window.scrollTo(0,0)});
+ckRender();
+
+/* ---------- Bonus: hex ---------- */
+var hxT=[{t:"b",v:0x0A},{t:"b",v:0x2F},{t:"b",v:0xFF},{t:"b",v:0x80},
+  {t:"c",v:0xFF0000,name:"pure red"},{t:"c",v:0xFFFF00,name:"yellow (red + green)"},{t:"c",v:0x800080,name:"purple: #800080"}];
+var hx={i:load("binlab-hex",0),armed:-1};
+var hxb=BitRow($("hxbits"),8,hxUpdate,{nibbles:true});
+var hr=BitRow($("hxr"),8,hxUpdate,{compact:true}),hg=BitRow($("hxg"),8,hxUpdate,{compact:true}),hb=BitRow($("hxb"),8,hxUpdate,{compact:true});
+var hH=Hint($("hxhint"),$("hxhintmsg"),function(){
+  var T=hxT[hx.i];if(!T)return "";
+  if(T.t==="b")return bitHint(hxb,T.v);
+  var ch=[["Red",hr,(T.v>>16)&255],["Green",hg,(T.v>>8)&255],["Blue",hb,T.v&255]];
+  for(var k=0;k<3;k++)if(ch[k][1].get()!==ch[k][2])return ch[k][0]+" should be "+hex2(ch[k][2])+" ("+bin(ch[k][2],8)+"). "+bitHint(ch[k][1],ch[k][2]);
+  return "";
+});
+(function(){var h="";for(var k=0;k<16;k++)h+="<span><b>"+k.toString(16).toUpperCase()+"</b>"+bin(k,4)+"</span>";$("hxchart").innerHTML=h})();
+function hxUpdate(){
+  var v=hxb.get();
+  $("hxval").textContent=hex2(v);$("hxdec").textContent="decimal "+v;
+  $("hxn1").textContent=bin(v>>4,4)+" = "+(v>>4).toString(16).toUpperCase();
+  $("hxn2").textContent=bin(v&15,4)+" = "+(v&15).toString(16).toUpperCase();
+  var r=hr.get(),gg=hg.get(),b=hb.get(),code=(r<<16)|(gg<<8)|b;
+  $("hxrh").textContent=hex2(r);$("hxgh").textContent=hex2(gg);$("hxbh").textContent=hex2(b);
+  $("hxsw").style.background="rgb("+r+","+gg+","+b+")";
+  $("hxcode").textContent="#"+hex2(r)+hex2(gg)+hex2(b);
+  var T=hxT[hx.i],box=$("hxtask");
+  $("hxbyte").classList.toggle("focus",!!T&&T.t==="b");$("hxcolor").classList.toggle("focus",!!T&&T.t==="c");
+  if(!T){hH.off();box.innerHTML='<div class="big ok">Bonus complete</div><div>Try mixing your own colors. What does #FFFFFF make?</div>';markDone("hex");return}
+  var hit=T.t==="b"?v===T.v:code===T.v;
+  if(hit){
+    hH.off();
+    box.innerHTML='<div class="big ok">'+(T.t==="b"?bin(T.v,8)+" = "+hex2(T.v)+" in hex = "+T.v+" in decimal":"#"+hex2(T.v>>16&255)+hex2(T.v>>8&255)+hex2(T.v&255)+" is "+T.name.split(":")[0])+'</div><div class="row" style="margin-top:8px"><button class="btn" id="hxnext">Next</button></div>';
+    $("hxnext").addEventListener("click",function(){hx.i++;save("binlab-hex",hx.i);hxb.set(0);hxUpdate()});
+  }else{
+    if(hx.armed!==hx.i){hx.armed=hx.i;hH.arm()}
+    box.innerHTML='<div class="muted small">Challenge '+(hx.i+1)+' of '+hxT.length+'</div><div class="big">'+(T.t==="b"?"Make hex "+hex2(T.v)+" with the bulbs":"Make "+T.name+" with the color bulbs")+'</div>'+(T.t==="b"?'<div class="small muted">Work out each hex digit as its own group of 4 bits.</div>':'');
+  }
+}
+hxUpdate();
+
+/* ---------- Finish ---------- */
+var finName=$("fin-name");finName.value=load("binlab-name","");
+finName.addEventListener("input",function(){save("binlab-name",finName.value);renderReport()});
+function reportText(){
+  var n=finName.value.trim(),got=required.filter(function(r){return done[r[0]]}).length;
+  var L=["Binary Lab report","Name: "+(n||"(not entered yet)"),"Date: "+new Date().toLocaleDateString(),
+    "Time in lab: about "+Math.max(1,Math.round(secs/60))+" min","",
+    "Stations completed: "+got+" of "+required.length];
+  required.forEach(function(r,k){L.push("  "+(done[r[0]]?"[x] ":"[ ] ")+(k+1)+". "+r[1])});
+  L.push("  "+(done.hex?"[x] ":"[ ] ")+"Bonus: Hex codes","");
+  L.push("Beat the clock best: 4 bits "+(g.best[4]||"-")+", 6 bits "+(g.best[6]||"-")+", 8 bits "+(g.best[8]||"-"));
+  L.push("AP check: "+(ck.res.first===null?"not taken":"first try "+ck.res.first+"/"+QS.length+", best "+ck.res.best+"/"+QS.length));
+  return L.join("\n");
+}
+function renderReport(){
+  var t=reportText();$("fin-out").textContent=t;$("fin-msg").textContent="";
+  $("fin-mail").href="mailto:dware@brimmer.org?subject="+encodeURIComponent("Binary Lab report"+(finName.value.trim()?" - "+finName.value.trim():""))+"&body="+encodeURIComponent(t);
+}
+$("fin-copy").addEventListener("click",function(){
+  if(!finName.value.trim()){$("fin-msg").textContent="Add your name first.";finName.focus();return}
+  copyText(reportText(),$("fin-out"),$("fin-msg"));
+});
+$("fin-mail").addEventListener("click",function(e){if(!finName.value.trim()){e.preventDefault();$("fin-msg").textContent="Add your name first.";finName.focus()}});
+
+/* ---------- walkthrough ---------- */
+var tour={i:0,on:false,steps:[
+  {el:"s1goal",text:"This yellow box tells you what to do. Right now it’s asking you to make a number."},
+  {el:"s1bits",text:"Each bulb is one bit. Tap a bulb to turn it on. The number under it is what that bulb is worth."},
+  {el:"s1readout",text:"The big number is the total of every bulb that’s on. When it matches the yellow box, a Next button appears. Stuck? A hint button shows up after a few seconds."}
+]};
+function tourShow(){
+  document.querySelectorAll(".spot").forEach(function(e){e.classList.remove("spot")});
+  var s=tour.steps[tour.i],el=$(s.el);el.classList.add("spot");
+  el.scrollIntoView({block:"center",behavior:"smooth"});
+  $("coach-step").textContent="Step "+(tour.i+1)+" of "+tour.steps.length;
+  $("coach-text").textContent=s.text;
+  $("coach-back").hidden=tour.i===0;
+  $("coach-next").textContent=tour.i===tour.steps.length-1?"Got it":"Next";
+  $("coach").hidden=false;$("coach-next").focus();
+}
+function startTour(){tour.on=true;tour.i=0;tourShow()}
+function endTour(){
+  if(!tour.on)return;tour.on=false;$("coach").hidden=true;
+  document.querySelectorAll(".spot").forEach(function(e){e.classList.remove("spot")});
+  save("binlab-tour",true);
+}
+$("coach-next").addEventListener("click",function(){if(tour.i<tour.steps.length-1){tour.i++;tourShow()}else endTour()});
+$("coach-back").addEventListener("click",function(){if(tour.i>0){tour.i--;tourShow()}});
+$("coach-skip").addEventListener("click",endTour);
+document.addEventListener("keydown",function(e){if(e.key==="Escape")endTour()});
+$("tour-open").addEventListener("click",function(){
+  if(current()!=="switches"){location.hash="switches";setTimeout(startTour,50)}else startTour();
+});
+
+paintNav();
+if(!load("binlab-tour",false)&&current()==="switches")setTimeout(startTour,400);
+})();
+</script>
+</body>
+</html>
