@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AP CSP Code Matcher — Pseudocode vs. Block-Based Code</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* =========================================================================
+       1. THEME DESIGN TOKENS (Dark Gray Default + Light Gray Mode)
+       ========================================================================= */
+    :root {
+      --bg-page: #181a1f;
+      --bg-header: #1e2128;
+      --bg-card: #23262e;
+      --bg-surface: #2c303a;
+      --bg-surface-hover: #353a47;
+      --bg-dropdown: #242831;
+      --border-subtle: #353a47;
+      --border-strong: #474f61;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+
+      /* AP CSP Exam Reference Sheet Pseudocode Box (Dark) */
+      --pseudo-bg: #14171d;
+      --pseudo-border: #313746;
+      --pseudo-kw: #60a5fa;
+      --pseudo-op: #fbbf24;
+      --pseudo-fn: #38bdf8;
+      --pseudo-var: #f8fafc;
+      --pseudo-brace: #94a3b8;
+      --pseudo-blk: #a78bfa;
+
+      /* Feedback States */
+      --row-correct-bg: rgba(16, 185, 129, 0.10);
+      --row-correct-border: rgba(16, 185, 129, 0.55);
+      --row-wrong-border: #ef4444;
+      --tip-bg: rgba(16, 185, 129, 0.14);
+      --tip-text: #a7f3d0;
+      --hint-bg: rgba(239, 68, 68, 0.14);
+      --hint-text: #fecaca;
+      --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.28);
+      --shadow-dropdown: 0 18px 42px rgba(0, 0, 0, 0.58);
+    }
+
+    html.theme-light {
+      --bg-page: #e5e7eb;
+      --bg-header: #f3f4f6;
+      --bg-card: #f7f8fa;
+      --bg-surface: #edf0f4;
+      --bg-surface-hover: #e2e8f0;
+      --bg-dropdown: #ffffff;
+      --border-subtle: #d1d5db;
+      --border-strong: #9ca3af;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #475569;
+
+      /* AP CSP Exam Reference Sheet Pseudocode Box (Light) */
+      --pseudo-bg: #ffffff;
+      --pseudo-border: #cbd5e1;
+      --pseudo-kw: #1d4ed8;
+      --pseudo-op: #b45309;
+      --pseudo-fn: #0369a1;
+      --pseudo-var: #0f172a;
+      --pseudo-brace: #64748b;
+      --pseudo-blk: #6d28d9;
+
+      /* Feedback States */
+      --row-correct-bg: rgba(16, 185, 129, 0.11);
+      --row-correct-border: #10b981;
+      --row-wrong-border: #dc2626;
+      --tip-bg: #ecfdf5;
+      --tip-text: #065f46;
+      --hint-bg: #fef2f2;
+      --hint-text: #991b1b;
+      --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.07);
+      --shadow-dropdown: 0 16px 36px rgba(15, 23, 42, 0.18);
+    }
+
+    /* =========================================================================
+       2. BASE LAYOUT & THEME UTILITY CLASSES
+       ========================================================================= */
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .t-header {
+      background-color: var(--bg-header);
+      border-color: var(--border-subtle);
+    }
+    .t-card {
+      background-color: var(--bg-card);
+      border-color: var(--border-subtle);
+      box-shadow: var(--shadow-card);
+    }
+    .t-surface {
+      background-color: var(--bg-surface);
+      border-color: var(--border-subtle);
+    }
+    .t-surface-btn {
+      background-color: var(--bg-surface);
+      border-color: var(--border-subtle);
+      color: var(--text-primary);
+    }
+    .t-surface-btn:hover {
+      background-color: var(--bg-surface-hover);
+      border-color: var(--border-strong);
+    }
+    .t-text-primary { color: var(--text-primary); }
+    .t-text-secondary { color: var(--text-secondary); }
+    .t-text-muted { color: var(--text-muted); }
+    .t-border { border-color: var(--border-subtle); }
+
+    /* Dedicated close button hover styling for both Dark & Light Gray themes */
+    .t-close-btn {
+      color: var(--text-muted);
+      transition: color 0.15s ease, background-color 0.15s ease;
+    }
+    .t-close-btn:hover {
+      color: var(--text-primary);
+      background-color: var(--bg-surface-hover);
+    }
+
+    /* =========================================================================
+       3. AP CSP PSEUDOCODE BOX STYLING
+       ========================================================================= */
+    .pseudo-box {
+      background-color: var(--pseudo-bg);
+      border: 1.5px solid var(--pseudo-border);
+      color: var(--pseudo-var);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      padding: 10px 14px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .p-kw    { color: var(--pseudo-kw); font-weight: 800; letter-spacing: 0.01em; }
+    .p-fn    { color: var(--pseudo-fn); font-weight: 800; }
+    .p-op    { color: var(--pseudo-op); font-weight: 800; }
+    .p-var   { color: var(--pseudo-var); font-weight: 500; }
+    .p-brace { color: var(--pseudo-brace); font-weight: 700; }
+    .p-blk   { color: var(--pseudo-blk); font-style: italic; font-weight: 600; }
+
+    /* =========================================================================
+       4. SCRATCH / MAKECODE VISUAL BLOCK CHIPS (9 COLOR CATEGORIES)
+       ========================================================================= */
+    .blk-var       { --blk-bg: #FF8C1A; --blk-border: #DB6E00; --blk-dark: #E67700; } /* Variables: orange */
+    .blk-output    { --blk-bg: #9966FF; --blk-border: #774DCB; --blk-dark: #8552E6; } /* Output: purple */
+    .blk-input     { --blk-bg: #29B6D8; --blk-border: #1A8CA8; --blk-dark: #209EBD; } /* Input: cyan */
+    .blk-op        { --blk-bg: #59C059; --blk-border: #389438; --blk-dark: #45A845; } /* Operators: green */
+    .blk-control   { --blk-bg: #E69B00; --blk-border: #BD7D00; --blk-dark: #CC8800; } /* Control: gold/amber */
+    .blk-list      { --blk-bg: #FF661A; --blk-border: #D94E07; --blk-dark: #E0530D; } /* Lists: deep orange-red */
+    .blk-proc      { --blk-bg: #E93D82; --blk-border: #C42565; --blk-dark: #D62F72; } /* Procedures: magenta/pink */
+    .blk-motion    { --blk-bg: #4C97FF; --blk-border: #3373CC; --blk-dark: #3B82E6; } /* Robot Motion: blue */
+    .blk-sensing   { --blk-bg: #0EA5A4; --blk-border: #0F766E; --blk-dark: #0D9488; } /* Robot Sensing: teal */
+
+    .scratch-reporter {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      background-color: var(--blk-bg);
+      border: 1.5px solid var(--blk-border);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.78rem;
+      line-height: 1.25;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      user-select: none;
+    }
+
+    .scratch-stack {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      background-color: var(--blk-bg);
+      border: 1.5px solid var(--blk-border);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.78rem;
+      line-height: 1.25;
+      padding: 6px 11px;
+      border-radius: 7px;
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      user-select: none;
+    }
+
+    .scratch-hat {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      background-color: var(--blk-bg);
+      border: 1.5px solid var(--blk-border);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.78rem;
+      line-height: 1.25;
+      padding: 7px 12px 6px 12px;
+      border-radius: 16px 16px 6px 6px;
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      user-select: none;
+    }
+
+    .scratch-boolean {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      background-color: var(--blk-bg);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.78rem;
+      line-height: 1.25;
+      padding: 5px 15px;
+      clip-path: polygon(9px 0%, calc(100% - 9px) 0%, 100% 50%, calc(100% - 9px) 100%, 9px 100%, 0% 50%);
+      user-select: none;
+    }
+
+    .blk-slot {
+      background-color: #ffffff;
+      color: #1e293b;
+      font-weight: 700;
+      font-size: 0.73rem;
+      padding: 1px 7px;
+      border-radius: 9999px;
+      box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.2);
+    }
+
+    .blk-hex {
+      background-color: var(--blk-dark);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.72rem;
+      padding: 1px 10px;
+      clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0% 50%);
+    }
+
+    .blk-drop {
+      background-color: var(--blk-dark);
+      border: 1px solid rgba(255, 255, 255, 0.42);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.73rem;
+      padding: 1px 6px;
+      border-radius: 5px;
+    }
+
+    .blk-body {
+      background-color: rgba(0, 0, 0, 0.22);
+      border: 1px dashed rgba(255, 255, 255, 0.45);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.72rem;
+      padding: 1px 7px;
+      border-radius: 5px;
+    }
+
+    /* =========================================================================
+       5. ROW STATES, CUSTOM DROPDOWN & ANIMATIONS
+       ========================================================================= */
+    .row-card {
+      background-color: var(--bg-card);
+      border: 1.5px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+      transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .row-card.dropdown-open {
+      z-index: 40;
+    }
+    .row-card.row-correct {
+      background-color: var(--row-correct-bg);
+      border-color: var(--row-correct-border);
+      box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.28), var(--shadow-card);
+    }
+    .row-card.row-wrong {
+      border-color: var(--row-wrong-border);
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.22);
+    }
+
+    .dropdown-menu {
+      background-color: var(--bg-dropdown);
+      border: 1.5px solid var(--border-strong);
+      box-shadow: var(--shadow-dropdown);
+      z-index: 60;
+    }
+
+    .dropdown-option {
+      transition: background-color 0.12s ease;
+    }
+    .dropdown-option:hover:not(:disabled) {
+      background-color: var(--bg-surface-hover);
+    }
+
+    .tip-banner {
+      background-color: var(--tip-bg);
+      color: var(--tip-text);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .hint-banner {
+      background-color: var(--hint-bg);
+      color: var(--hint-text);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    @keyframes shakeRow {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-5px); }
+      40% { transform: translateX(5px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+    .animate-shake {
+      animation: shakeRow 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes popCheck {
+      0% { transform: scale(0.6); opacity: 0; }
+      70% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-check {
+      animation: popCheck 0.35s ease-out forwards;
+    }
+
+    /* =========================================================================
+       6. PRINT STYLES (CLEAN INK-FRIENDLY WHITE REPORT ONLY)
+       ========================================================================= */
+    #printReportArea {
+      display: none;
+    }
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+      }
+      #appShell, #reportModal, #toastContainer {
+        display: none !important;
+      }
+      #printReportArea {
+        display: block !important;
+        padding: 0;
+        margin: 0;
+      }
+      .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+      }
+      .print-table th, .print-table td {
+        border: 1px solid #cbd5e1;
+        padding: 6px 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+      .print-table th {
+        background-color: #f1f5f9 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .print-break-avoid {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+  <!-- ==================== INTERACTIVE STUDENT APP SHELL ==================== -->
+  <div id="appShell" class="min-h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="t-header border-b sticky top-0 z-30 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <!-- Title & Subtitle -->
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md shrink-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight t-text-primary leading-tight">
+                AP CSP <span class="text-indigo-400">Code Matcher</span>
+              </h1>
+              <p class="text-xs sm:text-sm t-text-muted">
+                AP Computer Science Principles Exam Reference Sheet vs. Block-Based Code
+              </p>
+            </div>
+          </div>
+
+          <!-- Header Right Controls: Progress + Theme Toggle + Turn In -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Overall Progress Pill -->
+            <div class="t-surface border rounded-xl px-3 py-1.5 flex items-center gap-2.5">
+              <div class="flex items-center gap-1.5 text-xs sm:text-sm font-bold t-text-primary">
+                <span class="w-5 h-5 rounded-full bg-emerald-500 text-white inline-flex items-center justify-center text-[11px]">✓</span>
+                <span id="overallProgressLabel">0 / 30 Rows Completed</span>
+              </div>
+              <div class="w-20 sm:w-28 h-2 rounded-full bg-slate-600/30 overflow-hidden">
+                <div id="overallProgressBar" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <!-- Theme Toggle Button -->
+            <button
+              id="themeToggleBtn"
+              type="button"
+              onclick="toggleTheme()"
+              class="t-surface-btn border rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5 transition cursor-pointer"
+              title="Switch between Dark Mode and Light Gray Mode"
+            >
+              <!-- Sun icon (shown in Dark Mode) -->
+              <svg id="themeIconSun" class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <!-- Moon icon (shown in Light Gray Mode) -->
+              <svg id="themeIconMoon" class="w-4 h-4 text-indigo-600 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+              <span id="themeToggleText">Light Gray</span>
+            </button>
+
+            <!-- Turn In / Export Report Button -->
+            <button
+              type="button"
+              onclick="openReportModal()"
+              class="rounded-xl px-3.5 py-2 text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm inline-flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Turn In / Export Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabs & Toolbar Row -->
+        <div class="mt-3 pt-3 border-t t-border flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2.5">
+          <!-- 4 Category Tabs -->
+          <div id="categoryTabs" class="flex flex-wrap items-center gap-1.5" role="tablist">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Action Controls -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onclick="toggleHowToPlay()"
+              class="t-surface-btn border rounded-xl px-3 py-1.5 text-xs font-semibold inline-flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              How to Play
+            </button>
+
+            <button
+              id="descToggleBtn"
+              type="button"
+              onclick="toggleDescriptions()"
+              class="t-surface-btn border rounded-xl px-3 py-1.5 text-xs font-semibold inline-flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <span id="descDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span id="descToggleLabel">Descriptions: ON</span>
+            </button>
+
+            <button
+              type="button"
+              onclick="checkAllFilledInTab()"
+              class="rounded-xl px-3 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm inline-flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Check All Filled
+            </button>
+
+            <button
+              type="button"
+              onclick="resetCurrentTab()"
+              class="t-surface-btn border rounded-xl px-3 py-1.5 text-xs font-semibold inline-flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset Tab
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-5 space-y-4">
+
+      <!-- Collapsible "How to Play" Banner -->
+      <section id="howToPlayBanner" class="t-card border rounded-2xl p-4">
+        <div class="flex items-start justify-between gap-3">
+          <div class="space-y-1.5">
+            <h2 class="text-sm font-bold t-text-primary flex items-center gap-2">
+              <span class="w-5 h-5 rounded-md bg-indigo-500/20 text-indigo-400 inline-flex items-center justify-center text-xs font-extrabold">?</span>
+              How to Play
+            </h2>
+            <p class="text-xs sm:text-sm t-text-secondary leading-relaxed">
+              Match each <strong>AP CSP Text Pseudocode</strong> command on the left with its equivalent <strong>Block-Based Code</strong> on the right. All 4 tabs share <strong>one shuffled 30-block pool</strong>—once a block is placed, it becomes unavailable elsewhere until cleared. Use the quick search bar inside any dropdown to scan blocks fast! Click <strong>Check</strong> on a row (or <strong>Check All Filled</strong>) to lock in correct matches with a green checkmark and unlock AP CSP Exam Tips. When finished, click <strong>Turn In / Export Report</strong>.
+            </p>
+          </div>
+          <button
+            type="button"
+            onclick="toggleHowToPlay()"
+            class="t-close-btn p-1 rounded-lg cursor-pointer shrink-0"
+            aria-label="Close How to Play"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Live Session Metrics Bar (Auto-save + Accuracy + Mobile Pool Badge) -->
+      <section class="t-surface border rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="font-bold t-text-primary">Session Stats:</span>
+          <span class="t-text-muted">
+            Check Attempts: <strong id="attemptsStat" class="t-text-primary">0</strong>
+          </span>
+          <span class="t-text-muted">•</span>
+          <span class="t-text-muted">
+            First-Try Accuracy: <strong id="firstTryStat" class="text-emerald-400">—</strong>
+          </span>
+          <span class="t-text-muted hidden sm:inline">•</span>
+          <span id="autoSaveIndicator" class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400/90" title="Your progress is automatically saved in this browser">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Auto-saved</span>
+          </span>
+        </div>
+        <!-- Mobile Pool Remaining Badge -->
+        <div class="md:hidden">
+          <span id="poolBadgeMobile" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 font-bold text-xs">
+            Pool Remaining: 30 / 30
+          </span>
+        </div>
+      </section>
+
+      <!-- Column Headers (Desktop) -->
+      <div class="hidden md:grid md:grid-cols-12 gap-4 px-2 items-center">
+        <div class="md:col-span-6 flex items-center gap-2 text-xs font-bold uppercase tracking-wider t-text-muted">
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+          AP CSP Text Pseudocode (Exam Reference Sheet)
+        </div>
+        <div class="md:col-span-6 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider t-text-muted">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            Block-Based Code (Shared 30-Block Pool)
+          </div>
+          <span id="poolBadgeDesktop" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 font-bold text-xs">
+            Pool Remaining: 30 / 30
+          </span>
+        </div>
+      </div>
+
+      <!-- Matching Rows Container -->
+      <section id="rowsContainer" class="space-y-3 pb-12">
+        <!-- Populated dynamically by JS -->
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="t-header border-t py-3 px-4 text-center text-xs t-text-muted">
+      All 30 commands align with the official College Board AP Computer Science Principles Exam Reference Sheet.
+    </footer>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATION ==================== -->
+  <div id="toastContainer" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-4 w-[92%] max-w-lg">
+    <div id="toastBox" class="rounded-xl px-4 py-3 shadow-2xl border flex items-center gap-3 text-sm font-semibold">
+      <span id="toastIcon" class="shrink-0"></span>
+      <span id="toastMessage" class="leading-snug"></span>
+    </div>
+  </div>
+
+  <!-- ==================== TURN IN / EXPORT REPORT MODAL ==================== -->
+  <div id="reportModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/65 backdrop-blur-sm p-4">
+    <div class="t-card border rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-extrabold t-text-primary">Turn In / Export Report</h2>
+          <p class="text-xs sm:text-sm t-text-muted mt-0.5">
+            Enter your name and class period to export a printable PDF or Word (.doc) file for Canvas or Google Classroom.
+          </p>
+        </div>
+        <button
+          type="button"
+          onclick="closeReportModal()"
+          class="t-close-btn p-1.5 rounded-lg cursor-pointer"
+          aria-label="Close modal"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Student Inputs -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="studentNameInput" class="block text-xs font-bold t-text-secondary mb-1">Student Full Name</label>
+          <input
+            id="studentNameInput"
+            type="text"
+            oninput="saveProgress()"
+            placeholder="e.g., Alex Rivera"
+            class="w-full t-surface border rounded-xl px-3 py-2 text-sm t-text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label for="studentClassInput" class="block text-xs font-bold t-text-secondary mb-1">Class / Period</label>
+          <input
+            id="studentClassInput"
+            type="text"
+            oninput="saveProgress()"
+            placeholder="e.g., AP CSP - Period 2"
+            class="w-full t-surface border rounded-xl px-3 py-2 text-sm t-text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+      </div>
+
+      <!-- Timestamp -->
+      <div class="text-xs t-text-muted flex items-center justify-between t-surface border rounded-xl px-3 py-2">
+        <span class="font-semibold">Timestamp:</span>
+        <span id="reportTimestamp" class="font-mono t-text-primary"></span>
+      </div>
+
+      <!-- Summary Stats Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+        <div class="t-surface border rounded-2xl p-2.5">
+          <div id="modalCompleted" class="text-base sm:text-lg font-extrabold text-emerald-400">0 / 30</div>
+          <div class="text-[10px] font-semibold t-text-muted uppercase tracking-wide mt-0.5">Completed</div>
+        </div>
+        <div class="t-surface border rounded-2xl p-2.5">
+          <div id="modalCompletionPct" class="text-base sm:text-lg font-extrabold text-indigo-400">0%</div>
+          <div class="text-[10px] font-semibold t-text-muted uppercase tracking-wide mt-0.5">Completion</div>
+        </div>
+        <div class="t-surface border rounded-2xl p-2.5">
+          <div id="modalAttempts" class="text-base sm:text-lg font-extrabold text-sky-400">0</div>
+          <div class="text-[10px] font-semibold t-text-muted uppercase tracking-wide mt-0.5">Attempts</div>
+        </div>
+        <div class="t-surface border rounded-2xl p-2.5">
+          <div id="modalFirstTry" class="text-base sm:text-lg font-extrabold text-amber-400">—</div>
+          <div class="text-[10px] font-semibold t-text-muted uppercase tracking-wide mt-0.5">First-Try</div>
+        </div>
+      </div>
+
+      <!-- Export Actions -->
+      <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+        <button
+          type="button"
+          onclick="printPdfReport()"
+          class="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm inline-flex items-center justify-center gap-2 transition cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          Print / Save as PDF
+        </button>
+
+        <button
+          type="button"
+          onclick="downloadWordDoc()"
+          class="flex-1 rounded-xl px-4 py-2.5 text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm inline-flex items-center justify-center gap-2 transition cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Download Word Doc (.doc)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== DEDICATED PRINT REPORT CONTAINER ==================== -->
+  <div id="printReportArea"></div>
+
+  <!-- ==================== APPLICATION JAVASCRIPT ==================== -->
+  <script>
+    /* =========================================================================
+       1. SALTED 32-BIT DETERMINISTIC HASH VALIDATION (NO PLAIN-TEXT KEY)
+       ========================================================================= */
+    function computeMatchHash(rowId, blockId) {
+      const payload = `${rowId}:${blockId}`;
+      let h = 2166;
+      for (let i = 0; i < payload.length; i++) {
+        h = (Math.imul(h, 31) + payload.charCodeAt(i) + 17) >>> 0;
+      }
+      return h;
+    }
+
+    /* =========================================================================
+       2. SHARED 30-BLOCK VISUAL POOL (SHUFFLED ONCE ON LOAD)
+       ========================================================================= */
+    const RAW_BLOCK_POOL = [
+      {
+        id: 'Q',
+        category: 'Variables',
+        plainText: 'set [a] to (expression)',
+        html: `<span class="scratch-stack blk-var"><span>set</span><span class="blk-drop">a ▾</span><span>to</span><span class="blk-slot">expression</span></span>`,
+      },
+      {
+        id: '7',
+        category: 'Output',
+        plainText: 'say (expression)',
+        html: `<span class="scratch-stack blk-output"><span>say</span><span class="blk-slot">expression</span></span>`,
+      },
+      {
+        id: 'M',
+        category: 'Input',
+        plainText: 'ask [prompt] and wait → (answer)',
+        html: `<span class="inline-flex flex-wrap items-center gap-1"><span class="scratch-stack blk-input"><span>ask</span><span class="blk-slot">prompt</span><span>and wait</span></span><span class="text-xs font-bold opacity-75">→</span><span class="scratch-reporter blk-input"><span>answer</span></span></span>`,
+      },
+      {
+        id: 'V',
+        category: 'Operators',
+        plainText: '(a) mod (b)',
+        html: `<span class="scratch-reporter blk-op"><span class="blk-slot">a</span><span>mod</span><span class="blk-slot">b</span></span>`,
+      },
+      {
+        id: '3',
+        category: 'Operators',
+        plainText: 'pick random (a) to (b)',
+        html: `<span class="scratch-reporter blk-op"><span>pick random</span><span class="blk-slot">a</span><span>to</span><span class="blk-slot">b</span></span>`,
+      },
+      {
+        id: 'H',
+        category: 'Operators',
+        plainText: '(a) = (b)',
+        html: `<span class="scratch-boolean blk-op"><span class="blk-slot">a</span><span>=</span><span class="blk-slot">b</span></span>`,
+      },
+      {
+        id: 'Z',
+        category: 'Operators',
+        plainText: 'not <(a) = (b)>',
+        html: `<span class="scratch-boolean blk-op"><span>not</span><span class="blk-hex">a = b</span></span>`,
+      },
+      {
+        id: 'K',
+        category: 'Operators',
+        plainText: 'not <condition>',
+        html: `<span class="scratch-boolean blk-op"><span>not</span><span class="blk-hex">condition</span></span>`,
+      },
+      {
+        id: '5',
+        category: 'Operators',
+        plainText: '<cond1> and <cond2>',
+        html: `<span class="scratch-boolean blk-op"><span class="blk-hex">cond1</span><span>and</span><span class="blk-hex">cond2</span></span>`,
+      },
+      {
+        id: 'T',
+        category: 'Operators',
+        plainText: '<cond1> or <cond2>',
+        html: `<span class="scratch-boolean blk-op"><span class="blk-hex">cond1</span><span>or</span><span class="blk-hex">cond2</span></span>`,
+      },
+      {
+        id: 'E',
+        category: 'Control',
+        plainText: 'if <condition> then [ ... ]',
+        html: `<span class="scratch-stack blk-control"><span>if</span><span class="blk-hex">condition</span><span>then</span><span class="blk-body">...</span></span>`,
+      },
+      {
+        id: '9',
+        category: 'Control',
+        plainText: 'if <condition> then [ ... ] else [ ... ]',
+        html: `<span class="scratch-stack blk-control"><span>if</span><span class="blk-hex">condition</span><span>then</span><span class="blk-body">...</span><span>else</span><span class="blk-body">...</span></span>`,
+      },
+      {
+        id: 'W',
+        category: 'Control',
+        plainText: 'repeat (n) [ ... ]',
+        html: `<span class="scratch-stack blk-control"><span>repeat</span><span class="blk-slot">n</span><span class="blk-body">...</span></span>`,
+      },
+      {
+        id: 'J',
+        category: 'Control',
+        plainText: 'repeat until <condition> [ ... ]',
+        html: `<span class="scratch-stack blk-control"><span>repeat until</span><span class="blk-hex">condition</span><span class="blk-body">...</span></span>`,
+      },
+      {
+        id: '2',
+        category: 'Control',
+        plainText: 'for each [item] in [aList] [ ... ]',
+        html: `<span class="scratch-stack blk-control"><span>for each</span><span class="blk-drop">item ▾</span><span>in</span><span class="blk-drop">aList ▾</span><span class="blk-body">...</span></span>`,
+      },
+      {
+        id: 'R',
+        category: 'Lists',
+        plainText: 'set [aList] to list (val1, val2, val3)',
+        html: `<span class="scratch-stack blk-list"><span>set</span><span class="blk-drop">aList ▾</span><span>to list</span><span class="blk-slot">val1, val2, val3</span></span>`,
+      },
+      {
+        id: 'F',
+        category: 'Lists',
+        plainText: 'set [aList] to empty list',
+        html: `<span class="scratch-stack blk-list"><span>set</span><span class="blk-drop">aList ▾</span><span>to empty list</span></span>`,
+      },
+      {
+        id: '8',
+        category: 'Lists',
+        plainText: 'item (i) of [aList]',
+        html: `<span class="scratch-reporter blk-list"><span>item</span><span class="blk-slot">i</span><span>of</span><span class="blk-drop">aList ▾</span></span>`,
+      },
+      {
+        id: 'N',
+        category: 'Lists',
+        plainText: 'replace item (i) of [aList] with (x)',
+        html: `<span class="scratch-stack blk-list"><span>replace item</span><span class="blk-slot">i</span><span>of</span><span class="blk-drop">aList ▾</span><span>with</span><span class="blk-slot">x</span></span>`,
+      },
+      {
+        id: 'X',
+        category: 'Lists',
+        plainText: 'insert (value) at (i) of [aList]',
+        html: `<span class="scratch-stack blk-list"><span>insert</span><span class="blk-slot">value</span><span>at</span><span class="blk-slot">i</span><span>of</span><span class="blk-drop">aList ▾</span></span>`,
+      },
+      {
+        id: '4',
+        category: 'Lists',
+        plainText: 'add (value) to [aList]',
+        html: `<span class="scratch-stack blk-list"><span>add</span><span class="blk-slot">value</span><span>to</span><span class="blk-drop">aList ▾</span></span>`,
+      },
+      {
+        id: 'P',
+        category: 'Lists',
+        plainText: 'delete (i) of [aList]',
+        html: `<span class="scratch-stack blk-list"><span>delete</span><span class="blk-slot">i</span><span>of</span><span class="blk-drop">aList ▾</span></span>`,
+      },
+      {
+        id: 'L',
+        category: 'Lists',
+        plainText: 'length of [aList]',
+        html: `<span class="scratch-reporter blk-list"><span>length of</span><span class="blk-drop">aList ▾</span></span>`,
+      },
+      {
+        id: 'U',
+        category: 'Procedures',
+        plainText: 'define [procName] (p1) (p2)',
+        html: `<span class="scratch-hat blk-proc"><span>define</span><span class="blk-drop">procName</span><span class="blk-slot">p1</span><span class="blk-slot">p2</span></span>`,
+      },
+      {
+        id: '6',
+        category: 'Procedures',
+        plainText: 'call [procName] (arg1) (arg2)',
+        html: `<span class="scratch-stack blk-proc"><span>call</span><span class="blk-drop">procName</span><span class="blk-slot">arg1</span><span class="blk-slot">arg2</span></span>`,
+      },
+      {
+        id: 'G',
+        category: 'Procedures',
+        plainText: 'return (expression)',
+        html: `<span class="scratch-stack blk-proc"><span>return</span><span class="blk-slot">expression</span></span>`,
+      },
+      {
+        id: 'Y',
+        category: 'Robot Motion',
+        plainText: 'move forward (1) square',
+        html: `<span class="scratch-stack blk-motion"><span>move forward</span><span class="blk-slot">1</span><span>square</span></span>`,
+      },
+      {
+        id: 'I',
+        category: 'Robot Motion',
+        plainText: 'turn ↺ left (90) degrees',
+        html: `<span class="scratch-stack blk-motion"><span>turn ↺ left</span><span class="blk-slot">90</span><span>degrees</span></span>`,
+      },
+      {
+        id: 'S',
+        category: 'Robot Motion',
+        plainText: 'turn ↻ right (90) degrees',
+        html: `<span class="scratch-stack blk-motion"><span>turn ↻ right</span><span class="blk-slot">90</span><span>degrees</span></span>`,
+      },
+      {
+        id: 'O',
+        category: 'Robot Sensing',
+        plainText: 'can move (direction)?',
+        html: `<span class="scratch-boolean blk-sensing"><span>can move</span><span class="blk-slot">direction</span><span>?</span></span>`,
+      },
+    ];
+
+    // Fisher-Yates shuffle once on page load
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    const SHUFFLED_POOL = shuffleArray(RAW_BLOCK_POOL);
+    const BLOCK_MAP = Object.fromEntries(RAW_BLOCK_POOL.map((b) => [b.id, b]));
+
+    const TOPIC_BADGES = {
+      Variables:      'bg-orange-500/15 text-orange-400 border-orange-500/30',
+      Output:         'bg-purple-500/15 text-purple-400 border-purple-500/30',
+      Input:          'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+      Operators:      'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+      Control:        'bg-amber-500/15 text-amber-400 border-amber-500/30',
+      Lists:          'bg-orange-600/15 text-orange-400 border-orange-500/35',
+      Procedures:     'bg-pink-500/15 text-pink-400 border-pink-500/30',
+      'Robot Motion': 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+      'Robot Sensing':'bg-teal-500/15 text-teal-400 border-teal-500/30',
+    };
+
+    /* =========================================================================
+       3. ALL 30 OFFICIAL AP CSP EXAM REFERENCE SHEET ITEMS (4 TABS)
+       ========================================================================= */
+    const TABS = [
+      {
+        id: 'basics',
+        shortTitle: '1. Variables, I/O & Operators',
+        fullTitle: 'Tab 1: Variables, I/O & Operators',
+        items: [
+          {
+            id: 'a',
+            topic: 'Variables',
+            plainCode: 'a ← expression',
+            codeHtml: `<span class="p-var">a</span> <span class="p-op">←</span> <span class="p-var">expression</span>`,
+            desc: 'Assigns the value of expression to variable a',
+            tip: 'In AP CSP pseudocode, the left arrow (←) means assignment, not equality.',
+            hint: 'Look for an orange Variables block that stores a value into a variable.',
+            h: 64639283,
+          },
+          {
+            id: 'b',
+            topic: 'Output',
+            plainCode: 'DISPLAY(expression)',
+            codeHtml: `<span class="p-fn">DISPLAY</span><span class="p-brace">(</span><span class="p-var">expression</span><span class="p-brace">)</span>`,
+            desc: 'Displays the value of expression followed by a space',
+            tip: 'DISPLAY() prints output followed by a space rather than a new line by default.',
+            hint: 'Look for a purple Output block that shows text or values to the user.',
+            h: 64640218,
+          },
+          {
+            id: 'c',
+            topic: 'Input',
+            plainCode: 'INPUT()',
+            codeHtml: `<span class="p-fn">INPUT</span><span class="p-brace">()</span>`,
+            desc: 'Accepts a value from the user and returns the input value',
+            tip: 'Typically paired with assignment, e.g., name ← INPUT().',
+            hint: 'Look for a cyan Input block that prompts the user and captures their answer.',
+            h: 64641201,
+          },
+          {
+            id: 'd',
+            topic: 'Operators',
+            plainCode: 'a MOD b',
+            codeHtml: `<span class="p-var">a</span> <span class="p-kw">MOD</span> <span class="p-var">b</span>`,
+            desc: 'Evaluates to the remainder when a is divided by b',
+            tip: 'Useful for checking even/odd numbers (n MOD 2 = 0) and cycling through indices.',
+            hint: 'Look for a green Operators block that computes the division remainder.',
+            h: 64642171,
+          },
+          {
+            id: 'e',
+            topic: 'Operators',
+            plainCode: 'RANDOM(a, b)',
+            codeHtml: `<span class="p-fn">RANDOM</span><span class="p-brace">(</span><span class="p-var">a</span><span class="p-brace">,</span> <span class="p-var">b</span><span class="p-brace">)</span>`,
+            desc: 'Returns a random integer from a to b, including both a and b',
+            tip: 'Both endpoints a and b are inclusive! RANDOM(1, 6) can return 1, 2, 3, 4, 5, or 6.',
+            hint: 'Look for a green Operators block that generates a random integer in a range.',
+            h: 64643097,
+          },
+          {
+            id: 'f',
+            topic: 'Operators',
+            plainCode: 'a = b',
+            codeHtml: `<span class="p-var">a</span> <span class="p-op">=</span> <span class="p-var">b</span>`,
+            desc: 'Evaluates to true if a and b are equal; false otherwise',
+            tip: 'Single = is comparison in AP CSP pseudocode (unlike Java/Python which use ==).',
+            hint: 'Look for a green hexagonal Boolean comparison block testing equality.',
+            h: 64644079,
+          },
+          {
+            id: 'g',
+            topic: 'Operators',
+            plainCode: 'a ≠ b',
+            codeHtml: `<span class="p-var">a</span> <span class="p-op">≠</span> <span class="p-var">b</span>`,
+            desc: 'Evaluates to true if a and b are not equal; false otherwise',
+            tip: 'The ≠ operator tests inequality, equivalent to negating an equality check.',
+            hint: 'Look for a green Boolean block that negates an equality comparison.',
+            h: 64645058,
+          },
+          {
+            id: 'h',
+            topic: 'Operators',
+            plainCode: 'NOT condition',
+            codeHtml: `<span class="p-kw">NOT</span> <span class="p-var">condition</span>`,
+            desc: 'Evaluates to true if condition is false; otherwise evaluates to false',
+            tip: 'Reverses a Boolean value: NOT true is false, and NOT false is true.',
+            hint: 'Look for a green Boolean operator block that flips a single condition.',
+            h: 64646004,
+          },
+          {
+            id: 'i',
+            topic: 'Operators',
+            plainCode: 'cond1 AND cond2',
+            codeHtml: `<span class="p-var">cond1</span> <span class="p-kw">AND</span> <span class="p-var">cond2</span>`,
+            desc: 'Evaluates to true if both cond1 and cond2 are true; otherwise false',
+            tip: 'Both sides must be true for the whole AND expression to be true.',
+            hint: 'Look for a green Boolean operator block combining two conditions with AND.',
+            h: 64646943,
+          },
+          {
+            id: 'j',
+            topic: 'Operators',
+            plainCode: 'cond1 OR cond2',
+            codeHtml: `<span class="p-var">cond1</span> <span class="p-kw">OR</span> <span class="p-var">cond2</span>`,
+            desc: 'Evaluates to true if either cond1 or cond2 (or both) is true; otherwise false',
+            tip: 'Only one side needs to be true; it is only false when both sides are false.',
+            hint: 'Look for a green Boolean operator block combining two conditions with OR.',
+            h: 64647935,
+          },
+        ],
+      },
+      {
+        id: 'control',
+        shortTitle: '2. Selection & Iteration',
+        fullTitle: 'Tab 2: Selection & Iteration',
+        items: [
+          {
+            id: 'k',
+            topic: 'Control',
+            plainCode: 'IF(condition) { <block> }',
+            codeHtml: `<span class="p-kw">IF</span><span class="p-brace">(</span><span class="p-var">condition</span><span class="p-brace">) {</span> <span class="p-blk">&lt;block&gt;</span> <span class="p-brace">}</span>`,
+            desc: 'Executes the block of statements if condition evaluates to true',
+            tip: 'If the condition is false, the code inside the IF block is skipped completely.',
+            hint: 'Look for a gold/amber Control block with a single conditional branch.',
+            h: 64648881,
+          },
+          {
+            id: 'l',
+            topic: 'Control',
+            plainCode: 'IF(condition) { <b1> } ELSE { <b2> }',
+            codeHtml: `<span class="p-kw">IF</span><span class="p-brace">(</span><span class="p-var">condition</span><span class="p-brace">) {</span> <span class="p-blk">&lt;b1&gt;</span> <span class="p-brace">}</span> <span class="p-kw">ELSE</span> <span class="p-brace">{</span> <span class="p-blk">&lt;b2&gt;</span> <span class="p-brace">}</span>`,
+            desc: 'Executes b1 if condition is true; otherwise executes b2',
+            tip: 'Exactly one of the two branches will always execute.',
+            hint: 'Look for a gold/amber Control block with both a "then" and an "else" branch.',
+            h: 64649830,
+          },
+          {
+            id: 'm',
+            topic: 'Control',
+            plainCode: 'REPEAT n TIMES { <block> }',
+            codeHtml: `<span class="p-kw">REPEAT</span> <span class="p-var">n</span> <span class="p-kw">TIMES</span> <span class="p-brace">{</span> <span class="p-blk">&lt;block&gt;</span> <span class="p-brace">}</span>`,
+            desc: 'Repeats the block of statements n times',
+            tip: 'Use when you know the exact number of iterations in advance.',
+            hint: 'Look for a gold/amber Control loop block that repeats a fixed number of times.',
+            h: 64650821,
+          },
+          {
+            id: 'n',
+            topic: 'Control',
+            plainCode: 'REPEAT UNTIL(condition) { <block> }',
+            codeHtml: `<span class="p-kw">REPEAT UNTIL</span><span class="p-brace">(</span><span class="p-var">condition</span><span class="p-brace">) {</span> <span class="p-blk">&lt;block&gt;</span> <span class="p-brace">}</span>`,
+            desc: 'Repeats the block until condition evaluates to true',
+            tip: 'AP CSP Exam Trap! REPEAT UNTIL stops when the condition becomes TRUE (opposite of a while loop).',
+            hint: 'Look for a gold/amber Control loop block that loops until a condition becomes true.',
+            h: 64651769,
+          },
+          {
+            id: 'o',
+            topic: 'Control',
+            plainCode: 'FOR EACH item IN aList { <block> }',
+            codeHtml: `<span class="p-kw">FOR EACH</span> <span class="p-var">item</span> <span class="p-kw">IN</span> <span class="p-var">aList</span> <span class="p-brace">{</span> <span class="p-blk">&lt;block&gt;</span> <span class="p-brace">}</span>`,
+            desc: 'Iterates through each element of aList in order, assigning it to item',
+            tip: 'Great for traversing every item in a list without manually tracking an index variable.',
+            hint: 'Look for a gold/amber Control loop block that steps through every element of a list.',
+            h: 64652706,
+          },
+        ],
+      },
+      {
+        id: 'lists',
+        shortTitle: '3. List Operations',
+        fullTitle: 'Tab 3: List Operations',
+        items: [
+          {
+            id: 'p',
+            topic: 'Lists',
+            plainCode: 'aList ← [val1, val2, val3]',
+            codeHtml: `<span class="p-var">aList</span> <span class="p-op">←</span> <span class="p-brace">[</span><span class="p-var">val1</span><span class="p-brace">,</span> <span class="p-var">val2</span><span class="p-brace">,</span> <span class="p-var">val3</span><span class="p-brace">]</span>`,
+            desc: 'Creates a new list with the given values and assigns it to aList',
+            tip: 'AP CSP lists are 1-indexed—the first element val1 is at index 1, NOT 0!',
+            hint: 'Look for a deep orange-red Lists block that initializes a list with starting values.',
+            h: 64653699,
+          },
+          {
+            id: 'q',
+            topic: 'Lists',
+            plainCode: 'aList ← []',
+            codeHtml: `<span class="p-var">aList</span> <span class="p-op">←</span> <span class="p-brace">[]</span>`,
+            desc: 'Creates an empty list and assigns it to aList',
+            tip: 'An empty list has LENGTH(aList) equal to 0.',
+            hint: 'Look for a deep orange-red Lists block that creates an empty list.',
+            h: 64654648,
+          },
+          {
+            id: 'r',
+            topic: 'Lists',
+            plainCode: 'aList[i]',
+            codeHtml: `<span class="p-var">aList</span><span class="p-brace">[</span><span class="p-var">i</span><span class="p-brace">]</span>`,
+            desc: 'Accesses the element of aList at index i, where 1 ≤ i ≤ LENGTH(aList)',
+            tip: 'Remember 1-based indexing: aList[1] is the first item and aList[LENGTH(aList)] is the last.',
+            hint: 'Look for a rounded deep orange-red Lists reporter block that reads an item at index i.',
+            h: 64655595,
+          },
+          {
+            id: 's',
+            topic: 'Lists',
+            plainCode: 'aList[i] ← x',
+            codeHtml: `<span class="p-var">aList</span><span class="p-brace">[</span><span class="p-var">i</span><span class="p-brace">]</span> <span class="p-op">←</span> <span class="p-var">x</span>`,
+            desc: 'Assigns the value of x to the element at index i in aList, replacing it',
+            tip: 'Replaces the existing element without changing the length of the list.',
+            hint: 'Look for a deep orange-red Lists block that replaces an item at index i.',
+            h: 64656578,
+          },
+          {
+            id: 't',
+            topic: 'Lists',
+            plainCode: 'INSERT(aList, i, value)',
+            codeHtml: `<span class="p-fn">INSERT</span><span class="p-brace">(</span><span class="p-var">aList</span><span class="p-brace">,</span> <span class="p-var">i</span><span class="p-brace">,</span> <span class="p-var">value</span><span class="p-brace">)</span>`,
+            desc: 'Inserts value at index i, shifting elements at i and higher to the right',
+            tip: 'Increases list length by 1 and shifts later elements up by 1 index.',
+            hint: 'Look for a deep orange-red Lists block that inserts a value at a specific position.',
+            h: 64657549,
+          },
+          {
+            id: 'u',
+            topic: 'Lists',
+            plainCode: 'APPEND(aList, value)',
+            codeHtml: `<span class="p-fn">APPEND</span><span class="p-brace">(</span><span class="p-var">aList</span><span class="p-brace">,</span> <span class="p-var">value</span><span class="p-brace">)</span>`,
+            desc: 'Adds value to the end of aList, increasing its length by 1',
+            tip: 'Always places the new element at the very end of the list.',
+            hint: 'Look for a deep orange-red Lists block that adds a value to the end of a list.',
+            h: 64658474,
+          },
+          {
+            id: 'v',
+            topic: 'Lists',
+            plainCode: 'REMOVE(aList, i)',
+            codeHtml: `<span class="p-fn">REMOVE</span><span class="p-brace">(</span><span class="p-var">aList</span><span class="p-brace">,</span> <span class="p-var">i</span><span class="p-brace">)</span>`,
+            desc: 'Removes the element at index i, shifting elements after i to the left',
+            tip: 'Decreases list length by 1 and shifts all following elements down by 1 index.',
+            hint: 'Look for a deep orange-red Lists block that deletes an element at index i.',
+            h: 64659463,
+          },
+          {
+            id: 'w',
+            topic: 'Lists',
+            plainCode: 'LENGTH(aList)',
+            codeHtml: `<span class="p-fn">LENGTH</span><span class="p-brace">(</span><span class="p-var">aList</span><span class="p-brace">)</span>`,
+            desc: 'Evaluates to the number of elements currently in aList',
+            tip: 'Because AP CSP lists start at index 1, LENGTH(aList) is also the index of the last item.',
+            hint: 'Look for a rounded deep orange-red Lists reporter block that returns the size of a list.',
+            h: 64660420,
+          },
+        ],
+      },
+      {
+        id: 'proc_robot',
+        shortTitle: '4. Procedures & Robot',
+        fullTitle: 'Tab 4: Procedures & Robot',
+        items: [
+          {
+            id: 'x',
+            topic: 'Procedures',
+            plainCode: 'PROCEDURE procName(p1, p2) { <block> }',
+            codeHtml: `<span class="p-kw">PROCEDURE</span> <span class="p-fn">procName</span><span class="p-brace">(</span><span class="p-var">p1</span><span class="p-brace">,</span> <span class="p-var">p2</span><span class="p-brace">) {</span> <span class="p-blk">&lt;block&gt;</span> <span class="p-brace">}</span>`,
+            desc: 'Defines a procedure named procName with parameters p1 and p2',
+            tip: 'Procedures support procedural abstraction by grouping reusable code under one name.',
+            hint: 'Look for a magenta/pink Procedures hat block that defines a custom procedure.',
+            h: 64661390,
+          },
+          {
+            id: 'y',
+            topic: 'Procedures',
+            plainCode: 'procName(arg1, arg2)',
+            codeHtml: `<span class="p-fn">procName</span><span class="p-brace">(</span><span class="p-var">arg1</span><span class="p-brace">,</span> <span class="p-var">arg2</span><span class="p-brace">)</span>`,
+            desc: 'Calls the procedure procName, passing arguments arg1 and arg2',
+            tip: "Arguments passed in the call are assigned to the procedure's parameters in order.",
+            hint: 'Look for a magenta/pink Procedures block that invokes/calls a procedure with arguments.',
+            h: 64662320,
+          },
+          {
+            id: 'z',
+            topic: 'Procedures',
+            plainCode: 'RETURN(expression)',
+            codeHtml: `<span class="p-kw">RETURN</span><span class="p-brace">(</span><span class="p-var">expression</span><span class="p-brace">)</span>`,
+            desc: "Returns the flow of control to the caller and sends back expression's value",
+            tip: 'Immediately exits the procedure when executed; any code after RETURN inside the procedure does not run.',
+            hint: 'Look for a magenta/pink Procedures block that sends a value back to the caller.',
+            h: 64663298,
+          },
+          {
+            id: 'A',
+            topic: 'Robot Motion',
+            plainCode: 'MOVE_FORWARD()',
+            codeHtml: `<span class="p-fn">MOVE_FORWARD</span><span class="p-brace">()</span>`,
+            desc: 'Moves the robot one square forward in the direction it is facing',
+            tip: 'On the AP CSP exam, moving into a black wall or off the grid causes a runtime error.',
+            hint: 'Look for a blue Robot Motion block that advances the robot one square.',
+            h: 64608539,
+          },
+          {
+            id: 'B',
+            topic: 'Robot Motion',
+            plainCode: 'ROTATE_LEFT()',
+            codeHtml: `<span class="p-fn">ROTATE_LEFT</span><span class="p-brace">()</span>`,
+            desc: 'Rotates the robot 90 degrees counterclockwise in place',
+            tip: 'Rotates in place without moving to a new grid square.',
+            hint: 'Look for a blue Robot Motion block that turns counterclockwise (left).',
+            h: 64609484,
+          },
+          {
+            id: 'C',
+            topic: 'Robot Motion',
+            plainCode: 'ROTATE_RIGHT()',
+            codeHtml: `<span class="p-fn">ROTATE_RIGHT</span><span class="p-brace">()</span>`,
+            desc: 'Rotates the robot 90 degrees clockwise in place',
+            tip: 'Rotates in place without moving to a new grid square.',
+            hint: 'Look for a blue Robot Motion block that turns clockwise (right).',
+            h: 64610455,
+          },
+          {
+            id: 'D',
+            topic: 'Robot Sensing',
+            plainCode: 'CAN_MOVE(direction)',
+            codeHtml: `<span class="p-fn">CAN_MOVE</span><span class="p-brace">(</span><span class="p-var">direction</span><span class="p-brace">)</span>`,
+            desc: 'Returns true if there is an open square one space in the given direction; false otherwise',
+            tip: "Valid directions are forward, backward, left, and right—all relative to the robot's current facing direction!",
+            hint: 'Look for a teal hexagonal Robot Sensing block that checks if a path is open.',
+            h: 64611412,
+          },
+        ],
+      },
+    ];
+
+    const ALL_ITEMS = TABS.flatMap((t) => t.items);
+    const TOTAL_ROWS = ALL_ITEMS.length; // 30
+
+    /* =========================================================================
+       4. APPLICATION STATE
+       ========================================================================= */
+    let activeTabIndex = 0;
+    let showDescriptions = true;
+    let showHowToPlay = true;
+    let openDropdownRowId = null;
+    let dropdownSearchQuery = '';
+    let toastTimer = null;
+    let totalCheckAttempts = 0;
+
+    const rowState = {};
+    ALL_ITEMS.forEach((item) => {
+      rowState[item.id] = {
+        selectedBlockId: null,
+        status: 'unanswered', // 'unanswered' | 'correct' | 'wrong'
+        everChecked: false,
+        firstTryCorrect: false,
+      };
+    });
+
+    /* =========================================================================
+       5. THEME & AUTO-SAVE MANAGEMENT (localStorage)
+       ========================================================================= */
+    const THEME_STORAGE_KEY = 'apcsp_matcher_theme';
+    const PROGRESS_STORAGE_KEY = 'apcsp_matcher_progress_v1';
+
+    function saveProgress() {
+      try {
+        const nameEl = document.getElementById('studentNameInput');
+        const classEl = document.getElementById('studentClassInput');
+        const payload = {
+          rowState,
+          totalCheckAttempts,
+          activeTabIndex,
+          studentName: nameEl ? nameEl.value : '',
+          studentClass: classEl ? classEl.value : '',
+        };
+        localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(payload));
+      } catch (e) {
+        // Ignore storage errors in restricted iframes or private mode
+      }
+    }
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(PROGRESS_STORAGE_KEY);
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== 'object') return false;
+
+        if (Number.isInteger(data.activeTabIndex) && data.activeTabIndex >= 0 && data.activeTabIndex < TABS.length) {
+          activeTabIndex = data.activeTabIndex;
+        }
+        if (Number.isInteger(data.totalCheckAttempts) && data.totalCheckAttempts >= 0) {
+          totalCheckAttempts = data.totalCheckAttempts;
+        }
+
+        const nameEl = document.getElementById('studentNameInput');
+        const classEl = document.getElementById('studentClassInput');
+        if (nameEl && typeof data.studentName === 'string') nameEl.value = data.studentName;
+        if (classEl && typeof data.studentClass === 'string') classEl.value = data.studentClass;
+
+        let hasRowProgress = false;
+        if (data.rowState && typeof data.rowState === 'object') {
+          const validRowIds = new Set(ALL_ITEMS.map((it) => it.id));
+          const validStatuses = new Set(['unanswered', 'correct', 'wrong']);
+
+          Object.keys(data.rowState).forEach((rowId) => {
+            if (!validRowIds.has(rowId)) return;
+            const saved = data.rowState[rowId];
+            if (!saved || typeof saved !== 'object') return;
+
+            const blockId = saved.selectedBlockId && BLOCK_MAP[saved.selectedBlockId] ? saved.selectedBlockId : null;
+            const status = validStatuses.has(saved.status) ? saved.status : 'unanswered';
+
+            rowState[rowId] = {
+              selectedBlockId: blockId,
+              status: blockId ? status : 'unanswered',
+              everChecked: Boolean(saved.everChecked),
+              firstTryCorrect: Boolean(saved.firstTryCorrect),
+            };
+
+            if (blockId !== null || rowState[rowId].status === 'correct') {
+              hasRowProgress = true;
+            }
+          });
+        }
+
+        return hasRowProgress;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function applyTheme(mode) {
+      const isLight = mode === 'light';
+      document.documentElement.classList.toggle('theme-light', isLight);
+      document.getElementById('themeIconSun').classList.toggle('hidden', isLight);
+      document.getElementById('themeIconMoon').classList.toggle('hidden', !isLight);
+      document.getElementById('themeToggleText').textContent = isLight ? 'Dark Mode' : 'Light Gray';
+    }
+
+    function initTheme() {
+      let saved = 'dark';
+      try {
+        saved = localStorage.getItem(THEME_STORAGE_KEY) || 'dark';
+      } catch (e) {
+        saved = 'dark';
+      }
+      applyTheme(saved);
+    }
+
+    function toggleTheme() {
+      const currentlyLight = document.documentElement.classList.contains('theme-light');
+      const next = currentlyLight ? 'dark' : 'light';
+      applyTheme(next);
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, next);
+      } catch (e) {
+        // Ignore storage errors in restricted iframes
+      }
+    }
+
+    /* =========================================================================
+       6. SHARED 30-BLOCK POOL & METRICS
+       ========================================================================= */
+    function getUsedBlockIds() {
+      const used = new Set();
+      ALL_ITEMS.forEach((it) => {
+        const bId = rowState[it.id].selectedBlockId;
+        if (bId) used.add(bId);
+      });
+      return used;
+    }
+
+    function getMetrics() {
+      let completed = 0;
+      let checkedRows = 0;
+      let firstTryHits = 0;
+
+      ALL_ITEMS.forEach((it) => {
+        const st = rowState[it.id];
+        if (st.status === 'correct') completed += 1;
+        if (st.everChecked) {
+          checkedRows += 1;
+          if (st.firstTryCorrect) firstTryHits += 1;
+        }
+      });
+
+      const completionPct = Math.round((completed / TOTAL_ROWS) * 100);
+      const firstTryPct = checkedRows > 0 ? Math.round((firstTryHits / checkedRows) * 100) : null;
+      return { completed, completionPct, checkedRows, firstTryHits, firstTryPct };
+    }
+
+    /* =========================================================================
+       7. TOAST NOTIFICATIONS (No alert/confirm)
+       ========================================================================= */
+    function showToast(message, variant = 'info') {
+      const container = document.getElementById('toastContainer');
+      const box = document.getElementById('toastBox');
+      const icon = document.getElementById('toastIcon');
+      const msg = document.getElementById('toastMessage');
+
+      const themes = {
+        success: {
+          cls: 'bg-emerald-600 text-white border-emerald-500',
+          svg: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>',
+        },
+        error: {
+          cls: 'bg-rose-600 text-white border-rose-500',
+          svg: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>',
+        },
+        info: {
+          cls: 'bg-slate-800 text-white border-slate-600',
+          svg: '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+        },
+      };
+
+      const t = themes[variant] || themes.info;
+      box.className = `rounded-xl px-4 py-3 shadow-2xl border flex items-center gap-3 text-sm font-semibold ${t.cls}`;
+      icon.innerHTML = t.svg;
+      msg.textContent = message;
+
+      container.classList.remove('opacity-0', 'translate-y-4');
+      container.classList.add('opacity-100', 'translate-y-0');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        container.classList.add('opacity-0', 'translate-y-4');
+        container.classList.remove('opacity-100', 'translate-y-0');
+      }, 3200);
+    }
+
+    /* =========================================================================
+       8. INTERACTIONS & VALIDATION
+       ========================================================================= */
+    function switchTab(idx) {
+      activeTabIndex = idx;
+      openDropdownRowId = null;
+      dropdownSearchQuery = '';
+      saveProgress();
+      renderAll();
+    }
+
+    function toggleHowToPlay() {
+      showHowToPlay = !showHowToPlay;
+      document.getElementById('howToPlayBanner').classList.toggle('hidden', !showHowToPlay);
+    }
+
+    function toggleDescriptions() {
+      showDescriptions = !showDescriptions;
+      document.getElementById('descToggleLabel').textContent = showDescriptions ? 'Descriptions: ON' : 'Descriptions: OFF';
+      document.getElementById('descDot').className = `w-2 h-2 rounded-full ${showDescriptions ? 'bg-emerald-400' : 'bg-slate-400'}`;
+      renderRows();
+    }
+
+    function toggleDropdown(rowId, event) {
+      if (event) event.stopPropagation();
+      if (rowState[rowId].status === 'correct') return;
+
+      if (openDropdownRowId === rowId) {
+        openDropdownRowId = null;
+        dropdownSearchQuery = '';
+      } else {
+        openDropdownRowId = rowId;
+        dropdownSearchQuery = '';
+      }
+      renderRows();
+
+      // Auto-flip upward if near bottom of viewport & focus search box
+      if (openDropdownRowId === rowId) {
+        requestAnimationFrame(() => {
+          const menu = document.getElementById(`menu-${rowId}`);
+          if (menu) {
+            const rect = menu.getBoundingClientRect();
+            if (rect.bottom > window.innerHeight - 16 && rect.top > 320) {
+              menu.classList.remove('top-full', 'mt-1.5');
+              menu.classList.add('bottom-full', 'mb-1.5');
+            }
+          }
+          const searchInput = document.getElementById(`dd-search-${rowId}`);
+          if (searchInput) searchInput.focus();
+        });
+      }
+    }
+
+    function handleDropdownSearch(rowId, value) {
+      dropdownSearchQuery = value;
+      const listEl = document.getElementById(`dd-list-${rowId}`);
+      if (listEl) {
+        listEl.innerHTML = buildDropdownOptionsHtml(rowId, rowState[rowId].selectedBlockId, getUsedBlockIds(), dropdownSearchQuery);
+      }
+    }
+
+    function selectBlock(rowId, blockId, event) {
+      if (event) event.stopPropagation();
+      const st = rowState[rowId];
+      if (st.status === 'correct') return;
+
+      const used = getUsedBlockIds();
+      if (used.has(blockId) && st.selectedBlockId !== blockId) return;
+
+      st.selectedBlockId = blockId;
+      if (st.status === 'wrong') {
+        st.status = 'unanswered';
+      }
+      openDropdownRowId = null;
+      dropdownSearchQuery = '';
+      saveProgress();
+      renderAll();
+    }
+
+    function clearSelection(rowId, event) {
+      if (event) event.stopPropagation();
+      const st = rowState[rowId];
+      if (st.status === 'correct') return;
+
+      st.selectedBlockId = null;
+      st.status = 'unanswered';
+      openDropdownRowId = null;
+      dropdownSearchQuery = '';
+      saveProgress();
+      renderAll();
+    }
+
+    function checkRow(rowId, silent = false) {
+      const item = ALL_ITEMS.find((it) => it.id === rowId);
+      const st = rowState[rowId];
+      if (!item || !st || st.status === 'correct' || !st.selectedBlockId) return null;
+
+      openDropdownRowId = null;
+      dropdownSearchQuery = '';
+
+      const computedHash = computeMatchHash(item.id, st.selectedBlockId);
+      const isCorrect = computedHash === item.h;
+
+      totalCheckAttempts += 1;
+      if (!st.everChecked) {
+        st.everChecked = true;
+        st.firstTryCorrect = isCorrect;
+      }
+
+      if (isCorrect) {
+        st.status = 'correct';
+        if (!silent) {
+          saveProgress();
+          renderAll();
+          const metrics = getMetrics();
+          if (metrics.completed === TOTAL_ROWS) {
+            showToast('All 30 rows completed! Click "Turn In / Export Report" to submit your work.', 'success');
+          } else {
+            showToast(`✓ Correct! ${item.plainCode}`, 'success');
+          }
+        }
+        return true;
+      } else {
+        st.status = 'wrong';
+        if (!silent) {
+          saveProgress();
+          renderAll();
+          const card = document.getElementById(`row-${rowId}`);
+          if (card) {
+            card.classList.remove('animate-shake');
+            void card.offsetWidth;
+            card.classList.add('animate-shake');
+          }
+          showToast(`Not quite for ${item.plainCode}. Check the hint below the dropdown.`, 'error');
+        }
+        return false;
+      }
+    }
+
+    function checkAllFilledInTab() {
+      const tab = TABS[activeTabIndex];
+      const candidates = tab.items.filter((it) => {
+        const st = rowState[it.id];
+        return st.status !== 'correct' && st.selectedBlockId !== null;
+      });
+
+      if (candidates.length === 0) {
+        showToast('Select at least one unchecked row in this tab before clicking Check All Filled.', 'info');
+        return;
+      }
+
+      let right = 0;
+      let wrong = 0;
+      candidates.forEach((it) => {
+        const ok = checkRow(it.id, true);
+        if (ok === true) right += 1;
+        else if (ok === false) wrong += 1;
+      });
+
+      saveProgress();
+      renderAll();
+
+      if (wrong === 0) {
+        showToast(`Great job! All ${right} checked ${right === 1 ? 'row is' : 'rows are'} correct!`, 'success');
+      } else {
+        showToast(`Checked ${candidates.length} rows: ${right} correct, ${wrong} need another look.`, 'error');
+      }
+    }
+
+    function resetCurrentTab() {
+      const tab = TABS[activeTabIndex];
+      openDropdownRowId = null;
+      dropdownSearchQuery = '';
+      tab.items.forEach((it) => {
+        rowState[it.id].selectedBlockId = null;
+        rowState[it.id].status = 'unanswered';
+      });
+      saveProgress();
+      renderAll();
+      showToast(`${tab.shortTitle} has been reset. Blocks returned to the shared pool.`, 'info');
+    }
+
+    /* =========================================================================
+       9. RENDERING FUNCTIONS
+       ========================================================================= */
+    function renderAll() {
+      renderHeaderAndStats();
+      renderTabs();
+      renderRows();
+    }
+
+    function renderHeaderAndStats() {
+      const metrics = getMetrics();
+      const usedCount = getUsedBlockIds().size;
+      const remaining = TOTAL_ROWS - usedCount;
+
+      document.getElementById('overallProgressLabel').textContent = `${metrics.completed} / ${TOTAL_ROWS} Rows Completed`;
+      document.getElementById('overallProgressBar').style.width = `${metrics.completionPct}%`;
+
+      document.getElementById('attemptsStat').textContent = String(totalCheckAttempts);
+      document.getElementById('firstTryStat').textContent = metrics.firstTryPct === null ? '—' : `${metrics.firstTryPct}%`;
+
+      const poolText = `Pool Remaining: ${remaining} / ${TOTAL_ROWS}`;
+      document.getElementById('poolBadgeDesktop').textContent = poolText;
+      document.getElementById('poolBadgeMobile').textContent = poolText;
+    }
+
+    function renderTabs() {
+      const container = document.getElementById('categoryTabs');
+      container.innerHTML = TABS.map((tab, idx) => {
+        const doneCount = tab.items.filter((it) => rowState[it.id].status === 'correct').length;
+        const total = tab.items.length;
+        const isActive = idx === activeTabIndex;
+        const isComplete = doneCount === total;
+
+        const btnStyle = isActive
+          ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm'
+          : 't-surface-btn border';
+
+        const badge = isComplete
+          ? `<span class="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full ${isActive ? 'bg-white text-emerald-600' : 'bg-emerald-500 text-white'} text-[10px] font-extrabold">✓</span>`
+          : `<span class="ml-1.5 text-[11px] font-semibold opacity-80">(${doneCount}/${total})</span>`;
+
+        return `
+          <button
+            type="button"
+            role="tab"
+            aria-selected="${isActive}"
+            onclick="switchTab(${idx})"
+            class="inline-flex items-center px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer ${btnStyle}"
+          >
+            ${tab.shortTitle}${badge}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function buildDropdownOptionsHtml(rowId, currentBlockId, usedSet, query) {
+      const q = (query || '').trim().toLowerCase();
+      const filtered = SHUFFLED_POOL.filter((blk) => {
+        if (!q) return true;
+        return (
+          blk.plainText.toLowerCase().includes(q) ||
+          blk.category.toLowerCase().includes(q)
+        );
+      });
+
+      if (filtered.length === 0) {
+        return `<div class="px-4 py-5 text-center text-xs t-text-muted">No blocks match "${escapeHtml(query)}".</div>`;
+      }
+
+      return filtered.map((blk) => {
+        const isCurrent = currentBlockId === blk.id;
+        const isUsedElsewhere = usedSet.has(blk.id) && !isCurrent;
+
+        const statusBadge = isCurrent
+          ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 shrink-0">Selected</span>`
+          : isUsedElsewhere
+            ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-500/20 t-text-muted shrink-0">0 left</span>`
+            : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 shrink-0">1 left</span>`;
+
+        return `
+          <button
+            type="button"
+            ${isUsedElsewhere ? 'disabled' : ''}
+            onclick="selectBlock('${rowId}', '${blk.id}', event)"
+            class="dropdown-option w-full px-3 py-2 flex items-center justify-between gap-2 text-left border-b t-border last:border-b-0 ${isUsedElsewhere ? 'opacity-35 cursor-not-allowed' : 'cursor-pointer'} ${isCurrent ? 'bg-indigo-500/10' : ''}"
+          >
+            <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+              ${blk.html}
+            </div>
+            ${statusBadge}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderRows() {
+      const tab = TABS[activeTabIndex];
+      const usedSet = getUsedBlockIds();
+      const container = document.getElementById('rowsContainer');
+
+      container.innerHTML = tab.items.map((item, idx) => {
+        const st = rowState[item.id];
+        const isCorrect = st.status === 'correct';
+        const isWrong = st.status === 'wrong';
+        const isOpen = openDropdownRowId === item.id && !isCorrect;
+        const selectedBlk = st.selectedBlockId ? BLOCK_MAP[st.selectedBlockId] : null;
+        const badgeCls = TOPIC_BADGES[item.topic] || 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+
+        const rowClasses = [
+          'row-card rounded-2xl p-4',
+          isCorrect ? 'row-correct' : '',
+          isWrong ? 'row-wrong' : '',
+          isOpen ? 'dropdown-open' : '',
+        ].join(' ');
+
+        const descHtml = showDescriptions
+          ? `<p class="text-xs sm:text-[13px] t-text-secondary leading-snug mt-2">${escapeHtml(item.desc)}</p>`
+          : '';
+
+        const triggerContent = selectedBlk
+          ? selectedBlk.html
+          : `<span class="text-xs sm:text-sm t-text-muted font-medium">Select a matching visual block...</span>`;
+
+        const rightControls = isCorrect
+          ? `
+            <div class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold text-xs sm:text-sm shrink-0 animate-check">
+              <span class="w-5 h-5 rounded-full bg-emerald-500 text-white inline-flex items-center justify-center text-xs font-extrabold">✓</span>
+              Matched
+            </div>
+          `
+          : `
+            <div class="flex items-center gap-1.5 shrink-0">
+              ${selectedBlk ? `
+                <button
+                  type="button"
+                  onclick="clearSelection('${item.id}', event)"
+                  title="Clear selection and return block to pool"
+                  class="t-surface-btn border rounded-xl p-2.5 t-text-muted hover:text-rose-400 transition cursor-pointer"
+                  aria-label="Clear selection"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              ` : ''}
+              <button
+                type="button"
+                onclick="checkRow('${item.id}')"
+                ${!selectedBlk ? 'disabled' : ''}
+                class="rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition ${selectedBlk ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm cursor-pointer' : 't-surface t-text-muted border t-border opacity-55 cursor-not-allowed'}"
+              >
+                Check
+              </button>
+            </div>
+          `;
+
+        const feedbackHtml = isCorrect
+          ? `
+            <div class="tip-banner mt-2.5 rounded-xl px-3 py-2 text-xs leading-relaxed flex items-start gap-2">
+              <span class="font-extrabold shrink-0">AP CSP Tip:</span>
+              <span>${escapeHtml(item.tip)}</span>
+            </div>
+          `
+          : isWrong
+            ? `
+              <div class="hint-banner mt-2.5 rounded-xl px-3 py-2 text-xs font-medium leading-relaxed">
+                <strong>Hint:</strong> ${escapeHtml(item.hint)}
+              </div>
+            `
+            : '';
+
+        return `
+          <div id="row-${item.id}" class="${rowClasses}">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+              <!-- LEFT COLUMN: AP CSP Pseudocode & Description -->
+              <div class="md:col-span-6">
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-bold t-text-muted">#${idx + 1}</span>
+                    <span class="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${badgeCls}">
+                      ${item.topic}
+                    </span>
+                  </div>
+                  ${isCorrect ? '<span class="text-[11px] font-bold text-emerald-400">Verified ✓</span>' : ''}
+                </div>
+                <div class="pseudo-box">${item.codeHtml}</div>
+                ${descHtml}
+              </div>
+
+              <!-- RIGHT COLUMN: Searchable Visual Block Dropdown + Check -->
+              <div class="md:col-span-6 flex flex-col justify-center">
+                <div class="md:hidden text-[11px] font-bold uppercase tracking-wider t-text-muted mb-1.5">
+                  Block-Based Code Match
+                </div>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <!-- Custom Dropdown Wrapper -->
+                  <div class="relative flex-1 min-w-0">
+                    <button
+                      type="button"
+                      onclick="toggleDropdown('${item.id}', event)"
+                      ${isCorrect ? 'disabled' : ''}
+                      aria-expanded="${isOpen}"
+                      class="w-full min-h-[46px] px-3 py-2 rounded-xl border text-left flex items-center justify-between gap-2 transition ${isCorrect ? 't-surface border-emerald-500/40 cursor-default' : 't-surface-btn cursor-pointer'} ${isWrong ? 'border-rose-500' : ''}"
+                    >
+                      <div class="flex flex-wrap items-center gap-1 min-w-0">${triggerContent}</div>
+                      ${!isCorrect ? `
+                        <svg class="w-4 h-4 t-text-muted shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      ` : ''}
+                    </button>
+
+                    ${isOpen ? `
+                      <div
+                        id="menu-${item.id}"
+                        onclick="event.stopPropagation()"
+                        class="dropdown-menu absolute left-0 right-0 top-full mt-1.5 rounded-2xl overflow-hidden flex flex-col max-h-80"
+                      >
+                        <!-- Quick Filter Input Inside Dropdown -->
+                        <div class="p-2 border-b t-border shrink-0">
+                          <div class="relative">
+                            <svg class="w-3.5 h-3.5 t-text-muted absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input
+                              id="dd-search-${item.id}"
+                              type="text"
+                              value="${escapeHtml(dropdownSearchQuery)}"
+                              oninput="handleDropdownSearch('${item.id}', this.value)"
+                              placeholder="Filter 30 blocks (e.g., list, repeat, robot, mod)..."
+                              class="w-full t-surface border rounded-lg pl-8 pr-3 py-1.5 text-xs t-text-primary focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            />
+                          </div>
+                        </div>
+                        <!-- Scrollable Options List -->
+                        <div id="dd-list-${item.id}" class="overflow-y-auto flex-1">
+                          ${buildDropdownOptionsHtml(item.id, st.selectedBlockId, usedSet, dropdownSearchQuery)}
+                        </div>
+                      </div>
+                    ` : ''}
+                  </div>
+
+                  ${rightControls}
+                </div>
+
+                ${feedbackHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Close open dropdown on outside click or Escape key
+    document.addEventListener('click', () => {
+      if (openDropdownRowId !== null) {
+        openDropdownRowId = null;
+        dropdownSearchQuery = '';
+        renderRows();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (openDropdownRowId !== null) {
+          openDropdownRowId = null;
+          dropdownSearchQuery = '';
+          renderRows();
+        }
+        closeReportModal();
+      }
+    });
+
+    /* =========================================================================
+       10. TURN IN / EXPORT REPORT MODAL (Print/PDF & Word .doc)
+       ========================================================================= */
+    function openReportModal() {
+      const metrics = getMetrics();
+      document.getElementById('reportTimestamp').textContent = new Date().toLocaleString();
+      document.getElementById('modalCompleted').textContent = `${metrics.completed} / ${TOTAL_ROWS}`;
+      document.getElementById('modalCompletionPct').textContent = `${metrics.completionPct}%`;
+      document.getElementById('modalAttempts').textContent = String(totalCheckAttempts);
+      document.getElementById('modalFirstTry').textContent = metrics.firstTryPct === null ? '—' : `${metrics.firstTryPct}%`;
+
+      const modal = document.getElementById('reportModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeReportModal() {
+      const modal = document.getElementById('reportModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function buildReportBodyHtml() {
+      const studentName = (document.getElementById('studentNameInput').value || '').trim() || 'Not Provided';
+      const studentClass = (document.getElementById('studentClassInput').value || '').trim() || 'Not Provided';
+      const timestamp = new Date().toLocaleString();
+      const metrics = getMetrics();
+      const firstTryStr = metrics.firstTryPct === null
+        ? 'N/A'
+        : `${metrics.firstTryPct}% (${metrics.firstTryHits}/${metrics.checkedRows} checked rows)`;
+
+      let tablesHtml = '';
+      TABS.forEach((tab) => {
+        const rows = tab.items.map((item) => {
+          const st = rowState[item.id];
+          const chosenText = st.selectedBlockId ? BLOCK_MAP[st.selectedBlockId].plainText : '(Not Selected)';
+          let statusLabel = 'Unanswered —';
+          let statusColor = '#64748b';
+          if (st.status === 'correct') {
+            statusLabel = 'Correct ✓';
+            statusColor = '#059669';
+          } else if (st.status === 'wrong') {
+            statusLabel = 'Incorrect ✗';
+            statusColor = '#dc2626';
+          }
+
+          return `
+            <tr class="print-break-avoid">
+              <td style="font-weight:bold; color:#334155;">${escapeHtml(item.topic)}</td>
+              <td style="font-family:Consolas, monospace; font-size:11px;">${escapeHtml(item.plainCode)}</td>
+              <td>${escapeHtml(chosenText)}</td>
+              <td style="font-weight:bold; color:${statusColor};">${statusLabel}</td>
+            </tr>
+          `;
+        }).join('');
+
+        tablesHtml += `
+          <h3 style="margin:18px 0 6px 0; font-size:14px; color:#1e293b; border-bottom:1px solid #cbd5e1; padding-bottom:3px;">
+            ${escapeHtml(tab.fullTitle)}
+          </h3>
+          <table class="print-table" style="width:100%; border-collapse:collapse; font-size:12px; margin-bottom:10px;">
+            <thead>
+              <tr style="background-color:#f1f5f9;">
+                <th style="border:1px solid #cbd5e1; padding:6px; text-align:left; width:15%;">Category</th>
+                <th style="border:1px solid #cbd5e1; padding:6px; text-align:left; width:34%;">AP CSP Pseudocode</th>
+                <th style="border:1px solid #cbd5e1; padding:6px; text-align:left; width:35%;">Student Block Selection</th>
+                <th style="border:1px solid #cbd5e1; padding:6px; text-align:left; width:16%;">Status</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+      });
+
+      return `
+        <div style="font-family: Arial, Helvetica, sans-serif; color:#0f172a; max-width:900px; margin:0 auto;">
+          <div style="border-bottom:2px solid #4f46e5; padding-bottom:10px; margin-bottom:14px;">
+            <h1 style="margin:0; font-size:20px; color:#0f172a;">AP CSP Code Matcher — Student Report</h1>
+            <p style="margin:4px 0 0 0; font-size:12px; color:#475569;">College Board AP Computer Science Principles Exam Reference Sheet vs. Block-Based Code</p>
+          </div>
+
+          <table style="width:100%; border-collapse:collapse; margin-bottom:14px; font-size:12px;">
+            <tr>
+              <td style="padding:6px 8px; border:1px solid #cbd5e1; background:#f8fafc;"><strong>Student Name:</strong> ${escapeHtml(studentName)}</td>
+              <td style="padding:6px 8px; border:1px solid #cbd5e1; background:#f8fafc;"><strong>Class / Period:</strong> ${escapeHtml(studentClass)}</td>
+              <td style="padding:6px 8px; border:1px solid #cbd5e1; background:#f8fafc;"><strong>Date / Time:</strong> ${escapeHtml(timestamp)}</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 8px; border:1px solid #cbd5e1;"><strong>Rows Completed:</strong> ${metrics.completed} / ${TOTAL_ROWS} (${metrics.completionPct}%)</td>
+              <td style="padding:6px 8px; border:1px solid #cbd5e1;"><strong>Total Check Attempts:</strong> ${totalCheckAttempts}</td>
+              <td style="padding:6px 8px; border:1px solid #cbd5e1;"><strong>First-Try Accuracy:</strong> ${escapeHtml(firstTryStr)}</td>
+            </tr>
+          </table>
+
+          ${tablesHtml}
+        </div>
+      `;
+    }
+
+    function printPdfReport() {
+      const printArea = document.getElementById('printReportArea');
+      printArea.innerHTML = buildReportBodyHtml();
+      closeReportModal();
+      setTimeout(() => {
+        window.print();
+      }, 120);
+    }
+
+    function downloadWordDoc() {
+      const studentName = (document.getElementById('studentNameInput').value || '').trim();
+      const safeName = (studentName || 'Student').replace(/[^a-zA-Z0-9_-]+/g, '_');
+      const fileName = `AP_CSP_Code_Matcher_Report_${safeName}.doc`;
+
+      const wordHtml = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office"
+              xmlns:w="urn:schemas-microsoft-com:office:word"
+              xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="utf-8" />
+          <title>AP CSP Code Matcher Report</title>
+          <style>
+            body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #0f172a; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #cbd5e1; padding: 5px 7px; vertical-align: top; }
+            th { background-color: #f1f5f9; }
+          </style>
+        </head>
+        <body>
+          ${buildReportBodyHtml()}
+        </body>
+        </html>
+      `;
+
+      try {
+        const blob = new Blob(['\ufeff', wordHtml], { type: 'application/msword;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast(`Downloaded ${fileName}!`, 'success');
+      } catch (err) {
+        showToast('Could not generate Word download in this browser. Try Print / Save as PDF.', 'error');
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /* =========================================================================
+       11. INITIALIZATION
+       ========================================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      const restored = loadProgress();
+      renderAll();
+      if (restored) {
+        showToast('Saved progress restored.', 'info');
+      }
+    });
+  </script>
+</body>
+</html>
