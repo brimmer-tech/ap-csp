@@ -1,0 +1,1841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AP CSP Unit 5 — Algorithms and Programming, Part 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  color-scheme: light;
+  --paper:#F3F0F8; --panel:#FFFFFF; --ink:#241C36; --ink-2:#655B7A; --rule:#D8D1E6;
+  --accent:#6B37BF; --accent-soft:#ECE3FA; --ok:#146B42; --ok-soft:#DDF4E8; --bad:#A82E2E; --bad-soft:#FBE3E3;
+  --screen:#1B1430; --screen-ink:#F2EEFF; --grid:#2A2047; --hi:#FFE08A;
+  --b-sprite:#4C97FF; --b-ctrl:#D54322; --b-game:#8854D0; --b-var:#E74C3C; --b-math:#9B59B6; --b-logic:#1E90FF; --b-loop:#2EBE6B; --b-text:#B49B00; --b-info:#CF6A87;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#15111F; --panel:#1F1930; --ink:#EEE9F8; --ink-2:#AFA5C6; --rule:#352C4C;
+    --accent:#B48CFF; --accent-soft:#2D2149; --ok:#5ED59A; --ok-soft:#163626; --bad:#FF8E8E; --bad-soft:#4A2222;
+    --screen:#0D0A17; --grid:#1E1733; --hi:#7A6410;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#15111F; --panel:#1F1930; --ink:#EEE9F8; --ink-2:#AFA5C6; --rule:#352C4C;
+  --accent:#B48CFF; --accent-soft:#2D2149; --ok:#5ED59A; --ok-soft:#163626; --bad:#FF8E8E; --bad-soft:#4A2222;
+  --screen:#0D0A17; --grid:#1E1733; --hi:#7A6410;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+*{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Nunito","Segoe UI",Helvetica,Arial,sans-serif;font-size:17px;line-height:1.55}
+.px{font-family:"Press Start 2P","Courier New",monospace}
+h1{font-family:"Press Start 2P","Courier New",monospace;font-size:1.25rem;line-height:1.7;margin:0 0 .4rem;color:var(--accent)}
+h2{font-family:"Press Start 2P","Courier New",monospace;font-size:.9rem;line-height:1.6;margin:2.6rem 0 .8rem}
+h3{font-size:1.05rem;margin:1.4rem 0 .4rem;font-weight:700}
+p{margin:.5rem 0}
+.sub{color:var(--ink-2)}
+code{font-family:"Courier New",Menlo,monospace;background:var(--accent-soft);padding:1px 5px;border-radius:4px;font-size:.92em}
+a{color:var(--accent)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--paper);z-index:10}
+.wrap{display:grid;grid-template-columns:230px minmax(0,760px);gap:40px;max-width:1080px;margin:0 auto;padding:28px 20px 80px}
+nav.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start}
+nav.side a{display:block;padding:6px 10px;border-left:3px solid var(--rule);color:var(--ink-2);text-decoration:none;font-size:.95rem}
+nav.side a.on{border-left-color:var(--accent);color:var(--ink);font-weight:700}
+.prog{margin-top:18px;padding:12px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--panel);font-size:.9rem}
+.bar{height:8px;background:var(--rule);border-radius:4px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+main>section{scroll-margin-top:20px}
+.lead{font-size:1.1rem}
+table{border-collapse:collapse;width:100%;margin:.8rem 0;font-size:.95rem}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:700;color:var(--ink-2)}
+.scroll{overflow-x:auto}
+ul{padding-left:1.2rem} li{margin:.3rem 0}
+button{font-family:inherit;font-size:.95rem;font-weight:700;padding:8px 14px;border-radius:8px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);cursor:pointer}
+button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+
+/* blocks */
+.blocks{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin:.6rem 0;overflow-x:auto}
+.blk{display:block;width:max-content;max-width:100%;color:#fff;border-radius:6px;padding:5px 10px;margin:3px 0;font-weight:700;font-size:.9rem;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.blk .v{display:inline-block;background:rgba(255,255,255,.92);color:#241C36;border-radius:12px;padding:0 8px;margin:0 2px;font-weight:600}
+.blk .bool{display:inline-block;background:rgba(255,255,255,.92);color:#241C36;padding:0 10px;margin:0 2px;clip-path:polygon(10% 0,90% 0,100% 50%,90% 100%,10% 100%,0 50%);font-weight:600}
+.blk.hat{border-radius:16px 16px 6px 6px;padding-top:9px}
+.nest{margin-left:14px;border-left:10px solid;padding-left:6px;border-radius:0 0 0 6px}
+.c-sprite{background:var(--b-sprite)} .c-ctrl{background:var(--b-ctrl)} .c-game{background:var(--b-game)} .c-var{background:var(--b-var)} .c-math{background:var(--b-math)} .c-logic{background:var(--b-logic)} .c-loop{background:var(--b-loop)} .c-text{background:var(--b-text)} .c-info{background:var(--b-info)}
+.nest.c-logic{border-color:var(--b-logic);background:transparent} .nest.c-loop{border-color:var(--b-loop);background:transparent} .nest.c-ctrl{border-color:var(--b-ctrl);background:transparent} .nest.c-game{border-color:var(--b-game);background:transparent}
+pre.ap{margin:.6rem 0;padding:12px 14px;background:var(--screen);color:var(--screen-ink);border-radius:8px;font-family:"Courier New",Menlo,monospace;font-size:.92rem;line-height:1.5;overflow-x:auto}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.two .cap{font-size:.85rem;color:var(--ink-2);margin:0 0 4px}
+
+/* tracer */
+.tracer{border:1px solid var(--rule);border-radius:12px;background:var(--panel);margin:1.2rem 0;overflow:hidden}
+.tracer .q{padding:10px 14px;font-weight:700;border-bottom:1px solid var(--rule);background:var(--accent-soft)}
+.tracer .body{padding:10px 14px 0}
+.tracer .blocks{border:0;padding:0;margin:0}
+.tracer .ans{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px}
+.tracer input[type=text],.tracer select{flex:1 1 180px;min-width:0;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font-family:inherit;font-size:1rem}
+.tracer .out{padding:0 14px 14px;display:none}
+.tracer .out.show{display:block}
+.verdict{padding:8px 12px;border-radius:8px;margin-top:.4rem;margin-bottom:8px;font-weight:700}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)} .verdict.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* robot */
+.robot{border:1px solid var(--rule);border-radius:12px;background:var(--panel);padding:14px 16px;margin:1rem 0}
+.robot .lay{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
+.screen{background:var(--screen);border-radius:10px;padding:10px;display:inline-block;box-shadow:0 0 0 6px var(--grid), 0 0 0 8px var(--rule)}
+.screen svg{display:block;width:240px;height:240px}
+.robot pre.ap{margin:0 0 8px}
+.robot .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.robot select{padding:7px 9px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font-family:inherit;font-size:.95rem}
+.pline{display:block}
+.pline.on{background:var(--hi);color:#241C36;border-radius:3px}
+
+/* widgets */
+.widget{border:1px solid var(--rule);border-radius:12px;background:var(--panel);padding:14px 16px;margin:1.1rem 0}
+.widget .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:.4rem 0}
+.widget label{font-size:.95rem;color:var(--ink-2)}
+.widget input[type=number]{width:84px;padding:7px 9px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font-family:"Courier New",monospace;font-size:1rem}
+.result{font-family:"Courier New",monospace;background:var(--screen);color:var(--screen-ink);padding:10px 12px;border-radius:8px;margin-top:8px;overflow-x:auto;white-space:pre-wrap}
+.dots{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}
+.dot{width:22px;height:22px;border-radius:4px;background:var(--rule)}
+.dot.g{background:var(--accent)} .dot.r{background:var(--hi)}
+
+/* flashcards */
+.deck{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.card{border:2px solid var(--rule);border-radius:10px;background:var(--panel);padding:12px;min-height:92px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700;user-select:none}
+.card.flip{background:var(--accent-soft);border-color:var(--accent);font-weight:400;font-size:.92rem}
+
+/* quiz */
+.qz{border:1px solid var(--rule);border-radius:12px;background:var(--panel);padding:14px 16px;margin:1rem 0}
+.qz .stem{font-weight:700}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;margin:6px 0;cursor:pointer}
+.opt input{margin-top:4px}
+.opt.right{background:var(--ok-soft);border-color:var(--ok)} .opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.qz .why{display:none;margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--accent-soft)}
+.qz .why.show{display:block}
+.score{border:1px solid var(--rule);border-radius:12px;padding:14px 16px;background:var(--panel)}
+.topicbar{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:.95rem}
+.topicbar span{width:150px} .topicbar .bar{flex:1;margin:0} .topicbar .bar i{background:var(--accent)}
+
+@media (max-width:820px){
+  .wrap{grid-template-columns:1fr;gap:0;padding:16px 14px 60px}
+  nav.side{position:sticky;top:env(safe-area-inset-top,0px);background:var(--paper);z-index:5;display:flex;gap:6px;overflow-x:auto;padding:8px 0;border-bottom:1px solid var(--rule);margin-bottom:8px}
+  nav.side a{border-left:0;border-bottom:3px solid transparent;white-space:nowrap;padding:6px 8px;font-size:.9rem}
+  nav.side a.on{border-bottom-color:var(--accent)}
+  .prog{display:none}
+  .two{grid-template-columns:1fr}
+  .robot .lay{grid-template-columns:1fr}
+  .screen svg{width:200px;height:200px}
+}
+.ladder{display:grid;gap:6px;margin:.8rem 0}
+.rung{display:flex;gap:6px 14px;align-items:baseline;flex-wrap:wrap;padding:10px 14px;border-radius:8px;border:1px solid var(--rule);background:var(--panel)}
+.rung b{min-width:11em}
+.rung span{color:var(--ink-2)}
+.rung.r1{border-left:8px solid var(--b-loop)}
+.rung.r2{border-left:8px solid var(--accent)}
+.rung.r3{border-left:8px solid var(--ink-2)}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+
+.apk{color:#C9B2FF;font-weight:700} .aps{color:#A8D8A0} .apn{color:#F2C98A} .apc{color:#9A93B8}
+.cl{display:block;padding:0 6px;border-radius:3px;white-space:pre} .cl.on{background:rgba(255,224,138,.28)} .cl.dim{opacity:.45}
+.ln{display:inline-block;width:2.4em;color:#8F88AD;user-select:none}
+td.t{color:var(--ok);font-weight:700} td.f{color:var(--bad)} tr.diff td{background:var(--bad-soft)} tr.cur td{background:var(--accent-soft)}
+td.vv{font-family:"Courier New",Menlo,Consolas,monospace;font-size:.9rem}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.presets button{font-family:"Courier New",Menlo,Consolas,monospace;font-size:.8rem;padding:4px 8px}
+.widget input[type=text].wide,.widget textarea{width:100%;max-width:560px;font-family:"Courier New",Menlo,Consolas,monospace;padding:7px 9px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font-size:.95rem}
+.widget textarea{min-height:140px;max-width:100%;line-height:1.45}
+.widget select{padding:7px 9px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);font-family:inherit;font-size:.95rem}
+.widget details{margin:.5rem 0}.widget summary{cursor:pointer;font-weight:700}
+.widget pre.ap{margin:.4rem 0}
+.lbox{min-width:46px;text-align:center;border:2px solid var(--accent);border-radius:8px;background:var(--panel);padding:4px 8px}
+.lbox b{display:block;font-family:"Courier New",monospace;font-size:1.1rem}.lbox small{display:block;color:var(--ink-2);font-size:.75rem}.lbox small.mc{color:var(--b-sprite)}
+#lwlist{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;min-height:60px;align-items:flex-start}
+#svbars{display:flex;gap:6px;align-items:flex-end;min-height:110px;margin:10px 0}
+.sbar{text-align:center;min-width:34px}.sbar .bar2{background:var(--accent);border-radius:4px 4px 0 0;width:100%;opacity:.55}.sbar.hot .bar2{opacity:1;background:var(--b-ctrl)}.sbar b{display:block;font-family:"Courier New",monospace;font-size:.9rem}
+#srcells{display:flex;gap:4px;flex-wrap:wrap;margin:10px 0}
+.scell{min-width:38px;text-align:center;border:2px solid var(--rule);border-radius:6px;background:var(--paper);padding:2px 4px}.scell b{display:block;font-family:"Courier New",monospace}.scell small{display:block;color:var(--ink-2);font-size:.7rem}
+.scell.live{border-color:var(--accent);background:var(--accent-soft)}.scell.mid{border-color:var(--b-ctrl);background:var(--hi);color:var(--ink)}.scell.gone{opacity:.35}
+#mzwrap{outline:none}.mzgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-width:360px;margin:8px 0}
+.mzc{aspect-ratio:1;padding:0;border-radius:4px;border:1px solid var(--rule);font-size:1.1rem;line-height:1}.mzc.t0{background:var(--paper)}.mzc.t1{background:var(--ink-2);border-color:var(--ink-2)}.mzc.t2{background:var(--ok-soft);color:var(--ok)}.mzc.me{background:var(--hi);color:var(--ink)}
+#sibars{display:flex;gap:6px;align-items:flex-end;margin:10px 0}.hcol{text-align:center;min-width:34px}.hplot{position:relative;height:118px;display:flex;align-items:flex-end}
+.hbar{width:100%;background:var(--accent);border-radius:4px 4px 0 0}.hexp{position:absolute;left:-2px;right:-2px;height:0;border-top:3px solid var(--b-ctrl)}.hcol b{display:block;font-family:"Courier New",monospace}.hcol small{display:block;font-size:.7rem;color:var(--ink-2)}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);padding:8px 12px;border-radius:0 6px 6px 0;margin:.7rem 0}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:5px 0;cursor:pointer}.chk input{margin-top:5px}
+.qz.mono .opt span{font-family:"Courier New",Menlo,Consolas,monospace;font-size:.9rem}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="side" id="nav">
+  <a href="#start" class="on">Start here</a>
+  <a href="#ref">Exam pseudocode</a>
+  <a href="#procs">Procedures</a>
+  <a href="#libs">Libraries</a>
+  <a href="#logic">Logic</a>
+  <a href="#game">Multiplayer &amp; tile maps</a>
+  <a href="#trace">Trace tool</a>
+  <a href="#lists">Lists</a>
+  <a href="#algos">List algorithms</a>
+  <a href="#sort">Sorting</a>
+  <a href="#search">Searching</a>
+  <a href="#project">Projects &amp; GitHub</a>
+  <a href="#eff">Efficiency</a>
+  <a href="#sims">Simulations</a>
+  <a href="#undec">Undecidable problems</a>
+  <a href="#traps">Common traps</a>
+  <a href="#vocab">Flashcards</a>
+  <a href="#quiz">Quiz</a>
+  <div class="prog">
+    <div>Tracers solved: <b id="pt">0</b>/<span id="ptn">0</span></div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div>Best quiz score: <b id="pq">—</b></div>
+    <button id="reset" style="margin-top:6px">Reset my progress</button>
+  </div>
+</nav>
+
+<main>
+<section id="start">
+  <h1>AP CSP Unit 5<br>Algorithms &amp; Programming, Part 2</h1>
+  <p class="sub">MakeCode Arcade curriculum, Days 1–28: procedures, lists, searching and sorting, and what computers can and cannot do.</p>
+  <p class="lead">Unit 5 builds on Unit 3. You write your own procedures, store many values in lists, search and sort them, and ask big questions about efficiency and about problems no computer can solve. Each section has notes in AP exam pseudocode with the MakeCode version beside it, plus tracers: read the code, type what it displays, then check.</p>
+  <div class="scroll"><table>
+    <tr><th>Topic</th><th>Curriculum days</th><th>Where it is in this guide</th></tr>
+    <tr><td>Functions, parameters, return values</td><td>1–3</td><td>Procedures</td></tr>
+    <tr><td>Extensions</td><td>4</td><td>Libraries and extensions</td></tr>
+    <tr><td>Complex conditionals, user input, logic in loops</td><td>5–7</td><td>Logic</td></tr>
+    <tr><td>Multiplayer and tile maps</td><td>12–13</td><td>Multiplayer and tile maps</td></tr>
+    <tr><td>Lists (arrays) and algorithms with lists</td><td>14–17</td><td>Lists, List algorithms</td></tr>
+    <tr><td>Sorting</td><td>18</td><td>Sorting</td></tr>
+    <tr><td>Binary search</td><td>19</td><td>Searching</td></tr>
+    <tr><td>Collaborative coding with GitHub, unit project</td><td>8–11, 20–27</td><td>Projects and GitHub</td></tr>
+    <tr><td>Simulations, efficiency, undecidable problems</td><td>28</td><td>Efficiency, Simulations, Undecidable problems</td></tr>
+  </table></div>
+  <p class="sub">Day numbers follow the <a href="https://microsoft.github.io/makecode-csp/unit-5/algorithms-programming">MakeCode AP CSP curriculum</a>; your class calendar may differ. The procedure, list, search, simulation, and efficiency topics are part of Big Idea 3 (Algorithms and Programming) on the AP exam.</p>
+  <h3>Warm-up</h3>
+  <div class="tracer" data-id="t0" data-answer="8" data-topic="Warm-up">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">nums ← [<span class="apn">4</span>, <span class="apn">8</span>, <span class="apn">6</span>]
+<span class="apk">DISPLAY</span>(nums[<span class="apn">2</span>])</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>On the exam, lists start at index 1, so <code>nums[2]</code> is the second element, 8.</p></div>
+</div>
+</section>
+
+<section id="ref">
+  <h2>Exam pseudocode and MakeCode</h2>
+  <p class="lead">On the AP exam, code is written in one standard pseudocode. In MakeCode you write blocks or JavaScript. Learn both versions of each idea.</p>
+  <div class="scroll"><table>
+    <tr><th>Idea</th><th>AP exam pseudocode</th><th>MakeCode JavaScript</th></tr>
+    <tr><td>Assign</td><td><code>x ← 5</code></td><td><code>let x = 5</code></td></tr>
+    <tr><td>Show a value</td><td><code>DISPLAY(x)</code></td><td><code>game.splash(…)</code>, <code>mySprite.say(…)</code></td></tr>
+    <tr><td>Arithmetic</td><td><code>+  -  *  /  MOD</code></td><td><code>+  -  *  /  %</code></td></tr>
+    <tr><td>Compare</td><td><code>=  ≠  &gt;  &lt;  ≥  ≤</code></td><td><code>==  !=  &gt;  &lt;  &gt;=  &lt;=</code></td></tr>
+    <tr><td>Logic</td><td><code>NOT  AND  OR</code></td><td><code>!  &amp;&amp;  ||</code></td></tr>
+    <tr><td>Selection</td><td><code>IF (c) { } ELSE { }</code></td><td><code>if (c) { } else { }</code></td></tr>
+    <tr><td>Repeat n times</td><td><code>REPEAT n TIMES { }</code></td><td><code>for (let i = 0; i &lt; n; i++) { }</code></td></tr>
+    <tr><td>Repeat until</td><td><code>REPEAT UNTIL (c) { }</code></td><td><code>while (!c) { }</code></td></tr>
+    <tr><td>For each</td><td><code>FOR EACH item IN aList { }</code></td><td><code>for (let item of list) { }</code></td></tr>
+    <tr><td>Procedure</td><td><code>PROCEDURE name(p1, p2) { }</code></td><td><code>function name(p1: number, p2: number) { }</code></td></tr>
+    <tr><td>Return</td><td><code>RETURN(expression)</code></td><td><code>return expression</code></td></tr>
+    <tr><td>Random integer</td><td><code>RANDOM(a, b)</code></td><td><code>randint(a, b)</code></td></tr>
+    <tr><td>Make a list</td><td><code>aList ← [1, 2, 3]</code></td><td><code>let list = [1, 2, 3]</code></td></tr>
+    <tr><td>Get an element</td><td><code>aList[i]</code> (first is 1)</td><td><code>list[i]</code> (first is 0)</td></tr>
+    <tr><td>Set an element</td><td><code>aList[i] ← v</code></td><td><code>list[i] = v</code></td></tr>
+    <tr><td>Length</td><td><code>LENGTH(aList)</code></td><td><code>list.length</code></td></tr>
+    <tr><td>Add to the end</td><td><code>APPEND(aList, v)</code></td><td><code>list.push(v)</code></td></tr>
+    <tr><td>Insert at an index</td><td><code>INSERT(aList, i, v)</code></td><td><code>list.insertAt(i - 1, v)</code></td></tr>
+    <tr><td>Remove at an index</td><td><code>REMOVE(aList, i)</code></td><td><code>list.removeAt(i - 1)</code></td></tr>
+  </table></div>
+  <ul>
+    <li><b>Exam lists start at index 1. MakeCode lists start at index 0.</b> When you convert an exam index to a MakeCode index, subtract 1.</li>
+    <li>An index below 1 or above <code>LENGTH(aList)</code> makes the exam program stop with an error.</li>
+    <li>In exam pseudocode, <code>←</code> assigns and <code>=</code> compares.</li>
+    <li>Exam questions use parentheses to make the order of <code>NOT</code>, <code>AND</code>, and <code>OR</code> clear. Do the same in your own code.</li>
+  </ul>
+</section>
+
+<section id="procs">
+  <h2>Procedures: parameters and return values</h2>
+  <p class="lead">A procedure (also called a function or method) is a named group of instructions that may have parameters and may return a value.</p>
+  <div class="two">
+    <div><p class="cap">AP exam pseudocode</p><pre class="ap"><span class="apk">PROCEDURE</span> twice(n)
+{
+    <span class="apk">RETURN</span>(n * <span class="apn">2</span>)
+}
+x ← twice(<span class="apn">5</span>)
+<span class="apk">DISPLAY</span>(x)</pre></div>
+    <div><p class="cap">MakeCode JavaScript</p><pre class="ap"><span class="apk">function</span> twice(n: <span class="apk">number</span>): <span class="apk">number</span> {
+    <span class="apk">return</span> n * <span class="apn">2</span>
+}
+<span class="apk">let</span> x = twice(<span class="apn">5</span>)</pre></div>
+  </div>
+  <ul>
+    <li><b>Defining</b> a procedure gives it a name. It does not run it. <b>Calling</b> it, as in <code>twice(5)</code>, runs it.</li>
+    <li>A call <b>interrupts</b> the normal order. The program runs the statements inside the procedure, and when the last statement or a <code>RETURN</code> finishes, control goes back to the point just after the call.</li>
+    <li><b>Parameters</b> are the input variables named in the definition (<code>n</code>). <b>Arguments</b> are the values supplied in the call (<code>5</code>). They are matched in order, so <code>diff(10, 4)</code> and <code>diff(4, 10)</code> can give different results.</li>
+    <li><code>RETURN(expression)</code> ends the procedure right away and sends the value back. Use the returned value by storing it, displaying it, or using it in a bigger expression. A procedure can return from any branch.</li>
+    <li>The parameter holds a copy of the value. Changing it inside the procedure does not change the variable you passed in.</li>
+  </ul>
+  <h3>Why write procedures?</h3>
+  <ul>
+    <li><b>Procedural abstraction:</b> a name for a process lets you use it knowing <em>what</em> it does, not <em>how</em>.</li>
+    <li><b>Modularity:</b> a big problem is solved by combining solutions to smaller subproblems.</li>
+    <li>Fewer repeated lines, and easier-to-read code.</li>
+    <li>You can improve the inside of a procedure (make it faster, for example) without telling the people who use it, as long as it still does the same thing.</li>
+    <li>Parameters <b>generalize</b> a process so one procedure can handle many different values.</li>
+  </ul>
+  <div class="tracer" data-id="t1" data-answer="20" data-topic="Procedures">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap"><span class="apk">PROCEDURE</span> twice(n)
+{
+    <span class="apk">RETURN</span>(n * <span class="apn">2</span>)
+}
+x ← twice(<span class="apn">5</span>)
+y ← twice(x)
+<span class="apk">DISPLAY</span>(y)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p><code>twice(5)</code> returns 10 and that is stored in x. Then <code>twice(x)</code> returns 20, stored in y.</p></div>
+</div>
+  <div class="tracer" data-id="t2" data-answer="arguments~~argument" data-topic="Procedures">
+  <div class="q">In the call <code>area(4, 7)</code>, the values 4 and 7 are called ____. (parameters or arguments)</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>Arguments are the values you supply when you call a procedure. Parameters are the input variables named in the procedure’s definition.</p></div>
+</div>
+  <div class="tracer" data-id="t3" data-answer="0 5 6 9" data-topic="Procedures">
+  <div class="q">What is displayed? (separate values with spaces)</div>
+  <div class="body"><pre class="ap"><span class="apk">PROCEDURE</span> show(n)
+{
+    <span class="apk">DISPLAY</span>(n)
+    <span class="apk">DISPLAY</span>(n + <span class="apn">1</span>)
+}
+<span class="apk">DISPLAY</span>(<span class="apn">0</span>)
+show(<span class="apn">5</span>)
+<span class="apk">DISPLAY</span>(<span class="apn">9</span>)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>A call pauses the main program, runs the procedure, and then continues right after the call: 0, then the procedure shows 5 and 6, then 9.</p></div>
+</div>
+  <div class="tracer" data-id="t4" data-answer="big small" data-topic="Procedures">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap"><span class="apk">PROCEDURE</span> check(n)
+{
+    <span class="apk">IF</span> (n &gt; <span class="apn">10</span>)
+    {
+        <span class="apk">RETURN</span>(<span class="aps">"big"</span>)
+    }
+    <span class="apk">RETURN</span>(<span class="aps">"small"</span>)
+}
+<span class="apk">DISPLAY</span>(check(<span class="apn">15</span>))
+<span class="apk">DISPLAY</span>(check(<span class="apn">3</span>))</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>A RETURN ends the procedure immediately. For 15 the condition is true, so it returns “big”. For 3 it skips the IF and returns “small”.</p></div>
+</div>
+  <div class="tracer" data-id="t5" data-answer="6 -6" data-topic="Procedures">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap"><span class="apk">PROCEDURE</span> diff(a, b)
+{
+    <span class="apk">RETURN</span>(a - b)
+}
+<span class="apk">DISPLAY</span>(diff(<span class="apn">10</span>, <span class="apn">4</span>))
+<span class="apk">DISPLAY</span>(diff(<span class="apn">4</span>, <span class="apn">10</span>))</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>Arguments are matched to parameters in order. <code>diff(10, 4)</code> is 10 - 4, but <code>diff(4, 10)</code> is 4 - 10.</p></div>
+</div>
+  <div class="tracer" data-id="t6" data-answer="7" data-topic="Procedures">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap"><span class="apk">PROCEDURE</span> addOne(n)
+{
+    <span class="apk">RETURN</span>(n + <span class="apn">1</span>)
+}
+<span class="apk">PROCEDURE</span> addTwo(n)
+{
+    <span class="apk">RETURN</span>(addOne(addOne(n)))
+}
+<span class="apk">DISPLAY</span>(addTwo(<span class="apn">5</span>))</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>The innermost call runs first: <code>addOne(5)</code> is 6, then <code>addOne(6)</code> is 7, and addTwo returns that.</p></div>
+</div>
+  <div class="tracer" data-id="t7" data-answer="5 105" data-topic="Procedures">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap"><span class="apk">PROCEDURE</span> bump(n)
+{
+    n ← n + <span class="apn">100</span>
+    <span class="apk">RETURN</span>(n)
+}
+x ← <span class="apn">5</span>
+y ← bump(x)
+<span class="apk">DISPLAY</span>(x)
+<span class="apk">DISPLAY</span>(y)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>The parameter <code>n</code> is a copy of the argument. Changing n inside the procedure does not change the variable x in the main program.</p></div>
+</div>
+</section>
+
+<section id="libs">
+  <h2>Libraries and extensions</h2>
+  <p class="lead">Developers avoid rebuilding code that already exists. They share it in libraries.</p>
+  <ul>
+    <li>A <b>software library</b> is a collection of procedures you can use to build new programs. A MakeCode <b>extension</b> is a library of blocks you can import into a project. You can also write your own extension and share it.</li>
+    <li>An <b>application program interface (API)</b> is the specification of how a library’s procedures behave and how to use them. The documentation tells you each procedure’s parameters and what it returns.</li>
+    <li>Using a library saves time because the code has already been written and tested. You rely on procedural abstraction: you use the procedure without knowing the details inside.</li>
+    <li>For example, <code>randint(1, 6)</code> is a library procedure. Its documentation says it takes a lowest and highest value and returns a random integer from the lowest to the highest, including both.</li>
+  </ul>
+  <div class="tracer" data-id="t8" data-answer="library~~software library" data-topic="Libraries">
+  <div class="q">A collection of procedures that programmers can import and reuse in new programs is called a software ____.</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>A software library holds procedures you can reuse. In MakeCode, extensions are libraries you can add to a project.</p></div>
+</div>
+  <div class="tracer" data-id="t9" data-answer="C" data-topic="Libraries">
+  <div class="q">What does an API specify? Type the letter.<br>A. The color theme of a program<br>B. How many people use a library<br>C. How the procedures in a library behave and how to use them<br>D. How fast a computer runs</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>An application program interface (API) is a specification of how procedures behave and how other software can use them. You read it to learn the parameters and what each procedure returns.</p></div>
+</div>
+</section>
+
+<section id="logic">
+  <h2>Logic: conditions, input, and loops</h2>
+  <p class="lead">Complex conditionals combine true/false values so a program can make richer decisions.</p>
+  <div class="scroll"><table>
+    <tr><th>a</th><th>b</th><th><code>a AND b</code></th><th><code>a OR b</code></th><th><code>NOT a</code></th></tr>
+    <tr><td>true</td><td>true</td><td>true</td><td>true</td><td>false</td></tr>
+    <tr><td>true</td><td>false</td><td>false</td><td>true</td><td>false</td></tr>
+    <tr><td>false</td><td>true</td><td>false</td><td>true</td><td>true</td></tr>
+    <tr><td>false</td><td>false</td><td>false</td><td>false</td><td>true</td></tr>
+  </table></div>
+  <ul>
+    <li>Relational operators (<code>=  ≠  &gt;  &lt;  ≥  ≤</code>) compare two values and evaluate to true or false. The logical operators <code>NOT</code>, <code>AND</code>, and <code>OR</code> combine true/false values.</li>
+    <li>Use parentheses so the order is clear: <code>(x &gt; 5) AND (y &gt; 5)</code>.</li>
+    <li><b>De Morgan’s laws:</b> <code>NOT (a AND b)</code> is <code>(NOT a) OR (NOT b)</code>, and <code>NOT (a OR b)</code> is <code>(NOT a) AND (NOT b)</code>.</li>
+    <li>A <b>Boolean flag</b> is a variable that holds true or false so one part of a program can tell another what happened.</li>
+  </ul>
+  <div class="widget" id="logiclab">
+    <h3 style="margin-top:0">Logic lab</h3>
+    <p class="sub" style="margin-top:0">Type an expression using <code>a</code>, <code>b</code>, <code>x</code>, and <code>y</code>, with <code>AND</code>, <code>OR</code>, <code>NOT</code>, and the comparison symbols (you can type <code>!=</code>, <code>&gt;=</code>, <code>&lt;=</code> for ≠, ≥, ≤).</p>
+    <div class="row"><label>a <select id="lla"><option>true</option><option selected>false</option></select></label><label>b <select id="llb"><option selected>true</option><option>false</option></select></label><label>x <input type="number" id="llx" value="7"></label><label>y <input type="number" id="lly" value="3"></label></div>
+    <div class="row"><input type="text" class="wide" id="llexp" value="(x &gt; 5) AND (NOT a)" spellcheck="false" autocomplete="off"></div>
+    <div class="presets" id="llpre"></div>
+    <div class="result" id="llres"></div>
+    <h3>Equivalence checker</h3>
+    <p class="sub" style="margin-top:0">Use the Boolean variables <code>a</code>, <code>b</code>, and <code>c</code>. Rows where the two expressions disagree are highlighted.</p>
+    <div class="row"><label>Expression 1 <input type="text" class="wide" id="tt1" value="NOT (a AND b)" spellcheck="false" autocomplete="off"></label></div>
+    <div class="row"><label>Expression 2 <input type="text" class="wide" id="tt2" value="(NOT a) OR (NOT b)" spellcheck="false" autocomplete="off"></label></div>
+    <div class="presets" id="ttpre"></div>
+    <div class="scroll"><table id="ttab"></table></div>
+    <div class="result" id="ttres"></div>
+  </div>
+  <h3>Nested conditionals</h3>
+  <p>An <code>IF</code> inside another <code>IF</code> only runs when the outer condition is true. When neither <code>IF</code> has an <code>ELSE</code>, these two programs do the same thing:</p>
+  <div class="two"><div><pre class="ap"><span class="apk">IF</span> (hasKey)
+{
+    <span class="apk">IF</span> (level ≥ <span class="apn">3</span>)
+    {
+        <span class="apk">DISPLAY</span>(<span class="aps">"open"</span>)
+    }
+}</pre></div><div><pre class="ap"><span class="apk">IF</span> (hasKey <span class="apk">AND</span> (level ≥ <span class="apn">3</span>))
+{
+    <span class="apk">DISPLAY</span>(<span class="aps">"open"</span>)
+}</pre></div></div>
+  <h3>Strings and user input</h3>
+  <ul>
+    <li><b>String concatenation</b> joins strings end to end to make a new string.</li>
+    <li>Comparing strings with <code>=</code> is exact, so capital letters matter. “Arcade” and “arcade” are different.</li>
+    <li>Input from the user can be a string (such as a typed password) or a number. Your program should check, or <b>validate</b>, what it receives with a conditional before using it.</li>
+  </ul>
+  <h3>Logic in loops</h3>
+  <p>A loop condition can use <code>AND</code> and <code>OR</code> too. In exam pseudocode, <code>REPEAT UNTIL</code> runs <em>while the condition is false</em> and stops when it becomes true. A MakeCode <code>while</code> loop is the opposite: it runs while the condition is true.</p>
+  <div class="two"><div><p class="cap">AP exam pseudocode</p><pre class="ap"><span class="apk">REPEAT</span> <span class="apk">UNTIL</span> (lives = <span class="apn">0</span>)
+{
+    <span class="apc">// play one round</span>
+    lives ← lives - <span class="apn">1</span>
+}</pre></div><div><p class="cap">MakeCode JavaScript</p><pre class="ap"><span class="apk">while</span> (lives != <span class="apn">0</span>) {
+    <span class="apc">// play one round</span>
+    lives -= <span class="apn">1</span>
+}</pre></div></div>
+  <div class="tracer" data-id="t10" data-answer="false" data-topic="Logic">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">x ← <span class="apn">7</span>
+y ← <span class="apn">3</span>
+<span class="apk">DISPLAY</span>((x &gt; <span class="apn">5</span>) <span class="apk">AND</span> (y &gt; <span class="apn">5</span>))</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>7 &gt; 5 is true but 3 &gt; 5 is false. true AND false is false.</p></div>
+</div>
+  <div class="tracer" data-id="t11" data-answer="true" data-topic="Logic">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">a ← <span class="apk">false</span>
+b ← <span class="apk">true</span>
+<span class="apk">DISPLAY</span>((<span class="apk">NOT</span> a) <span class="apk">AND</span> b)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>NOT false is true, and true AND true is true.</p></div>
+</div>
+  <div class="tracer" data-id="t12" data-answer="D" data-topic="Logic">
+  <div class="q">Which is equivalent to <code>NOT (a AND b)</code>? Type the letter.<br>A. <code>a OR b</code><br>B. <code>(NOT a) AND (NOT b)</code><br>C. <code>a AND (NOT b)</code><br>D. <code>(NOT a) OR (NOT b)</code></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>De Morgan’s law: negate each part and switch AND to OR. A truth table confirms it, and the Logic lab above lets you try it.</p></div>
+</div>
+  <div class="tracer" data-id="t13" data-answer="login failed" data-topic="Logic">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">password ← <span class="aps">"Arcade"</span>
+guess ← <span class="aps">"arcade"</span>
+<span class="apk">IF</span> (guess = password)
+{
+    <span class="apk">DISPLAY</span>(<span class="aps">"login successful"</span>)
+}
+<span class="apk">ELSE</span>
+{
+    <span class="apk">DISPLAY</span>(<span class="aps">"login failed"</span>)
+}</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>String comparison with = is exact, so “arcade” is not the same as “Arcade”. Capital letters count.</p></div>
+</div>
+  <div class="tracer" data-id="t14" data-answer="minor" data-topic="Logic">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">age ← <span class="apn">15</span>
+hasTicket ← <span class="apk">true</span>
+<span class="apk">IF</span> (hasTicket)
+{
+    <span class="apk">IF</span> (age ≥ <span class="apn">18</span>)
+    {
+        <span class="apk">DISPLAY</span>(<span class="aps">"adult"</span>)
+    }
+    <span class="apk">ELSE</span>
+    {
+        <span class="apk">DISPLAY</span>(<span class="aps">"minor"</span>)
+    }
+}
+<span class="apk">ELSE</span>
+{
+    <span class="apk">DISPLAY</span>(<span class="aps">"no entry"</span>)
+}</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>hasTicket is true, so the inner IF is evaluated. 15 ≥ 18 is false, so its ELSE runs.</p></div>
+</div>
+  <div class="tracer" data-id="t15" data-answer="30" data-topic="Logic">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">lives ← <span class="apn">3</span>
+score ← <span class="apn">0</span>
+<span class="apk">REPEAT</span> <span class="apk">UNTIL</span> (lives = <span class="apn">0</span>)
+{
+    score ← score + <span class="apn">10</span>
+    lives ← lives - <span class="apn">1</span>
+}
+<span class="apk">DISPLAY</span>(score)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>REPEAT UNTIL runs while its condition is <em>false</em>. lives goes 3, 2, 1, 0, so the body runs 3 times and score is 30.</p></div>
+</div>
+  <div class="tracer" data-id="t16" data-answer="20" data-topic="Logic">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">lives ← <span class="apn">3</span>
+score ← <span class="apn">0</span>
+<span class="apk">REPEAT</span> <span class="apk">UNTIL</span> ((lives = <span class="apn">0</span>) <span class="apk">OR</span> (score ≥ <span class="apn">20</span>))
+{
+    score ← score + <span class="apn">10</span>
+    lives ← lives - <span class="apn">1</span>
+}
+<span class="apk">DISPLAY</span>(score)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>With OR, the loop stops as soon as either part is true. After 2 passes score is 20, so score ≥ 20 is true and the loop ends even though lives is 1.</p></div>
+</div>
+  <div class="tracer" data-id="t17" data-answer="true" data-topic="Logic">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">n ← <span class="apn">17</span>
+<span class="apk">DISPLAY</span>(n <span class="apk">MOD</span> <span class="apn">5</span> = <span class="apn">2</span>)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>17 MOD 5 is 2 (the remainder), so the comparison is true.</p></div>
+</div>
+</section>
+
+<section id="game">
+  <h2>Multiplayer and tile maps</h2>
+  <p class="lead">Two game-design ideas that put your logic and data skills to work.</p>
+  <h3>Multiplayer</h3>
+  <ul>
+    <li>In a multiplayer game, each player has their own controller, sprite, and score or lives.</li>
+    <li>Programs compare the players’ values with conditionals and comparison operators to decide what happens, such as who is ahead or who wins. Chains of decisions use <code>IF … ELSE IF … ELSE</code> (in exam pseudocode, an <code>IF</code> nested inside an <code>ELSE</code>).</li>
+  </ul>
+  <h3>Tile maps</h3>
+  <ul>
+    <li>A <b>tile map</b> builds a scene from a grid of tiles. The map is <b>data</b>: each cell holds a tile type, so a map is a kind of grid of values.</li>
+    <li>Some tiles, such as walls, block sprites. Others are floors, goals, or hazards. Your code reacts when a sprite touches a tile type.</li>
+    <li>You can create your own tile images and edit the map to make levels.</li>
+  </ul>
+  <div class="widget" id="mzwrap" tabindex="0">
+    <h3 style="margin-top:0">Tile map maze</h3>
+    <p class="sub" style="margin-top:0">Move the player (☺) to the goal (★) with the buttons or the arrow keys (click here first). Click a floor or wall tile to change it. Notice how the map is stored as a grid of numbers.</p>
+    <div class="mzgrid" id="mzgrid"></div>
+    <div class="row"><button id="mzU">Up</button><button id="mzD">Down</button><button id="mzL">Left</button><button id="mzR">Right</button><button id="mzreset">Reset</button></div>
+    <div class="result" id="mznote"></div>
+    <p class="sub" style="margin:.4rem 0 .2rem">The map as data (0 = floor, 1 = wall, 2 = goal):</p>
+    <pre class="ap" id="mzdata"></pre>
+  </div>
+  <div class="tracer" data-id="t18" data-answer="Player 2 wins" data-topic="Game design">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">p1 ← <span class="apn">30</span>
+p2 ← <span class="apn">45</span>
+<span class="apk">IF</span> (p1 &gt; p2)
+{
+    <span class="apk">DISPLAY</span>(<span class="aps">"Player 1 wins"</span>)
+}
+<span class="apk">ELSE</span>
+{
+    <span class="apk">IF</span> (p2 &gt; p1)
+    {
+        <span class="apk">DISPLAY</span>(<span class="aps">"Player 2 wins"</span>)
+    }
+    <span class="apk">ELSE</span>
+    {
+        <span class="apk">DISPLAY</span>(<span class="aps">"Tie"</span>)
+    }
+}</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>p1 &gt; p2 is false, so the ELSE runs. There the inner test p2 &gt; p1 is true.</p></div>
+</div>
+  <div class="tracer" data-id="t19" data-answer="24" data-topic="Game design">
+  <div class="q">A tile map is 6 tiles wide and 4 tiles tall. How many tiles does it hold in all?</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>A tile map is a grid, so the total is the width times the height: 6 × 4 = 24.</p></div>
+</div>
+</section>
+
+<section id="trace">
+  <h2>Trace tool for exam pseudocode</h2>
+  <p class="lead">Tracing means following code by hand and keeping track of every variable. This tool does it step by step for exam-style pseudocode. Pick a program, or write your own.</p>
+  <div class="widget" id="st">
+    <div class="row"><label>Program <select id="stsel"></select></label></div>
+    <pre class="ap" id="stcode"></pre>
+    <div class="verdict bad" id="sterr" style="display:none"></div>
+    <div class="row"><button class="pri" id="stnext">Step</button><button id="stback">Back</button><button id="strun">Run to the end</button><button id="streset">Reset</button></div>
+    <div class="result" id="stout"></div>
+    <div class="scroll"><table id="sttab"></table></div>
+    <details><summary>Write or paste your own program</summary>
+      <p class="sub">Supports assignment (←), DISPLAY, IF/ELSE, REPEAT n TIMES, REPEAT UNTIL, FOR EACH, lists with APPEND, INSERT, REMOVE, LENGTH, RANDOM(a, b), and PROCEDURE with RETURN. Put each brace on its own line, as on the exam. List indexes start at 1.</p>
+      <textarea id="sttext" spellcheck="false" aria-label="Your pseudocode program"></textarea>
+      <p><button id="stgo" class="pri">Run my program</button></p>
+    </details>
+  </div>
+</section>
+
+<section id="lists">
+  <h2>Lists (arrays)</h2>
+  <p class="lead">A list is an ordered sequence of values. One name holds many related values, which is a form of <b>data abstraction</b>: it manages complexity by letting you treat the whole collection as a single thing.</p>
+  <div class="two"><div><p class="cap">AP exam pseudocode</p><pre class="ap">aList ← [<span class="apn">10</span>, <span class="apn">20</span>, <span class="apn">30</span>]
+<span class="apk">APPEND</span>(aList, <span class="apn">40</span>)
+<span class="apk">INSERT</span>(aList, <span class="apn">2</span>, <span class="apn">15</span>)
+<span class="apk">REMOVE</span>(aList, <span class="apn">4</span>)</pre></div><div><p class="cap">MakeCode JavaScript</p><pre class="ap"><span class="apk">let</span> list = [<span class="apn">10</span>, <span class="apn">20</span>, <span class="apn">30</span>]
+list.push(<span class="apn">40</span>)
+list.insertAt(<span class="apn">1</span>, <span class="apn">15</span>)
+list.removeAt(<span class="apn">3</span>)</pre></div></div>
+  <ul>
+    <li>Each value is an <b>element</b> with an <b>index</b>. <b>Exam lists start at index 1; MakeCode lists start at 0.</b></li>
+    <li>On the exam, an index below 1 or above <code>LENGTH(aList)</code> makes the program stop with an error.</li>
+    <li><code>APPEND</code> adds to the end. <code>INSERT</code> puts a value at an index and shifts later values <b>right</b>. <code>REMOVE</code> deletes the value at an index and shifts later values <b>left</b>. The length changes each time.</li>
+    <li><code>aList[i] ← aList[j]</code> copies the value at position j into position i.</li>
+    <li>Lists can hold numbers, strings, or other values. A list of strings might hold player names. A list of sprites lets one loop give every sprite the same behavior.</li>
+  </ul>
+  <pre class="ap"><span class="apk">FOR</span> <span class="apk">EACH</span> enemy <span class="apk">IN</span> enemies
+{
+    <span class="apc">// every sprite in the list gets the same behavior</span>
+    moveToward(enemy, player)
+}</pre>
+  <h3>Traversing a list</h3>
+  <ul>
+    <li>A <b>traversal</b> visits elements using iteration. A <b>complete traversal</b> visits all of them. A <b>partial traversal</b> visits only some.</li>
+    <li><code>FOR EACH item IN aList</code> gives you each <em>value</em>, in order. It does not give you the index. Use <code>REPEAT</code> with an index variable when you need positions.</li>
+  </ul>
+  <div class="widget" id="lw">
+    <h3 style="margin-top:0">List workbench</h3>
+    <p class="sub" style="margin-top:0">Start with <code>[10, 20, 30]</code> and try each operation. Each one shows the exam pseudocode and the MakeCode JavaScript. Try an index that is too large.</p>
+    <div id="lwlist"></div>
+    <div class="row"><b id="lwlen"></b><label class="chk" style="padding:0"><input type="checkbox" id="lw0"><span>Also show MakeCode (0-based) indexes</span></label></div>
+    <div class="row"><label>value <input type="text" id="lwval" size="8" value="15" spellcheck="false" autocomplete="off"></label><label>index <input type="number" id="lwidx" value="2"></label></div>
+    <div class="row"><button id="lw_append">APPEND</button><button id="lw_insert">INSERT</button><button id="lw_remove">REMOVE</button><button id="lw_set">aList[i] ← value</button><button id="lwreset">Reset</button></div>
+    <div class="verdict" id="lwlog" aria-live="polite"></div>
+  </div>
+  <div class="tracer" data-id="t20" data-answer="10 30" data-topic="Lists">
+  <div class="q">What is displayed? (separate values with spaces)</div>
+  <div class="body"><pre class="ap">aList ← [<span class="apn">10</span>, <span class="apn">20</span>, <span class="apn">30</span>, <span class="apn">40</span>]
+<span class="apk">DISPLAY</span>(aList[<span class="apn">1</span>])
+<span class="apk">DISPLAY</span>(aList[<span class="apn">3</span>])</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>The first element of an AP list is at index 1, so index 3 is the third element.</p></div>
+</div>
+  <div class="tracer" data-id="t21" data-answer="40" data-topic="Lists">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">aList ← [<span class="apn">10</span>, <span class="apn">20</span>, <span class="apn">30</span>, <span class="apn">40</span>]
+<span class="apk">DISPLAY</span>(aList[<span class="apk">LENGTH</span>(aList)])</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>LENGTH(aList) is 4, and the last element is at index 4.</p></div>
+</div>
+  <div class="tracer" data-id="t22" data-answer="10 15 20 40" data-topic="Lists">
+  <div class="q">What is displayed? (separate values with spaces)</div>
+  <div class="body"><pre class="ap">aList ← [<span class="apn">10</span>, <span class="apn">20</span>, <span class="apn">30</span>]
+<span class="apk">APPEND</span>(aList, <span class="apn">40</span>)
+<span class="apk">INSERT</span>(aList, <span class="apn">2</span>, <span class="apn">15</span>)
+<span class="apk">REMOVE</span>(aList, <span class="apn">4</span>)
+<span class="apk">FOR</span> <span class="apk">EACH</span> item <span class="apk">IN</span> aList
+{
+    <span class="apk">DISPLAY</span>(item)
+}</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>APPEND adds 40 at the end: [10, 20, 30, 40]. INSERT at 2 shifts the rest right: [10, 15, 20, 30, 40]. REMOVE at 4 removes the 30.</p></div>
+</div>
+  <div class="tracer" data-id="t23" data-answer="2 5" data-topic="Lists">
+  <div class="q">What is displayed? (separate values with spaces)</div>
+  <div class="body"><pre class="ap">aList ← [<span class="apn">5</span>, <span class="apn">9</span>, <span class="apn">2</span>]
+temp ← aList[<span class="apn">1</span>]
+aList[<span class="apn">1</span>] ← aList[<span class="apn">3</span>]
+aList[<span class="apn">3</span>] ← temp
+<span class="apk">DISPLAY</span>(aList[<span class="apn">1</span>])
+<span class="apk">DISPLAY</span>(aList[<span class="apn">3</span>])</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>This swaps the first and last elements using a temporary variable.</p></div>
+</div>
+  <div class="tracer" data-id="t24" data-answer="error~~an error" data-topic="Lists">
+  <div class="q">On the exam, what happens when this runs? (type <code>error</code> or the value displayed)</div>
+  <div class="body"><pre class="ap">aList ← [<span class="apn">1</span>, <span class="apn">2</span>, <span class="apn">3</span>]
+<span class="apk">DISPLAY</span>(aList[<span class="apn">0</span>])</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>There is no index 0 in an AP list. An index below 1 or above LENGTH makes the program stop with an error.</p></div>
+</div>
+  <div class="tracer" data-id="t25" data-answer="6" data-topic="Lists">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">scores ← [<span class="apn">4</span>, <span class="apn">8</span>, <span class="apn">6</span>]
+total ← <span class="apn">0</span>
+<span class="apk">FOR</span> <span class="apk">EACH</span> s <span class="apk">IN</span> scores
+{
+    total ← total + s
+}
+<span class="apk">DISPLAY</span>(total / <span class="apk">LENGTH</span>(scores))</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>FOR EACH gives each <em>value</em> (not its index). The total is 4 + 8 + 6 = 18, and 18 / 3 is 6.</p></div>
+</div>
+  <div class="tracer" data-id="t26" data-answer="6 9 12" data-topic="Lists">
+  <div class="q">What is displayed? (separate values with spaces)</div>
+  <div class="body"><pre class="ap">nums ← [<span class="apn">3</span>, <span class="apn">6</span>, <span class="apn">9</span>, <span class="apn">12</span>, <span class="apn">15</span>]
+i ← <span class="apn">2</span>
+<span class="apk">REPEAT</span> <span class="apn">3</span> <span class="apk">TIMES</span>
+{
+    <span class="apk">DISPLAY</span>(nums[i])
+    i ← i + <span class="apn">1</span>
+}</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>This is a partial traversal: it starts at index 2 and visits only three elements.</p></div>
+</div>
+  <div class="tracer" data-id="t27" data-answer="3 3" data-topic="Lists">
+  <div class="q">What is displayed? (separate values with spaces)</div>
+  <div class="body"><pre class="ap">aList ← [<span class="apn">1</span>, <span class="apn">2</span>, <span class="apn">3</span>, <span class="apn">4</span>]
+<span class="apk">REMOVE</span>(aList, <span class="apn">2</span>)
+<span class="apk">DISPLAY</span>(aList[<span class="apn">2</span>])
+<span class="apk">DISPLAY</span>(<span class="apk">LENGTH</span>(aList))</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>REMOVE shifts the later elements left to close the gap. The list becomes [1, 3, 4], so index 2 holds 3 and LENGTH is 3.</p></div>
+</div>
+  <div class="tracer" data-id="t28" data-answer="4 5" data-topic="Lists">
+  <div class="q">A list has 5 elements. Type the index of its last element in MakeCode, then in AP exam pseudocode (two numbers).</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>MakeCode lists start at index 0, so the last of 5 elements is at index 4. AP exam lists start at index 1, so the last element is at index 5.</p></div>
+</div>
+</section>
+
+<section id="algos">
+  <h2>Algorithms with lists</h2>
+  <p class="lead">Lists and iteration combine into a few patterns you will see again and again. Learn each pattern, then adapt it.</p>
+  <h3>Sum and average</h3>
+  <pre class="ap">total ← <span class="apn">0</span>
+<span class="apk">FOR</span> <span class="apk">EACH</span> n <span class="apk">IN</span> nums
+{
+    total ← total + n
+}
+average ← total / <span class="apk">LENGTH</span>(nums)</pre>
+  <h3>Minimum or maximum</h3>
+  <pre class="ap">max ← nums[<span class="apn">1</span>]
+<span class="apk">FOR</span> <span class="apk">EACH</span> n <span class="apk">IN</span> nums
+{
+    <span class="apk">IF</span> (n &gt; max)
+    {
+        max ← n
+    }
+}</pre>
+  <p>Start with the <b>first element</b>, not 0. If every value is negative, starting at 0 gives a wrong answer. For a minimum, flip the comparison to <code>&lt;</code>.</p>
+  <h3>Count how many match (frequency)</h3>
+  <pre class="ap">count ← <span class="apn">0</span>
+<span class="apk">FOR</span> <span class="apk">EACH</span> n <span class="apk">IN</span> nums
+{
+    <span class="apk">IF</span> (n = target)
+    {
+        count ← count + <span class="apn">1</span>
+    }
+}</pre>
+  <h3>Linear (sequential) search</h3>
+  <pre class="ap">position ← <span class="apn">0</span>
+i ← <span class="apn">1</span>
+<span class="apk">REPEAT</span> <span class="apk">UNTIL</span> ((i &gt; <span class="apk">LENGTH</span>(nums)) <span class="apk">OR</span> (position &gt; <span class="apn">0</span>))
+{
+    <span class="apk">IF</span> (nums[i] = target)
+    {
+        position ← i
+    }
+    i ← i + <span class="apn">1</span>
+}</pre>
+  <p>A linear search checks each element in order until it finds the value or has checked every element. It works on any list, sorted or not.</p>
+  <div class="tracer" data-id="t29" data-answer="11" data-topic="List algorithms">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">nums ← [<span class="apn">4</span>, <span class="apn">11</span>, <span class="apn">7</span>, <span class="apn">2</span>, <span class="apn">9</span>]
+max ← nums[<span class="apn">1</span>]
+<span class="apk">FOR</span> <span class="apk">EACH</span> n <span class="apk">IN</span> nums
+{
+    <span class="apk">IF</span> (n &gt; max)
+    {
+        max ← n
+    }
+}
+<span class="apk">DISPLAY</span>(max)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>max starts as the first element, then FOR EACH keeps the largest value seen.</p></div>
+</div>
+  <div class="tracer" data-id="t30" data-answer="0" data-topic="List algorithms">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">nums ← [-<span class="apn">5</span>, -<span class="apn">2</span>, -<span class="apn">9</span>]
+max ← <span class="apn">0</span>
+<span class="apk">FOR</span> <span class="apk">EACH</span> n <span class="apk">IN</span> nums
+{
+    <span class="apk">IF</span> (n &gt; max)
+    {
+        max ← n
+    }
+}
+<span class="apk">DISPLAY</span>(max)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>max started at 0, and no element beats 0. The code reports 0 even though 0 is not in the list. Start with the first element instead.</p></div>
+</div>
+  <div class="tracer" data-id="t31" data-answer="24" data-topic="List algorithms">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">nums ← [<span class="apn">3</span>, <span class="apn">8</span>, <span class="apn">5</span>, <span class="apn">6</span>, <span class="apn">10</span>]
+total ← <span class="apn">0</span>
+<span class="apk">FOR</span> <span class="apk">EACH</span> n <span class="apk">IN</span> nums
+{
+    <span class="apk">IF</span> (n <span class="apk">MOD</span> <span class="apn">2</span> = <span class="apn">0</span>)
+    {
+        total ← total + n
+    }
+}
+<span class="apk">DISPLAY</span>(total)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>Only the even values (8, 6, 10) are added: 8 + 6 + 10 = 24.</p></div>
+</div>
+  <div class="tracer" data-id="t32" data-answer="3" data-topic="List algorithms">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">nums ← [<span class="apn">5</span>, <span class="apn">15</span>, <span class="apn">5</span>, <span class="apn">5</span>, <span class="apn">20</span>]
+target ← <span class="apn">5</span>
+count ← <span class="apn">0</span>
+<span class="apk">FOR</span> <span class="apk">EACH</span> n <span class="apk">IN</span> nums
+{
+    <span class="apk">IF</span> (n = target)
+    {
+        count ← count + <span class="apn">1</span>
+    }
+}
+<span class="apk">DISPLAY</span>(count)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>This counts how often a value appears (a frequency). The 5 appears three times.</p></div>
+</div>
+  <div class="tracer" data-id="t33" data-answer="2" data-topic="List algorithms">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap">list ← [<span class="apn">7</span>, <span class="apn">3</span>, <span class="apn">9</span>, <span class="apn">3</span>]
+position ← <span class="apn">0</span>
+i ← <span class="apn">1</span>
+<span class="apk">REPEAT</span> <span class="apk">UNTIL</span> ((i &gt; <span class="apk">LENGTH</span>(list)) <span class="apk">OR</span> (position &gt; <span class="apn">0</span>))
+{
+    <span class="apk">IF</span> (list[i] = <span class="apn">3</span>)
+    {
+        position ← i
+    }
+    i ← i + <span class="apn">1</span>
+}
+<span class="apk">DISPLAY</span>(position)</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>This linear search stops once position is set. The first 3 is at index 2, so the loop ends before it reaches the second 3.</p></div>
+</div>
+  <div class="tracer" data-id="t34" data-answer="3" data-topic="List algorithms">
+  <div class="q">What is displayed?</div>
+  <div class="body"><pre class="ap"><span class="apk">PROCEDURE</span> countAbove(nums, limit)
+{
+    count ← <span class="apn">0</span>
+    <span class="apk">FOR</span> <span class="apk">EACH</span> n <span class="apk">IN</span> nums
+    {
+        <span class="apk">IF</span> (n &gt; limit)
+        {
+            count ← count + <span class="apn">1</span>
+        }
+    }
+    <span class="apk">RETURN</span>(count)
+}
+scores ← [<span class="apn">72</span>, <span class="apn">95</span>, <span class="apn">88</span>, <span class="apn">60</span>, <span class="apn">91</span>]
+<span class="apk">DISPLAY</span>(countAbove(scores, <span class="apn">85</span>))</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>The procedure counts the scores above the limit: 95, 88, and 91.</p></div>
+</div>
+</section>
+
+<section id="sort">
+  <h2>Sorting</h2>
+  <p class="lead">Sorting puts data in order. Different algorithms can take the same input and produce the same output with different efficiency.</p>
+  <div class="scroll"><table>
+    <tr><th>Algorithm</th><th>Idea</th></tr>
+    <tr><td><b>Bubble sort</b></td><td>Compare neighbors and swap them if they are out of order. Repeat passes until nothing is out of order. Each pass moves the largest remaining value to the end.</td></tr>
+    <tr><td><b>Selection sort</b></td><td>Find the smallest value in the unsorted part and swap it into the next position.</td></tr>
+    <tr><td><b>Insertion sort</b></td><td>Take the next value and insert it into its place in the sorted part on its left.</td></tr>
+  </table></div>
+  <pre class="ap"><span class="apk">REPEAT</span> <span class="apk">LENGTH</span>(list) - <span class="apn">1</span> <span class="apk">TIMES</span>
+{
+    i ← <span class="apn">1</span>
+    <span class="apk">REPEAT</span> <span class="apk">LENGTH</span>(list) - <span class="apn">1</span> <span class="apk">TIMES</span>
+    {
+        <span class="apk">IF</span> (list[i] &gt; list[i + <span class="apn">1</span>])
+        {
+            temp ← list[i]
+            list[i] ← list[i + <span class="apn">1</span>]
+            list[i + <span class="apn">1</span>] ← temp
+        }
+        i ← i + <span class="apn">1</span>
+    }
+}</pre>
+  <p>Sorting matters because many tasks, such as binary search, only work on sorted data. Your class built a sorting algorithm to see this. The learning objectives for this part of the unit are about traversing lists and about efficiency, so focus on the ideas: sorted data enables faster searching, and algorithms for the same problem can differ in efficiency.</p>
+  <div class="widget" id="sv">
+    <h3 style="margin-top:0">Sorting visualizer</h3>
+    <p class="sub" style="margin-top:0">Pick an algorithm and step through it. Highlighted bars are being compared or moved. Counts can differ between versions of an algorithm, but every version ends with the same sorted list.</p>
+    <div class="row"><label>Algorithm <select id="svalg"><option value="bubble">Bubble sort</option><option value="selection">Selection sort</option><option value="insertion">Insertion sort</option></select></label><label>List <input type="text" id="svin" size="22" value="5, 2, 4, 1, 3" spellcheck="false" autocomplete="off"></label></div>
+    <div id="svbars"></div>
+    <div class="result" id="svnote"></div>
+    <p class="sub" id="svcount" style="margin:.3rem 0"></p>
+    <div class="row"><button class="pri" id="svnext">Step</button><button id="svback">Back</button><button id="svrun">Run to the end</button><button id="svreset">Reset</button></div>
+  </div>
+  <div class="tracer" data-id="t35" data-answer="2 4 1 5" data-topic="Sorting">
+  <div class="q">What is displayed? (separate values with spaces)</div>
+  <div class="body"><pre class="ap">list ← [<span class="apn">5</span>, <span class="apn">2</span>, <span class="apn">4</span>, <span class="apn">1</span>]
+i ← <span class="apn">1</span>
+<span class="apk">REPEAT</span> <span class="apn">3</span> <span class="apk">TIMES</span>
+{
+    <span class="apk">IF</span> (list[i] &gt; list[i + <span class="apn">1</span>])
+    {
+        temp ← list[i]
+        list[i] ← list[i + <span class="apn">1</span>]
+        list[i + <span class="apn">1</span>] ← temp
+    }
+    i ← i + <span class="apn">1</span>
+}
+<span class="apk">FOR</span> <span class="apk">EACH</span> item <span class="apk">IN</span> list
+{
+    <span class="apk">DISPLAY</span>(item)
+}</pre></div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>This is one pass of bubble sort: neighbors are compared and swapped, so the largest value (5) bubbles to the end.</p></div>
+</div>
+  <div class="tracer" data-id="t36" data-answer="10 29 14 37 13" data-topic="Sorting">
+  <div class="q">Selection sort finds the smallest value in the unsorted part and swaps it into the first position. What is <code>[29, 10, 14, 37, 13]</code> after the first step? (type the numbers)</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>The smallest value is 10, at index 2. Swapping it with the value at index 1 gives [10, 29, 14, 37, 13].</p></div>
+</div>
+  <div class="tracer" data-id="t37" data-answer="3 4 7 9 5" data-topic="Sorting">
+  <div class="q">Insertion sort takes the next value and inserts it into the sorted part on its left. In <code>[3, 7, 4, 9, 5]</code>, the first two values are sorted. What is the list after inserting the 4? (type the numbers)</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>The 4 slides left past the 7 and stops after the 3: [3, 4, 7, 9, 5].</p></div>
+</div>
+</section>
+
+<section id="search">
+  <h2>Searching: linear and binary</h2>
+  <p class="lead">Binary search is often much more efficient than linear search, but it has a requirement.</p>
+  <ul>
+    <li><b>Linear search</b> checks each element in order until it finds the value or has checked them all.</li>
+    <li><b>Binary search</b> starts at the middle of a <b>sorted</b> set of data and eliminates half of it. It repeats on the half that could still contain the value, until the value is found or nothing is left.</li>
+    <li>The data <b>must be sorted</b> for binary search to work.</li>
+    <li>Each check halves what is left, so the number of checks grows very slowly:</li>
+  </ul>
+  <div class="scroll"><table>
+    <tr><th>Values in the list</th><th>Most checks, linear search</th><th>Most checks, binary search</th></tr>
+    <tr><td>15</td><td>15</td><td>4</td></tr>
+    <tr><td>100</td><td>100</td><td>7</td></tr>
+    <tr><td>1,000</td><td>1,000</td><td>10</td></tr>
+    <tr><td>1,000,000</td><td>1,000,000</td><td>20</td></tr>
+  </table></div>
+  <p class="sub">A range with an even number of values has two middle values, and different versions of binary search pick different ones. The counts in this guide are the same either way. The AP course treats specific binary search implementations as out of scope; what you need is what binary search requires, how it works, and how many values it checks.</p>
+  <div class="widget" id="sr">
+    <h3 style="margin-top:0">Linear vs binary search</h3>
+    <p class="sub" style="margin-top:0">Edit the sorted list or the target, then step through the binary search. When a range has an even number of values, this widget uses the lower of the two middle values. It also tells you how many checks a linear search would use.</p>
+    <div class="row"><label>Sorted list <input type="text" class="wide" id="srlist" value="3, 8, 12, 19, 25, 31, 40, 47, 55, 62, 70, 78, 85, 91, 99" spellcheck="false" autocomplete="off"></label></div>
+    <div class="row"><label>Target <input type="number" id="srtar" value="55"></label></div>
+    <div id="srcells"></div>
+    <div class="row"><button class="pri" id="srnext">Step</button><button id="srback">Back</button><button id="srrun">Run to the end</button><button id="srreset">Reset</button></div>
+    <div class="result" id="srres"></div>
+    <div class="scroll"><table id="srtab"></table></div>
+  </div>
+  <div class="tracer" data-id="t38" data-answer="sorted~~in order~~in sorted order" data-topic="Searching">
+  <div class="q">Binary search needs the data to be ____ . (one word)</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>Binary search keeps the half that could contain the target, which only works when the data is in order.</p></div>
+</div>
+  <div class="tracer" data-id="t39" data-answer="4" data-topic="Searching">
+  <div class="q">A sorted list holds 3, 8, 12, 19, 25, 31, 40, 47, 55, 62, 70, 78, 85, 91, 99. A binary search looks for 99. Each step checks the middle of the remaining values. How many values does it check?</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>It checks 47 (middle), then 78 (middle of the upper 7), then 91 (middle of the upper 3), then 99. That is 4 checks, for a 15-value list, which is the most any search of 15 sorted values could need.</p></div>
+</div>
+  <div class="tracer" data-id="t40" data-answer="3" data-topic="Searching">
+  <div class="q">A sorted list holds 2, 4, 6, 8, 10, 12, 14. A binary search looks for 11. How many values does it check before it can tell 11 is missing?</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>It checks 8, then 12 (the middle of 10, 12, 14), then 10. Nothing is left, so 11 is not in the list: 3 checks.</p></div>
+</div>
+  <div class="tracer" data-id="t41" data-answer="10" data-topic="Searching">
+  <div class="q">A sorted list has 1000 values. At most how many values does a binary search check?</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>Each check halves what is left: 1000, 500, 250, 125, 62, 31, 15, 7, 3, 1. That is at most 10 checks, instead of up to 1000 for a linear search.</p></div>
+</div>
+</section>
+
+<section id="project">
+  <h2>Projects and GitHub</h2>
+  <p class="lead">Your unit project is a game you design with a partner. You also answer the same kinds of written prompts used in the Create Performance Task.</p>
+  <h3>Collaborating with GitHub</h3>
+  <ul>
+    <li>A <b>repository</b> is the shared place where a project’s files and their history are kept.</li>
+    <li><b>Commit</b> saves a snapshot of your changes with a short message. <b>Push</b> uploads your commits to the shared repository. <b>Pull</b> downloads your partner’s changes into your copy.</li>
+    <li>Write clear comments and commit messages so your partner can follow your work. Collaboration brings in other perspectives and improves a solution.</li>
+  </ul>
+  <h3>Project requirements</h3>
+  <p class="sub">Check each one as your project meets it. Your checks save in this browser.</p>
+  <div class="widget">
+    <b>Your project must include and execute</b>
+    <label class="chk"><input type="checkbox" class="preq" id="rq1"><span>Functions with parameters and return values</span></label>
+    <label class="chk"><input type="checkbox" class="preq" id="rq2"><span>Conditional statements and Boolean operators</span></label>
+    <label class="chk"><input type="checkbox" class="preq" id="rq3"><span>User input</span></label>
+    <label class="chk"><input type="checkbox" class="preq" id="rq4"><span>While loops</span></label>
+    <label class="chk"><input type="checkbox" class="preq" id="rq5"><span>Arrays (lists)</span></label>
+    <label class="chk"><input type="checkbox" class="preq" id="rq6"><span>Multiplayer</span></label>
+    <label class="chk"><input type="checkbox" class="preq" id="rq7"><span>Tile maps</span></label>
+    <label class="chk"><input type="checkbox" class="preq" id="rq8"><span>An extension (an existing one, or one you create)</span></label>
+    <label class="chk"><input type="checkbox" class="preq" id="rq9"><span>Documentation: a user guide that explains how it works</span></label>
+    <div class="bar"><i id="reqbar"></i></div>
+    <b id="reqscore"></b>
+  </div>
+  <h3>Test it in at least two different ways</h3>
+  <p>For each test case, describe <b>how you tested</b>, <b>what condition in your program was being tested</b>, and <b>the result</b>.</p>
+  <div class="tracer" data-id="t42" data-answer="A" data-topic="Project">
+  <div class="q">Which test case description is best for a maze game? Type the letter.<br>A. I moved the player into a wall tile to test the condition that blocks movement. The player stayed in place.<br>B. I played the game and it worked.<br>C. I tested the walls.<br>D. I tested it twice and both times it worked.</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>A says how it was tested, which condition was being tested, and the result. The others only say that it worked.</p></div>
+</div>
+  <h3>Written responses</h3>
+  <div class="scroll"><table>
+    <tr><th>Prompt</th><th>What to include</th></tr>
+    <tr><td>The link to my project</td><td>The shared project link</td></tr>
+    <tr><td>Screenshot of my code</td><td>A code segment labeled with the algorithm implementations: functions with parameters, return values, conditional statements, and while loops</td></tr>
+    <tr><td>Screencast</td><td>A recording of the program running</td></tr>
+    <tr><td>The purpose of my program</td><td>The problem being solved or the creative interest being pursued</td></tr>
+    <tr><td>The function of my program</td><td>The behavior of the program during execution, often described by how a user interacts with it</td></tr>
+    <tr><td>The input of my program</td><td>The data sent to the program</td></tr>
+    <tr><td>The output of my program</td><td>What the program sends out: text, a score, images, or sound</td></tr>
+    <tr><td>How my algorithms work</td><td>Detailed steps, enough for someone else to recreate them</td></tr>
+  </table></div>
+  <div class="tracer" data-id="t43" data-answer="push" data-topic="Project">
+  <div class="q">Which GitHub action uploads your saved changes so your partner can get them? (commit, push, or pull)</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>A commit saves a snapshot of your changes with a message. Push sends your commits to the shared repository. Pull brings your partner’s changes into your copy.</p></div>
+</div>
+</section>
+
+<section id="eff">
+  <h2>Efficiency and problem solving</h2>
+  <p class="lead">Computers can solve many problems, but not all of them, and not always in a reasonable amount of time.</p>
+  <ul>
+    <li>A <b>problem</b> is a general description of a task. An <b>instance</b> is one specific input: sorting is a problem, and sorting the list (2, 3, 1, 7) is an instance of it.</li>
+    <li>A <b>decision problem</b> has a yes/no answer (“Is there a path from A to B?”). An <b>optimization problem</b> looks for the best solution among many (“What is the shortest path from A to B?”).</li>
+    <li><b>Efficiency</b> estimates the computing resources an algorithm uses, usually as a function of the size of the input. Counting steps is one way to compare algorithms.</li>
+    <li>Algorithms with <b>polynomial efficiency or lower</b> (constant, linear, square, cube, and so on) run in a <b>reasonable amount of time</b>. Algorithms with <b>exponential or factorial</b> efficiency run in an <b>unreasonable amount of time</b>.</li>
+    <li>When no reasonable algorithm is known for the best answer, a <b>heuristic</b> can find a good solution in reasonable time. It may not be the best one.</li>
+  </ul>
+  <div class="widget" id="gr">
+    <h3 style="margin-top:0">How fast does the work grow?</h3>
+    <p class="sub" style="margin-top:0">Move the slider to change n, the size of the input, and compare how many steps each kind of algorithm needs. Large numbers are shown in scientific form.</p>
+    <div class="row"><label>n = <b id="grlab">10</b> <input type="range" id="grn" min="1" max="60" value="10"></label></div>
+    <div class="scroll"><table id="grtab"></table></div>
+  </div>
+  <div class="tracer" data-id="t44" data-answer="10" data-topic="Efficiency">
+  <div class="q">A linear search checks up to n values. If the list becomes 10 times longer, the most checks it needs is multiplied by what number?</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>The worst case for a linear search grows in step with the list, so 10 times as many values means up to 10 times as many checks.</p></div>
+</div>
+  <div class="tracer" data-id="t45" data-answer="unreasonable" data-topic="Efficiency">
+  <div class="q">An algorithm needs about 2<sup>n</sup> steps for n items. Does it run in a reasonable or an unreasonable amount of time?</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>Exponential growth (and factorial growth) is unreasonable: each extra item doubles the work. Polynomial growth, such as n, n², or n³, is reasonable.</p></div>
+</div>
+  <div class="tracer" data-id="t46" data-answer="decision optimization" data-topic="Efficiency">
+  <div class="q">(a) “Is there a path from A to B?” (b) “What is the shortest path from A to B?” Type decision or optimization for each, in order.</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>A decision problem has a yes/no answer. An optimization problem looks for the best answer among many.</p></div>
+</div>
+</section>
+
+<section id="sims">
+  <h2>Simulations</h2>
+  <p class="lead">A simulation is a representation that uses varying values to reflect the changing state of a phenomenon.</p>
+  <ul>
+    <li>Simulations are most useful when real-world events are impractical for experiments: too big, too small, too fast, too slow, too expensive, or too dangerous.</li>
+    <li>They help people form and refine hypotheses.</li>
+    <li>A simulation can contain <b>bias</b>, because someone chose which real-world elements to include or leave out.</li>
+    <li>Many simulations use random numbers. <code>RANDOM(a, b)</code> returns a random integer from a to b, <b>including both ends</b>. Each result is equally likely.</li>
+  </ul>
+  <div class="widget" id="si">
+    <h3 style="margin-top:0">Dice simulation</h3>
+    <p class="sub" style="margin-top:0">Roll one or two dice many times. Each die is <code>RANDOM(1, 6)</code>.</p>
+    <div class="row"><label>Dice <select id="sidice"><option value="1">1 die</option><option value="2" selected>2 dice (sum)</option></select></label><label>Trials <select id="sitr"><option>10</option><option>100</option><option selected>1000</option><option>10000</option></select></label><button class="pri" id="sirun">Run again</button></div>
+    <div id="sibars"></div>
+    <p class="sub" id="sinote" style="margin:.3rem 0 0"></p>
+  </div>
+  <div class="tracer" data-id="t47" data-answer="6~~six" data-topic="Simulations">
+  <div class="q">How many different values can <code>RANDOM(1, 6)</code> return?</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>RANDOM(a, b) includes both ends, so it can return 1, 2, 3, 4, 5, or 6.</p></div>
+</div>
+  <div class="tracer" data-id="t48" data-answer="bias~~biased" data-topic="Simulations">
+  <div class="q">A simulation leaves out some real-world details. The results can then contain ____ . (one word)</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>The choices about what to include or leave out can make a simulation’s results biased.</p></div>
+</div>
+</section>
+
+<section id="undec">
+  <h2>Undecidable problems</h2>
+  <p class="lead">Can computers solve every problem? No.</p>
+  <ul>
+    <li>An <b>undecidable problem</b> is one for which no algorithm can be built that is always capable of giving a correct yes-or-no answer.</li>
+    <li>An undecidable problem may have some instances that an algorithm can solve, but no algorithm can solve all of its instances.</li>
+    <li>The <b>halting problem</b> is a famous example: no algorithm can always decide, for every program and input, whether the program will finish or run forever.</li>
+    <li>“Undecidable” is different from “slow.” A slow problem can still be solved given enough time. An undecidable one cannot be solved by any algorithm, however long it runs. (Proving that a particular problem is undecidable is beyond this course.)</li>
+  </ul>
+  <div class="tracer" data-id="t49" data-answer="undecidable" data-topic="Undecidable problems">
+  <div class="q">The halting problem is an example of an ____ problem. (one word)</div>
+  <div class="ans"><input type="text" aria-label="Your answer" autocomplete="off" spellcheck="false"><button class="pri check">Check</button><button class="reveal">Show me</button></div>
+  <div class="out"><div class="verdict"></div><p>No algorithm can always correctly decide, for every program and input, whether the program will finish or run forever.</p></div>
+</div>
+</section>
+
+<section id="traps">
+  <h2>Common traps</h2>
+  <div class="scroll"><table>
+    <tr><th>Students think</th><th>What is true</th></tr>
+    <tr><td>The first element of a list is at index 0</td><td>On the AP exam it is at index 1. In MakeCode it is at index 0. Convert carefully.</td></tr>
+    <tr><td>An index of <code>LENGTH(aList) + 1</code> is fine</td><td>It is out of range. Valid indexes are 1 to LENGTH(aList), and a bad index stops the exam program with an error.</td></tr>
+    <tr><td><code>FOR EACH</code> gives you the index</td><td>It gives you each value, in order. Use an index variable if you need positions.</td></tr>
+    <tr><td><code>REMOVE</code> leaves an empty spot</td><td>It shifts the later elements left and shortens the list by 1.</td></tr>
+    <tr><td><code>INSERT</code> replaces the element at that index</td><td>It shifts that element and the ones after it to the right and makes the list 1 longer.</td></tr>
+    <tr><td>Parameters and arguments are the same thing</td><td>Parameters are named in the definition. Arguments are the values supplied in the call.</td></tr>
+    <tr><td>A procedure always returns a value</td><td>Only if it uses RETURN. A procedure can just do something, such as display values.</td></tr>
+    <tr><td>Changing a parameter changes the variable I passed in</td><td>The parameter holds a copy of the value. The original variable is unchanged.</td></tr>
+    <tr><td>Defining a procedure runs it</td><td>Defining only names it. The code runs when the procedure is called.</td></tr>
+    <tr><td><code>REPEAT UNTIL</code> runs while the condition is true</td><td>It runs while the condition is <em>false</em> and stops when it becomes true. A MakeCode <code>while</code> is the opposite.</td></tr>
+    <tr><td><code>NOT (a AND b)</code> is <code>(NOT a) AND (NOT b)</code></td><td>De Morgan: negate each part <em>and</em> switch the operator. It is <code>(NOT a) OR (NOT b)</code>.</td></tr>
+    <tr><td>Starting <code>max ← 0</code> always works</td><td>If every value is negative, the answer stays 0. Start with the first element.</td></tr>
+    <tr><td>Binary search works on any list</td><td>The data must be sorted first.</td></tr>
+    <tr><td>Binary search checks every value, one at a time</td><td>It checks the middle and eliminates half of what is left each time.</td></tr>
+    <tr><td>Reasonable time means fast</td><td>It means polynomial or lower. Exponential and factorial growth are unreasonable.</td></tr>
+    <tr><td>A heuristic always finds the best answer</td><td>It finds a good answer in reasonable time but may not be the best.</td></tr>
+    <tr><td>Undecidable means very slow</td><td>It means no algorithm can always give a correct yes-or-no answer, however much time it has.</td></tr>
+    <tr><td>A simulation is always accurate</td><td>It can contain bias from what was included or left out.</td></tr>
+    <tr><td>A commit sends my work to my partner</td><td>A commit saves a snapshot on your computer. Push uploads it, and your partner pulls it.</td></tr>
+  </table></div>
+</section>
+
+<section id="vocab">
+  <h2>Flashcards</h2>
+  <p class="sub">Tap a card to flip it. <button id="shuffle">Shuffle</button></p>
+  <div class="deck" id="deck"></div>
+</section>
+
+<section id="quiz">
+  <h2>Unit quiz</h2>
+  <p class="sub" id="qintro">Twenty-four questions in AP style. Pick an answer to see the reasoning; your best score saves.</p>
+  <div id="quizbox"></div>
+  <div class="score" id="scorebox" style="display:none"></div>
+  <p><button class="pri" id="grade">Show my score</button> <button id="requiz">Start over</button></p>
+</section>
+</main>
+</div>
+
+<script>
+
+(function(){
+  'use strict';
+  var w=window;
+  var KEY='apcsp-u5-v1';
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
+  function save(st){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+  var state=load(); state.solved=state.solved||{}; state.best=state.best||null;
+  function norm(s){ return s.replace(/[\[\],;]/g,' ').replace(/\s+/g,' ').replace(/\s*\|\s*/g,'|').trim().toLowerCase().replace(/\.$/,''); }
+  var tracers=Array.prototype.slice.call(document.querySelectorAll('.tracer[data-id]'));
+  document.getElementById('ptn').textContent=tracers.length;
+  tracers.forEach(function(t){
+    var id=t.dataset.id, ans=t.dataset.answer, alts=ans.split('~~'), input=t.querySelector('input'), out=t.querySelector('.out'), v=t.querySelector('.verdict');
+    function show(ok,msg){ out.classList.add('show'); v.className='verdict '+(ok?'ok':'bad'); v.textContent=msg; }
+    if(state.solved[id]){ input.value=alts[0]; show(true,'Solved earlier'); }
+    t.querySelector('.check').addEventListener('click',function(){
+      if(alts.some(function(a){ return norm(input.value)===norm(a); })){ show(true,'Correct'); state.solved[id]=true; save(state); updateProg(); }
+      else show(false,'Not yet. Expected: '+alts[0]);
+    });
+    t.querySelector('.reveal').addEventListener('click',function(){ show(false,'Answer: '+alts[0]); });
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter') t.querySelector('.check').click(); });
+  });
+  function updateProg(){
+    var n=Object.keys(state.solved).length;
+    document.getElementById('pt').textContent=n;
+    document.getElementById('pbar').style.width=(100*n/tracers.length)+'%';
+    document.getElementById('pq').textContent=state.best==null?'\u2014':state.best+'/'+Q.length;
+  }
+  document.getElementById('reset').addEventListener('click',function(){
+    if(confirm('Clear your saved progress on this device?')){ state={solved:{},best:null}; save(state); location.reload(); }
+  });
+  // ======================================================================
+  // AP exam-reference-sheet pseudocode interpreter (lists are 1-indexed)
+  // ======================================================================
+  function APErr(kind,line,msg){ this.kind=kind; this.line=line; this.msg=msg; }
+  function RetSig(v,line){ this.v=v; this.line=line; }
+  var AP_OPS2={'<-':'←','!=':'≠','>=':'≥','<=':'≤'};
+  function apTokenize(src){
+    var toks=[], i=0, line=1, n=src.length, m;
+    while(i<n){
+      var c=src.charAt(i);
+      if(c==='\n'){ line++; i++; continue; }
+      if(/\s/.test(c)){ i++; continue; }
+      if(c==='/'&&src.charAt(i+1)==='/'){ while(i<n&&src.charAt(i)!=='\n') i++; continue; }
+      if(c==='"'){
+        var j=i+1, s='';
+        while(j<n&&src.charAt(j)!=='"'){ if(src.charAt(j)==='\n') throw new APErr('parse',line,'A string is missing its closing quotation mark.'); s+=src.charAt(j++); }
+        if(j>=n) throw new APErr('parse',line,'A string is missing its closing quotation mark.');
+        toks.push({k:'str',v:s,line:line}); i=j+1; continue;
+      }
+      if(/[0-9]/.test(c)){ m=/^[0-9]+(\.[0-9]+)?/.exec(src.slice(i)); toks.push({k:'num',v:parseFloat(m[0]),line:line}); i+=m[0].length; continue; }
+      if(/[A-Za-z_]/.test(c)){ m=/^[A-Za-z_][A-Za-z_0-9]*/.exec(src.slice(i)); toks.push({k:'id',v:m[0],line:line}); i+=m[0].length; continue; }
+      var two=src.substr(i,2);
+      if(AP_OPS2[two]){ toks.push({k:'op',v:AP_OPS2[two],line:line}); i+=2; continue; }
+      if(c==='←'||c==='≠'||c==='≥'||c==='≤'){ toks.push({k:'op',v:c,line:line}); i++; continue; }
+      if('=<>+-*/()[]{},'.indexOf(c)>=0){ toks.push({k:'op',v:c,line:line}); i++; continue; }
+      throw new APErr('parse',line,'Unexpected character “'+c+'”.');
+    }
+    return toks;
+  }
+  var AP_RESERVED={PROCEDURE:1,RETURN:1,IF:1,ELSE:1,REPEAT:1,TIMES:1,UNTIL:1,FOR:1,EACH:1,IN:1,DISPLAY:1,APPEND:1,INSERT:1,REMOVE:1,LENGTH:1,RANDOM:1,AND:1,OR:1,NOT:1,MOD:1};
+  function apParse(toks,exprOnly){
+    var i=0;
+    function lineNow(){ var t=toks[i]||toks[toks.length-1]; return t?t.line:1; }
+    function isId(v){ var t=toks[i]; return !!t&&t.k==='id'&&t.v===v; }
+    function isOp(v){ var t=toks[i]; return !!t&&t.k==='op'&&t.v===v; }
+    function needOp(v){ if(!isOp(v)) throw new APErr('parse',lineNow(),'Expected “'+v+'”'+(toks[i]?' but found “'+toks[i].v+'”':' but the program ended')+'.'); return toks[i++]; }
+    function needId(v){ if(!isId(v)) throw new APErr('parse',lineNow(),'Expected '+v+(toks[i]?' but found “'+toks[i].v+'”':' but the program ended')+'.'); i++; }
+    function name(){ var t=toks[i]; if(!t||t.k!=='id'||AP_RESERVED[t.v]) throw new APErr('parse',lineNow(),'Expected a variable or procedure name'+(t?' but found “'+t.v+'”':'')+'.'); i++; return t.v; }
+    function level(next,ops){ return function(){ var l=next(); while(toks[i]&&toks[i].k==='op'&&ops.indexOf(toks[i].v)>=0){ var op=toks[i].v, ln=toks[i].line; i++; var r=next(); l={t:'bin',op:op,l:l,r:r,line:ln}; } return l; }; }
+    function primary(){
+      var t=toks[i]; if(!t) throw new APErr('parse',lineNow(),'The expression ends too early.');
+      if(t.k==='num'){ i++; return {t:'lit',v:t.v}; }
+      if(t.k==='str'){ i++; return {t:'lit',v:t.v}; }
+      if(t.k==='op'&&t.v==='('){ i++; var e=orE(); needOp(')'); return e; }
+      if(t.k==='op'&&t.v==='['){ i++; var items=[]; if(!isOp(']')){ items.push(orE()); while(isOp(',')){ i++; items.push(orE()); } } needOp(']'); return {t:'list',items:items,line:t.line}; }
+      if(t.k==='id'){
+        if(t.v==='true'||t.v==='false'){ i++; return {t:'lit',v:t.v==='true'}; }
+        if(t.v==='LENGTH'){ i++; needOp('('); var a=orE(); needOp(')'); return {t:'len',e:a,line:t.line}; }
+        if(t.v==='RANDOM'){ i++; needOp('('); var ra=orE(); needOp(','); var rb=orE(); needOp(')'); return {t:'rand',a:ra,b:rb,line:t.line}; }
+        if(AP_RESERVED[t.v]) throw new APErr('parse',t.line,'“'+t.v+'” cannot be used here.');
+        i++;
+        if(isOp('(')){ i++; var args=[]; if(!isOp(')')){ args.push(orE()); while(isOp(',')){ i++; args.push(orE()); } } needOp(')'); return {t:'call',name:t.v,args:args,line:t.line}; }
+        if(isOp('[')){ i++; var ix=orE(); needOp(']'); return {t:'idx',name:t.v,i:ix,line:t.line}; }
+        return {t:'var',name:t.v,line:t.line};
+      }
+      throw new APErr('parse',t.line,'Unexpected “'+t.v+'”.');
+    }
+    function unary(){ if(isOp('-')){ var ln=toks[i].line; i++; return {t:'neg',e:unary(),line:ln}; } return primary(); }
+    // MOD is a keyword operator at multiplicative level
+    function mulWithMod(){ var l=unary(); while((toks[i]&&toks[i].k==='op'&&(toks[i].v==='*'||toks[i].v==='/'))||isId('MOD')){ var op=isId('MOD')?'MOD':toks[i].v, ln=toks[i].line; i++; var r=unary(); l={t:'bin',op:op,l:l,r:r,line:ln}; } return l; }
+    function addE2(){ var l=mulWithMod(); while(toks[i]&&toks[i].k==='op'&&(toks[i].v==='+'||toks[i].v==='-')){ var op=toks[i].v, ln=toks[i].line; i++; var r=mulWithMod(); l={t:'bin',op:op,l:l,r:r,line:ln}; } return l; }
+    var relE=level(addE2,['=','≠','<','>','≤','≥']);
+    function notE(){ if(isId('NOT')){ var ln=toks[i].line; i++; return {t:'not',e:notE(),line:ln}; } return relE(); }
+    function andE(){ var l=notE(); while(isId('AND')){ var ln=toks[i].line; i++; var r=notE(); l={t:'bin',op:'AND',l:l,r:r,line:ln}; } return l; }
+    function orE(){ var l=andE(); while(isId('OR')){ var ln=toks[i].line; i++; var r=andE(); l={t:'bin',op:'OR',l:l,r:r,line:ln}; } return l; }
+    if(exprOnly){ var e=orE(); if(i<toks.length) throw new APErr('parse',lineNow(),'Unexpected “'+toks[i].v+'”.'); return e; }
+    function block(){
+      needOp('{'); var body=[];
+      while(!isOp('}')){ if(i>=toks.length) throw new APErr('parse',lineNow(),'A block is missing its closing brace }.'); body.push(stmt()); }
+      needOp('}'); return body;
+    }
+    function args(){ needOp('('); var a=[]; if(!isOp(')')){ a.push(orE()); while(isOp(',')){ i++; a.push(orE()); } } needOp(')'); return a; }
+    function stmt(){
+      var t=toks[i]; if(!t) throw new APErr('parse',lineNow(),'The program ended too early.');
+      var ln=t.line;
+      if(t.k==='id'){
+        switch(t.v){
+          case 'IF': { i++; needOp('('); var c=orE(); needOp(')'); var th=block(), el=null; if(isId('ELSE')){ i++; el=block(); } return {t:'if',cond:c,then:th,els:el,line:ln}; }
+          case 'REPEAT': { i++; if(isId('UNTIL')){ i++; needOp('('); var cu=orE(); needOp(')'); return {t:'until',cond:cu,body:block(),line:ln}; } var cnt=orE(); needId('TIMES'); return {t:'times',n:cnt,body:block(),line:ln}; }
+          case 'FOR': { i++; needId('EACH'); var v=name(); needId('IN'); var l=orE(); return {t:'foreach',v:v,list:l,body:block(),line:ln}; }
+          case 'PROCEDURE': { i++; var pn=name(); needOp('('); var ps=[]; if(!isOp(')')){ ps.push(name()); while(isOp(',')){ i++; ps.push(name()); } } needOp(')'); return {t:'proc',name:pn,params:ps,body:block(),line:ln}; }
+          case 'RETURN': { i++; return {t:'return',e:orE(),line:ln}; }
+          case 'DISPLAY': { i++; needOp('('); var d=orE(); needOp(')'); return {t:'display',e:d,line:ln}; }
+          case 'APPEND': { i++; var a1=args(); if(a1.length!==2) throw new APErr('parse',ln,'APPEND needs a list and a value.'); return {t:'append',a:a1,line:ln}; }
+          case 'INSERT': { i++; var a2=args(); if(a2.length!==3) throw new APErr('parse',ln,'INSERT needs a list, an index, and a value.'); return {t:'insert',a:a2,line:ln}; }
+          case 'REMOVE': { i++; var a3=args(); if(a3.length!==2) throw new APErr('parse',ln,'REMOVE needs a list and an index.'); return {t:'remove',a:a3,line:ln}; }
+        }
+        if(AP_RESERVED[t.v]) throw new APErr('parse',ln,'Unexpected “'+t.v+'”.');
+        i++;
+        if(isOp('←')){ i++; return {t:'assign',name:t.v,e:orE(),line:ln}; }
+        if(isOp('[')){ i++; var ix=orE(); needOp(']'); needOp('←'); return {t:'assign',name:t.v,index:ix,e:orE(),line:ln}; }
+        if(isOp('(')){ var ar=args(); return {t:'callstmt',e:{t:'call',name:t.v,args:ar,line:ln},line:ln}; }
+        throw new APErr('parse',ln,'Expected ← after “'+t.v+'”.');
+      }
+      throw new APErr('parse',ln,'Unexpected “'+t.v+'”.');
+    }
+    var prog=[]; while(i<toks.length) prog.push(stmt());
+    return prog;
+  }
+  function apFmt(v,quote){
+    if(v===true) return 'true'; if(v===false) return 'false';
+    if(typeof v==='number') return Number.isInteger(v)?String(v):String(Math.round(v*1e10)/1e10);
+    if(Array.isArray(v)) return '['+v.map(function(x){ return apFmt(x,true); }).join(', ')+']';
+    if(typeof v==='string') return quote?'"'+v+'"':v;
+    return String(v);
+  }
+  function apType(v){ return Array.isArray(v)?'a list':typeof v==='number'?'a number':typeof v==='string'?'a string':typeof v==='boolean'?'a Boolean':'nothing'; }
+  function apCopy(v){ return Array.isArray(v)?v.map(apCopy):v; }
+  function apEq(a,b){ if(Array.isArray(a)&&Array.isArray(b)) return a.length===b.length&&a.every(function(x,i){ return apEq(x,b[i]); }); return a===b; }
+  function apRun(src,opts){
+    var res={steps:[],output:'',error:null,vars:{}};
+    var prog;
+    try{ prog=apParse(apTokenize(src)); }
+    catch(e){ if(e instanceof APErr){ res.error={kind:'parse',line:e.line,msg:e.msg}; return res; } throw e; }
+    var LIM=(opts&&opts.limit)||3000, globals={}, procs={}, stack=[{name:'main',vars:globals}], out=[], steps=res.steps;
+    function has(o,k){ return Object.prototype.hasOwnProperty.call(o,k); }
+    function top(){ return stack[stack.length-1]; }
+    function visible(){ var o={}, vs=top().vars; Object.keys(vs).forEach(function(k){ o[k]=apFmt(vs[k],true); }); return o; }
+    function snap(line,note){
+      if(steps.length>=LIM) throw new APErr('run',line,'This program ran more than '+LIM+' steps and was stopped. It may contain an infinite loop.');
+      steps.push({line:line,frame:top().name,vars:visible(),out:out.join(' '),note:note||''});
+    }
+    function getVar(n,line){ var f=top().vars; if(has(f,n)) return f[n]; if(has(globals,n)) return globals[n]; throw new APErr('run',line,'The variable “'+n+'” does not have a value yet.'); }
+    function setVar(n,v){ top().vars[n]=v; }
+    function num(v,op,line){ if(typeof v!=='number') throw new APErr('run',line,'The operator '+op+' needs numbers, but it got '+apType(v)+'.'); return v; }
+    function bool(v,op,line){ if(typeof v!=='boolean') throw new APErr('run',line,op+' needs a true or false value, but it got '+apType(v)+'.'); return v; }
+    function idx(L,i,line,allowEnd){
+      if(!Array.isArray(L)) throw new APErr('run',line,'Only a list can be used with an index, but this is '+apType(L)+'.');
+      if(typeof i!=='number') throw new APErr('run',line,'A list index must be a number.');
+      i=Math.floor(i); var max=L.length+(allowEnd?1:0);
+      if(i<1||i>max) throw new APErr('run',line,'Index '+i+' is out of range for a list of length '+L.length+'. On the exam, the program stops with an error.');
+      return i;
+    }
+    function ev(n){
+      switch(n.t){
+        case 'lit': return n.v;
+        case 'var': return getVar(n.name,n.line);
+        case 'list': return n.items.map(ev);
+        case 'len': { var x=ev(n.e); if(Array.isArray(x)||typeof x==='string') return x.length; throw new APErr('run',n.line,'LENGTH needs a list or a string.'); }
+        case 'rand': { var ra=Math.floor(num(ev(n.a),'RANDOM',n.line)), rb=Math.floor(num(ev(n.b),'RANDOM',n.line)); if(ra>rb) throw new APErr('run',n.line,'RANDOM(a, b) requires a ≤ b.'); return Math.floor(Math.random()*(rb-ra+1))+ra; }
+        case 'idx': { var L=getVar(n.name,n.line), k=idx(L,ev(n.i),n.line,false); return L[k-1]; }
+        case 'neg': return -num(ev(n.e),'-',n.line);
+        case 'not': return !bool(ev(n.e),'NOT',n.line);
+        case 'call': return callProc(n);
+        case 'bin': {
+          var op=n.op, l=ev(n.l);
+          if(op==='AND'){ return bool(l,'AND',n.line)?bool(ev(n.r),'AND',n.line):false; }
+          if(op==='OR'){ return bool(l,'OR',n.line)?true:bool(ev(n.r),'OR',n.line); }
+          var r=ev(n.r);
+          if(op==='='){ return apEq(l,r); } if(op==='≠'){ return !apEq(l,r); }
+          if(op==='+'&&typeof l==='string'&&typeof r==='string') return l+r;
+          if(op==='<'||op==='>'||op==='≤'||op==='≥'){
+            if(typeof l!==typeof r||(typeof l!=='number'&&typeof l!=='string')) throw new APErr('run',n.line,'The operator '+op+' cannot compare '+apType(l)+' with '+apType(r)+'.');
+            return op==='<'?l<r:op==='>'?l>r:op==='≤'?l<=r:l>=r;
+          }
+          num(l,op,n.line); num(r,op,n.line);
+          if(op==='+') return l+r; if(op==='-') return l-r; if(op==='*') return l*r;
+          if(op==='/'){ if(r===0) throw new APErr('run',n.line,'Division by zero.'); return l/r; }
+          if(op==='MOD'){ if(r===0) throw new APErr('run',n.line,'MOD by zero.'); return ((l%r)+r)%r; }
+        }
+      }
+      throw new APErr('run',n.line||1,'Unsupported expression.');
+    }
+    function callProc(n){
+      var p=procs[n.name]; if(!p) throw new APErr('run',n.line,'There is no procedure named “'+n.name+'”.');
+      var a=n.args.map(ev);
+      if(a.length!==p.params.length) throw new APErr('run',n.line,n.name+' needs '+p.params.length+' argument'+(p.params.length===1?'':'s')+' but got '+a.length+'.');
+      if(stack.length>60) throw new APErr('run',n.line,'Too many nested procedure calls.');
+      var f={name:n.name+'('+a.map(function(x){ return apFmt(x,true); }).join(', ')+')',vars:{}};
+      p.params.forEach(function(pn,k){ f.vars[pn]=apCopy(a[k]); });
+      stack.push(f); snap(p.line,'procedure called');
+      try{ execBlock(p.body); }
+      catch(e){ if(e instanceof RetSig){ snap(e.line,'returns '+apFmt(e.v,true)); stack.pop(); return e.v; } stack.pop(); throw e; }
+      stack.pop(); throw new APErr('run',n.line,'The procedure “'+n.name+'” did not RETURN a value, so it cannot be used in an expression.');
+    }
+    function execBlock(b){ for(var k=0;k<b.length;k++) exec(b[k]); }
+    function exec(s){
+      switch(s.t){
+        case 'proc': return;
+        case 'assign': {
+          var v=apCopy(ev(s.e));
+          if(s.index){ var L=getVar(s.name,s.line), k=idx(L,ev(s.index),s.line,false); L[k-1]=v; snap(s.line,s.name+'['+k+'] ← '+apFmt(v,true)); }
+          else { setVar(s.name,v); snap(s.line,s.name+' ← '+apFmt(v,true)); }
+          return; }
+        case 'display': { var d=ev(s.e); out.push(apFmt(d,false)); snap(s.line,'displays '+apFmt(d,true)); return; }
+        case 'if': { var c=bool(ev(s.cond),'IF',s.line); snap(s.line,'condition is '+c); execBlock(c?s.then:(s.els||[])); return; }
+        case 'times': { var n=num(ev(s.n),'REPEAT',s.line); n=Math.floor(n); if(n<=0){ snap(s.line,'repeats 0 times'); return; } for(var p=1;p<=n;p++){ snap(s.line,'pass '+p+' of '+n); execBlock(s.body); } return; }
+        case 'until': { for(;;){ var cu=bool(ev(s.cond),'REPEAT UNTIL',s.line); snap(s.line,'test: '+(cu?'true, so the loop stops':'false, so the loop runs again')); if(cu) break; execBlock(s.body); } return; }
+        case 'foreach': { var L2=ev(s.list); if(!Array.isArray(L2)) throw new APErr('run',s.line,'FOR EACH needs a list.'); for(var q=0;q<L2.length;q++){ setVar(s.v,L2[q]); snap(s.line,s.v+' ← '+apFmt(L2[q],true)); execBlock(s.body); } snap(s.line,'no more items'); return; }
+        case 'append': { var La=ev(s.a[0]); if(!Array.isArray(La)) throw new APErr('run',s.line,'APPEND needs a list.'); var va=apCopy(ev(s.a[1])); La.push(va); snap(s.line,'APPEND '+apFmt(va,true)); return; }
+        case 'insert': { var Li=ev(s.a[0]), ki=idx(Li,ev(s.a[1]),s.line,true), vi=apCopy(ev(s.a[2])); Li.splice(ki-1,0,vi); snap(s.line,'INSERT '+apFmt(vi,true)+' at '+ki); return; }
+        case 'remove': { var Lr=ev(s.a[0]), kr=idx(Lr,ev(s.a[1]),s.line,false); Lr.splice(kr-1,1); snap(s.line,'REMOVE index '+kr); return; }
+        case 'return': throw new RetSig(ev(s.e),s.line);
+        case 'callstmt': { callStmt(s); return; }
+      }
+    }
+    function callStmt(s){
+      var n=s.e, p=procs[n.name]; if(!p) throw new APErr('run',n.line,'There is no procedure named “'+n.name+'”.');
+      var a=n.args.map(ev);
+      if(a.length!==p.params.length) throw new APErr('run',n.line,n.name+' needs '+p.params.length+' argument'+(p.params.length===1?'':'s')+' but got '+a.length+'.');
+      if(stack.length>60) throw new APErr('run',n.line,'Too many nested procedure calls.');
+      var f={name:n.name+'('+a.map(function(x){ return apFmt(x,true); }).join(', ')+')',vars:{}};
+      p.params.forEach(function(pn,k){ f.vars[pn]=apCopy(a[k]); });
+      stack.push(f); snap(p.line,'procedure called');
+      try{ execBlock(p.body); }
+      catch(e){ if(e instanceof RetSig){ snap(e.line,'returns '+apFmt(e.v,true)); stack.pop(); return; } stack.pop(); throw e; }
+      stack.pop();
+    }
+    try{
+      prog.forEach(function(s){ if(s.t==='proc') procs[s.name]=s; });
+      execBlock(prog);
+    }catch(e){
+      if(e instanceof APErr){
+        res.error={kind:e.kind,line:e.line,msg:e.msg};
+        steps.push({line:e.line,frame:top().name,vars:visible(),out:out.join(' '),note:'ERROR: '+e.msg,error:true});
+      } else if(e instanceof RetSig){ res.error={kind:'run',line:e.line,msg:'RETURN can only be used inside a procedure.'}; }
+      else throw e;
+    }
+    res.output=out.join(' '); res.vars=globals;
+    return res;
+  }
+  function apEvalExpr(src,env){
+    var pre=Object.keys(env).map(function(k){ var v=env[k]; return k+' ← '+(typeof v==='string'?'"'+v+'"':String(v)); }).join('\n');
+    var res=apRun(pre+(pre?'\n':'')+'__result ← '+src,{limit:200});
+    if(res.error) return {ok:false,msg:res.error.msg};
+    return {ok:true,v:res.vars.__result};
+  }
+  w.__apRun=apRun; w.__apEval=apEvalExpr; w.__apFmt=apFmt;
+  // ---------- highlighting for code listings ----------
+  function escH(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  var HL_RE=/(\/\/[^\n]*)|("(?:[^"\n])*")|(\b\d+(?:\.\d+)?\b)|\b(PROCEDURE|RETURN|IF|ELSE|REPEAT|TIMES|UNTIL|FOR|EACH|IN|DISPLAY|APPEND|INSERT|REMOVE|LENGTH|RANDOM|AND|OR|NOT|MOD|true|false)\b/g;
+  function apHl(line){
+    return escH(line).replace(HL_RE,function(m,c,s,n,k){
+      if(c) return '<span class="apc">'+c+'</span>'; if(s) return '<span class="aps">'+s+'</span>'; if(n) return '<span class="apn">'+n+'</span>'; return '<span class="apk">'+k+'</span>';
+    });
+  }
+
+  // ---------- AP pseudocode trace tool ----------
+  var PRESETS=[
+    {name:'Procedure that returns a value',src:'PROCEDURE twice(n)\n{\n    RETURN(n * 2)\n}\nx ← twice(5)\ny ← twice(x)\nDISPLAY(y)'},
+    {name:'Procedure call order',src:'PROCEDURE show(n)\n{\n    DISPLAY(n)\n    DISPLAY(n + 1)\n}\nDISPLAY(0)\nshow(5)\nDISPLAY(9)'},
+    {name:'List operations: APPEND, INSERT, REMOVE',src:'aList ← [10, 20, 30]\nAPPEND(aList, 40)\nINSERT(aList, 2, 15)\nREMOVE(aList, 4)\nFOR EACH item IN aList\n{\n    DISPLAY(item)\n}'},
+    {name:'Maximum of a list',src:'nums ← [4, 11, 7, 2, 9]\nmax ← nums[1]\nFOR EACH n IN nums\n{\n    IF (n > max)\n    {\n        max ← n\n    }\n}\nDISPLAY(max)'},
+    {name:'Sum and average',src:'scores ← [4, 8, 6]\ntotal ← 0\nFOR EACH s IN scores\n{\n    total ← total + s\n}\nDISPLAY(total / LENGTH(scores))'},
+    {name:'Linear search',src:'list ← [7, 3, 9, 3]\nposition ← 0\ni ← 1\nREPEAT UNTIL ((i > LENGTH(list)) OR (position > 0))\n{\n    IF (list[i] = 3)\n    {\n        position ← i\n    }\n    i ← i + 1\n}\nDISPLAY(position)'},
+    {name:'Procedure with a list parameter',src:'PROCEDURE countAbove(nums, limit)\n{\n    count ← 0\n    FOR EACH n IN nums\n    {\n        IF (n > limit)\n        {\n            count ← count + 1\n        }\n    }\n    RETURN(count)\n}\nscores ← [72, 95, 88, 60, 91]\nDISPLAY(countAbove(scores, 85))'},
+    {name:'Bubble sort (all passes)',src:'list ← [5, 2, 4, 1]\npasses ← LENGTH(list) - 1\nREPEAT passes TIMES\n{\n    i ← 1\n    REPEAT passes TIMES\n    {\n        IF (list[i] > list[i + 1])\n        {\n            temp ← list[i]\n            list[i] ← list[i + 1]\n            list[i + 1] ← temp\n        }\n        i ← i + 1\n    }\n}\nFOR EACH item IN list\n{\n    DISPLAY(item)\n}'},
+    {name:'Loop that stops on either condition',src:'lives ← 3\nscore ← 0\nREPEAT UNTIL ((lives = 0) OR (score ≥ 20))\n{\n    score ← score + 10\n    lives ← lives - 1\n}\nDISPLAY(score)'}
+  ];
+  var stsel=document.getElementById('stsel'), stcode=document.getElementById('stcode'), sttab=document.getElementById('sttab'), stout=document.getElementById('stout'), sterr=document.getElementById('sterr'), sttext=document.getElementById('sttext');
+  var stRes=null, stIdx=0, stSrc='';
+  PRESETS.forEach(function(p,i){ var o=document.createElement('option'); o.value=i; o.textContent=p.name; stsel.appendChild(o); });
+  function stLoad(src){
+    stSrc=src; sttext.value=src; stRes=apRun(src,{limit:3000}); stIdx=0; stDraw();
+  }
+  function stDraw(){
+    var lines=stSrc.split('\n'), cur=-1;
+    var steps=stRes.steps;
+    if(steps.length) cur=steps[Math.min(stIdx,steps.length-1)].line;
+    stcode.innerHTML=lines.map(function(l,i){ return '<span class="cl'+((i+1)===cur?' on':'')+'"><span class="ln">'+(i+1)+'</span>'+apHl(l)+'</span>'; }).join('');
+    sterr.style.display='none'; sterr.textContent='';
+    var parseErr=stRes.error&&stRes.error.kind==='parse';
+    if(parseErr){ sterr.style.display='block'; sterr.textContent='Line '+stRes.error.line+': '+stRes.error.msg; sttab.innerHTML=''; stout.textContent=''; document.getElementById('stnext').disabled=true; document.getElementById('stback').disabled=true; document.getElementById('strun').disabled=true; document.getElementById('streset').disabled=true; return; }
+    var names=[]; steps.forEach(function(s){ Object.keys(s.vars).forEach(function(k){ if(names.indexOf(k)<0) names.push(k); }); });
+    var head='<tr><th>Step</th><th>Line</th><th>Where</th>'+names.map(function(n){ return '<th>'+escH(n)+'</th>'; }).join('')+'<th>What happened</th></tr>', body='';
+    for(var i=0;i<=stIdx&&i<steps.length;i++){
+      var R=steps[i];
+      body+='<tr class="'+(i===stIdx?'cur':'')+(R.error?' diff':'')+'"><td>'+(i+1)+'</td><td>'+R.line+'</td><td class="vv">'+escH(R.frame)+'</td>'+names.map(function(n){ var v=R.vars[n]; return '<td class="vv">'+(v===undefined?'—':escH(v))+'</td>'; }).join('')+'<td>'+escH(R.note)+'</td></tr>';
+    }
+    sttab.innerHTML=head+body;
+    var last=(stIdx>=steps.length-1), R2=steps[Math.min(stIdx,steps.length-1)];
+    stout.textContent='Displayed so far: '+(R2&&R2.out!==''?R2.out:'(nothing yet)')+(last?(stRes.error?'   —   The program stopped with an error: '+stRes.error.msg:'   —   Done.'):'   (step '+(stIdx+1)+' of '+steps.length+')');
+    document.getElementById('stnext').disabled=last; document.getElementById('stback').disabled=(stIdx===0); document.getElementById('strun').disabled=last; document.getElementById('streset').disabled=(stIdx===0);
+  }
+  stsel.addEventListener('change',function(){ stLoad(PRESETS[parseInt(stsel.value,10)].src); });
+  document.getElementById('stnext').addEventListener('click',function(){ if(stIdx<stRes.steps.length-1){ stIdx++; stDraw(); } });
+  document.getElementById('stback').addEventListener('click',function(){ if(stIdx>0){ stIdx--; stDraw(); } });
+  document.getElementById('strun').addEventListener('click',function(){ stIdx=Math.max(0,stRes.steps.length-1); stDraw(); });
+  document.getElementById('streset').addEventListener('click',function(){ stIdx=0; stDraw(); });
+  document.getElementById('stgo').addEventListener('click',function(){ stLoad(sttext.value); });
+  stLoad(PRESETS[0].src);
+
+  // ---------- Logic lab ----------
+  var lla=document.getElementById('lla'), llb=document.getElementById('llb'), llx=document.getElementById('llx'), lly=document.getElementById('lly'), llexp=document.getElementById('llexp'), llres=document.getElementById('llres');
+  function drawLL(){
+    var x=parseFloat(llx.value), y=parseFloat(lly.value);
+    if(isNaN(x)||isNaN(y)){ llres.textContent='Enter a number for x and for y.'; return; }
+    var r=apEvalExpr(llexp.value,{a:lla.value==='true',b:llb.value==='true',x:x,y:y});
+    llres.textContent=r.ok?llexp.value.trim()+'   gives   '+apFmt(r.v,true)+'   ('+apType(r.v).replace('a ','')+')':'Error: '+r.msg;
+  }
+  [lla,llb,llx,lly,llexp].forEach(function(el){ el.addEventListener('input',drawLL); el.addEventListener('change',drawLL); });
+  var llpre=document.getElementById('llpre');
+  ['(x > 5) AND (y > 5)','(x > 5) OR (y > 5)','NOT (x > 5)','(NOT a) AND b','(x MOD 2 = 0) AND a','NOT ((x > 5) AND (y > 5))','(NOT (x > 5)) OR (NOT (y > 5))'].forEach(function(p){
+    var b=document.createElement('button'); b.textContent=p; b.addEventListener('click',function(){ llexp.value=p; drawLL(); }); llpre.appendChild(b);
+  });
+  drawLL();
+  var tt1=document.getElementById('tt1'), tt2=document.getElementById('tt2'), ttab=document.getElementById('ttab'), ttres=document.getElementById('ttres');
+  function usedVars(src){ var o={}; apTokenize(src).forEach(function(t){ if(t.k==='id'&&!AP_RESERVED[t.v]&&t.v!=='true'&&t.v!=='false') o[t.v]=1; }); return o; }
+  function drawTT(){
+    ttab.innerHTML=''; var u;
+    try{ u=usedVars(tt1.value); var u2=usedVars(tt2.value); Object.keys(u2).forEach(function(k){ u[k]=1; }); apParse(apTokenize(tt1.value),true); apParse(apTokenize(tt2.value),true); }
+    catch(e){ if(e instanceof APErr){ ttres.textContent='Error: '+e.msg; return; } throw e; }
+    var names=Object.keys(u).sort(); var bad=names.filter(function(n){ return ['a','b','c'].indexOf(n)<0; });
+    if(bad.length){ ttres.textContent='Use only the Boolean variables a, b, and c (found “'+bad[0]+'”).'; return; }
+    if(!names.length){ ttres.textContent='Use at least one of the variables a, b, or c.'; return; }
+    var head='<tr>'+names.map(function(n){ return '<th>'+n+'</th>'; }).join('')+'<th>Expression 1</th><th>Expression 2</th></tr>', rows='', diff=0, total=1<<names.length;
+    for(var m=0;m<total;m++){
+      var env={}, cells='';
+      names.forEach(function(n,k){ var v=!!(m&(1<<(names.length-1-k))); env[n]=v; cells+='<td class="'+(v?'t':'f')+'">'+v+'</td>'; });
+      var r1=apEvalExpr(tt1.value,env), r2=apEvalExpr(tt2.value,env);
+      if(!r1.ok||!r2.ok){ ttres.textContent='Error: '+(!r1.ok?r1.msg:r2.msg); ttab.innerHTML=''; return; }
+      if(typeof r1.v!=='boolean'||typeof r2.v!=='boolean'){ ttres.textContent='Both expressions must give true or false.'; ttab.innerHTML=''; return; }
+      var d=r1.v!==r2.v; if(d) diff++;
+      rows+='<tr class="'+(d?'diff':'')+'">'+cells+'<td class="'+(r1.v?'t':'f')+'">'+r1.v+'</td><td class="'+(r2.v?'t':'f')+'">'+r2.v+'</td></tr>';
+    }
+    ttab.innerHTML=head+rows;
+    ttres.textContent=diff===0?'Equivalent: the two expressions agree in all '+total+' cases.':'Not equivalent: they disagree in '+diff+' of '+total+' cases (highlighted).';
+  }
+  [tt1,tt2].forEach(function(el){ el.addEventListener('input',drawTT); });
+  var ttpre=document.getElementById('ttpre');
+  [['NOT (a AND b)','(NOT a) OR (NOT b)'],['NOT (a OR b)','(NOT a) AND (NOT b)'],['NOT (a AND b)','(NOT a) AND (NOT b)'],['a AND (b OR c)','(a AND b) OR (a AND c)'],['a OR (b AND c)','(a OR b) AND c']].forEach(function(p){
+    var b=document.createElement('button'); b.textContent=p[0]+'  vs  '+p[1]; b.addEventListener('click',function(){ tt1.value=p[0]; tt2.value=p[1]; drawTT(); }); ttpre.appendChild(b);
+  });
+  drawTT();
+
+  // ---------- List workbench ----------
+  var lwDefault=[10,20,30];
+  var lwArr=lwDefault.slice(), lwlist=document.getElementById('lwlist'), lwval=document.getElementById('lwval'), lwidx=document.getElementById('lwidx'), lwlog=document.getElementById('lwlog'), lw0=document.getElementById('lw0'), lwlen=document.getElementById('lwlen');
+  function lwApply(arr,op,i,v){
+    var a=arr.slice(), n=a.length;
+    if(op==='append'){ a.push(v); return {ok:true,arr:a,ap:'APPEND(aList, '+apFmt(v,true)+')',mc:'list.push('+apFmt(v,true)+')'}; }
+    if(op==='insert'){ if(!(i>=1&&i<=n+1)) return {ok:false,arr:a,err:'This tool accepts INSERT at an index from 1 to '+(n+1)+' for a list of length '+n+' (index '+(n+1)+' puts the value at the end).'}; a.splice(i-1,0,v); return {ok:true,arr:a,ap:'INSERT(aList, '+i+', '+apFmt(v,true)+')',mc:'list.insertAt('+(i-1)+', '+apFmt(v,true)+')'}; }
+    if(op==='remove'){ if(!(i>=1&&i<=n)) return {ok:false,arr:a,err:'Index '+i+' is out of range for a list of length '+n+'. On the exam, the program stops with an error.'}; a.splice(i-1,1); return {ok:true,arr:a,ap:'REMOVE(aList, '+i+')',mc:'list.removeAt('+(i-1)+')'}; }
+    if(op==='set'){ if(!(i>=1&&i<=n)) return {ok:false,arr:a,err:'Index '+i+' is out of range for a list of length '+n+'. On the exam, the program stops with an error.'}; a[i-1]=v; return {ok:true,arr:a,ap:'aList['+i+'] ← '+apFmt(v,true),mc:'list['+(i-1)+'] = '+apFmt(v,true)}; }
+    return {ok:false,arr:a,err:'Unknown operation.'};
+  }
+  w.__lwApply=lwApply;
+  function lwVal(){ var s=lwval.value.trim(); if(s==='') return null; return (!isNaN(Number(s)))?Number(s):s; }
+  function lwDraw(){
+    var h='';
+    lwArr.forEach(function(v,k){ h+='<div class="lbox"><b>'+escH(apFmt(v,false))+'</b><small>'+(k+1)+'</small>'+(lw0.checked?'<small class="mc">'+k+'</small>':'')+'</div>'; });
+    lwlist.innerHTML=h||'<em class="sub">The list is empty.</em>';
+    lwlen.textContent='LENGTH(aList) = '+lwArr.length;
+  }
+  function lwDo(op){
+    var v=lwVal(), i=parseInt(lwidx.value,10);
+    if((op==='append'||op==='insert'||op==='set')&&v===null){ lwlog.className='verdict bad'; lwlog.textContent='Type a value first.'; return; }
+    if((op==='insert'||op==='remove'||op==='set')&&isNaN(i)){ lwlog.className='verdict bad'; lwlog.textContent='Type an index first.'; return; }
+    var r=lwApply(lwArr,op,i,v);
+    if(r.ok){ lwArr=r.arr; lwlog.className='verdict ok'; lwlog.innerHTML='AP exam: <code>'+escH(r.ap)+'</code><br>MakeCode: <code>'+escH(r.mc)+'</code>'; }
+    else { lwlog.className='verdict bad'; lwlog.textContent=r.err; }
+    lwDraw();
+  }
+  ['append','insert','remove','set'].forEach(function(op){ document.getElementById('lw_'+op).addEventListener('click',function(){ lwDo(op); }); });
+  document.getElementById('lwreset').addEventListener('click',function(){ lwArr=lwDefault.slice(); lwlog.className='verdict'; lwlog.textContent=''; lwDraw(); });
+  lw0.addEventListener('change',lwDraw); lwDraw();
+
+  // ---------- Sorting visualizer ----------
+  function sortFrames(alg,arr){
+    var a=arr.slice(), n=a.length, F=[], cmp=0, mv=0, i, j, t;
+    function push(note,hi){ F.push({list:a.slice(),hi:hi||[],cmp:cmp,mv:mv,note:note}); }
+    push('Start: '+a.join(', '),[]);
+    if(alg==='bubble'){
+      for(var pass=1;pass<n;pass++){
+        for(i=0;i<n-pass;i++){
+          cmp++; push('Compare '+a[i]+' and '+a[i+1],[i,i+1]);
+          if(a[i]>a[i+1]){ t=a[i]; a[i]=a[i+1]; a[i+1]=t; mv++; push('Swap them: '+a[i]+' and '+a[i+1]+' were out of order',[i,i+1]); }
+        }
+        push('Pass '+pass+' done: '+a[n-pass]+' is in its final place',[n-pass]);
+      }
+    } else if(alg==='selection'){
+      for(i=0;i<n-1;i++){
+        var m=i;
+        for(j=i+1;j<n;j++){ cmp++; push('Compare '+a[j]+' with the smallest so far ('+a[m]+')',[j,m]); if(a[j]<a[m]){ m=j; push('New smallest so far: '+a[m],[m]); } }
+        if(m!==i){ t=a[i]; a[i]=a[m]; a[m]=t; mv++; push('Swap the smallest ('+a[i]+') into position '+(i+1),[i,m]); }
+        else push('Position '+(i+1)+' already holds the smallest',[i]);
+      }
+    } else {
+      for(i=1;i<n;i++){
+        var key=a[i]; j=i-1;
+        push('Take '+key+' and insert it into the sorted part on its left',[i]);
+        while(j>=0){
+          cmp++; push('Compare '+a[j]+' with '+key,[j]);
+          if(a[j]>key){ a[j+1]=a[j]; mv++; push('Shift '+a[j]+' one place to the right',[j,j+1]); j--; }
+          else break;
+        }
+        a[j+1]=key; push('Place '+key+' in position '+(j+2),[j+1]);
+      }
+    }
+    push('Sorted: '+a.join(', '),[]);
+    return F;
+  }
+  w.__sortRun=function(alg,arr){ var F=sortFrames(alg,arr), L=F[F.length-1]; return {final:L.list,cmp:L.cmp,mv:L.mv,frames:F.length}; };
+  var svalg=document.getElementById('svalg'), svin=document.getElementById('svin'), svbars=document.getElementById('svbars'), svnote=document.getElementById('svnote'), svcount=document.getElementById('svcount'), svF=[], svI=0;
+  function svLoad(){
+    var parts=svin.value.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s!==''; });
+    var nums=parts.map(Number);
+    if(nums.length<2||nums.length>10||nums.some(function(x){ return isNaN(x)||!isFinite(x); })){ svnote.textContent='Enter 2 to 10 numbers separated by commas.'; svbars.innerHTML=''; svcount.textContent=''; svF=[]; return; }
+    svF=sortFrames(svalg.value,nums); svI=0; svDraw();
+  }
+  function svDraw(){
+    if(!svF.length) return;
+    var F=svF[svI], mn=Math.min.apply(null,F.list), mx=Math.max.apply(null,F.list), span=(mx-mn)||1;
+    svbars.innerHTML=F.list.map(function(v,k){ var hgt=8+Math.round(62*(v-mn)/span); return '<div class="sbar'+(F.hi.indexOf(k)>=0?' hot':'')+'"><div class="bar2" style="height:'+hgt+'px"></div><b>'+v+'</b></div>'; }).join('');
+    svnote.textContent=F.note;
+    svcount.textContent='Comparisons: '+F.cmp+'    Moves (swaps or shifts): '+F.mv+'    (step '+(svI+1)+' of '+svF.length+')';
+    document.getElementById('svnext').disabled=(svI>=svF.length-1); document.getElementById('svback').disabled=(svI===0);
+  }
+  svalg.addEventListener('change',svLoad); svin.addEventListener('input',svLoad);
+  document.getElementById('svnext').addEventListener('click',function(){ if(svI<svF.length-1){ svI++; svDraw(); } });
+  document.getElementById('svback').addEventListener('click',function(){ if(svI>0){ svI--; svDraw(); } });
+  document.getElementById('svrun').addEventListener('click',function(){ svI=svF.length-1; svDraw(); });
+  document.getElementById('svreset').addEventListener('click',function(){ svI=0; svDraw(); });
+  svLoad();
+
+  // ---------- Linear vs binary search ----------
+  function bsFrames(list,target){
+    var low=1, high=list.length, F=[];
+    while(low<=high){
+      var mid=Math.floor((low+high)/2), v=list[mid-1];
+      var d=v===target?'found it':(target<v?'target is smaller, keep the lower half':'target is larger, keep the upper half');
+      F.push({low:low,high:high,mid:mid,v:v,decision:d});
+      if(v===target) return {found:true,frames:F};
+      if(target<v) high=mid-1; else low=mid+1;
+    }
+    return {found:false,frames:F};
+  }
+  w.__bsearch=bsFrames;
+  var srlist=document.getElementById('srlist'), srtar=document.getElementById('srtar'), srcells=document.getElementById('srcells'), srtab=document.getElementById('srtab'), srres=document.getElementById('srres'), srI=0, srB=null, srL=null;
+  function srLoad(){
+    var parts=srlist.value.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s!==''; }), nums=parts.map(Number), t=Number(srtar.value);
+    srcells.innerHTML=''; srtab.innerHTML='';
+    if(nums.length<1||nums.length>31||nums.some(function(x){ return isNaN(x); })||srtar.value.trim()===''||isNaN(t)){ srres.textContent='Enter 1 to 31 numbers separated by commas, and a target number.'; srB=null; ['srnext','srback','srrun','srreset'].forEach(function(id){ document.getElementById(id).disabled=true; }); return; }
+    for(var k=1;k<nums.length;k++) if(nums[k]<nums[k-1]){ srres.textContent='Binary search needs sorted data, and this list is not sorted. Put the numbers in increasing order first.'; srB=null; ['srnext','srback','srrun','srreset'].forEach(function(id){ document.getElementById(id).disabled=true; }); return; }
+    srB=bsFrames(nums,t); var idx=nums.indexOf(t); srL={checks:idx>=0?idx+1:nums.length,found:idx>=0}; srI=0; srNums=nums; srDraw();
+  }
+  var srNums=[];
+  function srDraw(){
+    if(!srB) return;
+    var F=srB.frames, shown=Math.min(srI+1,F.length), cur=F[Math.min(srI,F.length-1)];
+    srcells.innerHTML=srNums.map(function(v,k){ var pos=k+1, st='';
+      if(srI<F.length){ if(pos<cur.low||pos>cur.high) st=' gone'; else if(pos===cur.mid) st=' mid'; else st=' live'; }
+      else { st=' gone'; }
+      return '<div class="scell'+st+'"><b>'+v+'</b><small>'+pos+'</small></div>'; }).join('');
+    var rows='<tr><th>Check</th><th>Values left</th><th>Middle</th><th>What happens</th></tr>';
+    for(var i=0;i<shown;i++){ var f=F[i]; rows+='<tr'+(i===srI?' class="cur"':'')+'><td>'+(i+1)+'</td><td class="vv">'+f.low+' to '+f.high+' ('+(f.high-f.low+1)+' values)</td><td class="vv">position '+f.mid+' = '+f.v+'</td><td>'+f.decision+'</td></tr>'; }
+    srtab.innerHTML=rows;
+    var finished=srI>=F.length-1;
+    srres.textContent='Binary search: '+(finished?(srB.found?'found in '+F.length+' check'+(F.length===1?'':'s')+'.':'not found after '+F.length+' check'+(F.length===1?'':'s')+'.'):'step '+(srI+1)+' of '+F.length+'.')+'   Linear search would use '+srL.checks+' check'+(srL.checks===1?'':'s')+(srL.found?'.':' (it has to look at every value).');
+    document.getElementById('srnext').disabled=finished; document.getElementById('srback').disabled=(srI===0); document.getElementById('srrun').disabled=finished; document.getElementById('srreset').disabled=(srI===0);
+  }
+  [srlist,srtar].forEach(function(el){ el.addEventListener('input',srLoad); });
+  document.getElementById('srnext').addEventListener('click',function(){ if(srB&&srI<srB.frames.length-1){ srI++; srDraw(); } });
+  document.getElementById('srback').addEventListener('click',function(){ if(srI>0){ srI--; srDraw(); } });
+  document.getElementById('srrun').addEventListener('click',function(){ if(srB){ srI=srB.frames.length-1; srDraw(); } });
+  document.getElementById('srreset').addEventListener('click',function(){ srI=0; srDraw(); });
+  srLoad();
+
+  // ---------- Growth of work ----------
+  function fmtBig(b){
+    var s=b.toString();
+    if(s.length<=15) return s.replace(/\B(?=(\d{3})+(?!\d))/g,',');
+    return s.charAt(0)+'.'+s.slice(1,4)+' × 10^'+(s.length-1);
+  }
+  function fmtNum(x){
+    if(x<1e15) return String(Math.round(x)).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+    var e=x.toExponential(3).split('e+'); return e[0]+' × 10^'+e[1];
+  }
+  function growthRows(n){
+    var c=0, t=n, k, vals; while(t>0){ c++; t=Math.floor(t/2); }
+    if(typeof BigInt==='function'){
+      var B=BigInt, N=B(n), fact=B(1), two=B(1);
+      for(k=1;k<=n;k++){ fact=fact*B(k); two=two*B(2); }
+      vals=[fmtBig(N),fmtBig(N*N),fmtBig(N*N*N),fmtBig(two),fmtBig(fact)];
+    } else {
+      var f=1, p=1; for(k=1;k<=n;k++){ f*=k; p*=2; }
+      vals=[fmtNum(n),fmtNum(n*n),fmtNum(n*n*n),fmtNum(p),fmtNum(f)];
+    }
+    return [
+      {name:'Binary search (most checks, sorted data)',val:String(c),tag:'reasonable'},
+      {name:'Linear search, or one pass through the data (n)',val:vals[0],tag:'reasonable'},
+      {name:'Nested passes (n²)',val:vals[1],tag:'reasonable'},
+      {name:'Triple-nested passes (n³)',val:vals[2],tag:'reasonable'},
+      {name:'Try every on/off combination (2ⁿ)',val:vals[3],tag:'unreasonable'},
+      {name:'Try every ordering (n!)',val:vals[4],tag:'unreasonable'}
+    ];
+  }
+  w.__growth=growthRows; w.__fmtBig=fmtBig;
+  var grn=document.getElementById('grn'), grtab=document.getElementById('grtab'), grlab=document.getElementById('grlab');
+  function drawGR(){
+    var n=parseInt(grn.value,10); grlab.textContent=n;
+    grtab.innerHTML='<tr><th>Kind of algorithm</th><th>Steps for n = '+n+'</th><th>Time</th></tr>'+growthRows(n).map(function(r){ return '<tr><td>'+r.name+'</td><td class="vv">'+r.val+'</td><td class="'+(r.tag==='reasonable'?'t':'f')+'">'+r.tag+'</td></tr>'; }).join('');
+  }
+  grn.addEventListener('input',drawGR); drawGR();
+
+  // ---------- Simulation ----------
+  function simExpected(dice){
+    var e={}, k, d;
+    if(dice===1){ for(k=1;k<=6;k++) e[k]=100/6; return e; }
+    for(k=2;k<=12;k++){ var ways=6-Math.abs(k-7); e[k]=100*ways/36; }
+    return e;
+  }
+  function simRun(dice,trials,rng){
+    var counts={}, k, t, d, s;
+    for(k=dice;k<=6*dice;k++) counts[k]=0;
+    for(t=0;t<trials;t++){ s=0; for(d=0;d<dice;d++) s+=Math.floor(rng()*6)+1; counts[s]++; }
+    return counts;
+  }
+  w.__simRun=simRun; w.__simExpected=simExpected;
+  var sidice=document.getElementById('sidice'), sitr=document.getElementById('sitr'), sibars=document.getElementById('sibars'), sinote=document.getElementById('sinote');
+  function drawSI(){
+    var dice=parseInt(sidice.value,10), trials=parseInt(sitr.value,10), c=simRun(dice,trials,Math.random), e=simExpected(dice);
+    var keys=Object.keys(c).map(Number), mx=Math.max.apply(null,keys.map(function(k){ return Math.max(100*c[k]/trials,e[k]); }));
+    sibars.innerHTML=keys.map(function(k){
+      var ob=100*c[k]/trials, hgt=Math.max(2,Math.round(110*ob/mx)), eh=Math.round(110*e[k]/mx);
+      return '<div class="hcol"><div class="hplot"><div class="hbar" style="height:'+hgt+'px"></div><div class="hexp" style="bottom:'+eh+'px"></div></div><b>'+k+'</b><small>'+ob.toFixed(1)+'%</small></div>'; }).join('');
+    sinote.textContent=trials.toLocaleString('en-US')+' trials of RANDOM(1, 6)'+(dice===2?' added to RANDOM(1, 6)':'')+'. Bars are what happened; the line marks the percentage you would expect in the long run. Run it again and the bars change.';
+  }
+  document.getElementById('sirun').addEventListener('click',drawSI); sidice.addEventListener('change',drawSI); sitr.addEventListener('change',drawSI); drawSI();
+
+  // ---------- Tile map maze ----------
+  var MZ0=[[0,0,0,1,0,0,0,0],[0,1,0,1,0,1,1,0],[0,1,0,0,0,0,1,0],[0,1,1,1,1,0,1,0],[0,0,0,0,1,0,0,0],[1,1,1,0,1,1,1,0],[0,0,0,0,0,0,1,0],[0,1,1,1,1,0,0,2]];
+  var mzMap=MZ0.map(function(r){ return r.slice(); }), mzPos={r:0,c:0}, mzMoves=0, mzGrid=document.getElementById('mzgrid'), mzNote=document.getElementById('mznote'), mzData=document.getElementById('mzdata');
+  function mazeStep(map,pos,dir){
+    var dr={U:-1,D:1,L:0,R:0}[dir], dc={U:0,D:0,L:-1,R:1}[dir], r=pos.r+dr, c=pos.c+dc;
+    if(r<0||c<0||r>=map.length||c>=map[0].length||map[r][c]===1) return {r:pos.r,c:pos.c,moved:false};
+    return {r:r,c:c,moved:true};
+  }
+  w.__mazeStep=mazeStep; w.__mazeDefault=MZ0;
+  function mzDraw(){
+    var h='';
+    for(var r=0;r<8;r++) for(var c=0;c<8;c++){
+      var v=mzMap[r][c], here=(r===mzPos.r&&c===mzPos.c);
+      h+='<button class="mzc t'+v+(here?' me':'')+'" data-r="'+r+'" data-c="'+c+'" aria-label="'+(here?'player, ':'')+(v===1?'wall':v===2?'goal':'floor')+' at row '+(r+1)+', column '+(c+1)+'">'+(here?'☺':(v===2?'★':''))+'</button>';
+    }
+    mzGrid.innerHTML=h;
+    mzData.textContent=mzMap.map(function(r){ return '['+r.join(', ')+']'; }).join('\n');
+    var won=(mzMap[mzPos.r][mzPos.c]===2);
+    mzNote.textContent=won?'You reached the goal in '+mzMoves+' moves!':'Moves: '+mzMoves+'. Walls (1) block the player; the goal (2) ends the game.';
+  }
+  function mzMove(d){
+    if(mzMap[mzPos.r][mzPos.c]===2) return;
+    var s=mazeStep(mzMap,mzPos,d); if(s.moved){ mzPos={r:s.r,c:s.c}; mzMoves++; } mzDraw();
+  }
+  ['U','D','L','R'].forEach(function(d){ document.getElementById('mz'+d).addEventListener('click',function(){ mzMove(d); }); });
+  mzGrid.addEventListener('click',function(e){
+    var b=e.target.closest('.mzc'); if(!b) return; var r=+b.dataset.r, c=+b.dataset.c;
+    if((r===mzPos.r&&c===mzPos.c)||mzMap[r][c]===2) return;
+    mzMap[r][c]=mzMap[r][c]===1?0:1; mzDraw();
+  });
+  document.getElementById('mzwrap').addEventListener('keydown',function(e){
+    var m={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R'}[e.key]; if(m){ e.preventDefault(); mzMove(m); }
+  });
+  document.getElementById('mzreset').addEventListener('click',function(){ mzMap=MZ0.map(function(r){ return r.slice(); }); mzPos={r:0,c:0}; mzMoves=0; mzDraw(); });
+  mzDraw();
+
+  // ---------- Project checklist ----------
+  state.proj=state.proj||{}; state.proj.req=state.proj.req||{};
+  var preqs=document.querySelectorAll('.preq');
+  function reqDraw(){
+    var n=0; preqs.forEach(function(c){ if(c.checked) n++; });
+    document.getElementById('reqscore').textContent=n+' of '+preqs.length+' requirements met';
+    document.getElementById('reqbar').style.width=(100*n/preqs.length)+'%';
+  }
+  preqs.forEach(function(c){ c.checked=!!state.proj.req[c.id]; c.addEventListener('change',function(){ state.proj.req[c.id]=c.checked; save(state); reqDraw(); }); });
+  reqDraw();
+
+  // ---------- flashcards ----------
+  var vocab=[["procedure", "A named group of programming instructions that may have parameters and return a value. Also called a function or method."], ["parameter", "An input variable of a procedure, named in its definition."], ["argument", "The value given for a parameter when a procedure is called."], ["return value", "The value a procedure gives back with RETURN to the place it was called."], ["procedure call", "Interrupts the sequence: the procedure runs, then control returns to just after the call."], ["procedural abstraction", "Giving a process a name so it can be used knowing what it does, not how it does it."], ["modularity", "Dividing a program into separate subprograms (procedures)."], ["software library", "A collection of procedures that can be used to build new programs."], ["extension (MakeCode)", "A library of blocks you can import into a project. You can also write and share your own."], ["API", "Application program interface: the specification of how a library’s procedures behave and how to use them."], ["Boolean value", "Either true or false."], ["logical operator", "NOT, AND, OR. They combine or reverse Boolean values."], ["string concatenation", "Joining two or more strings end to end to make a new string."], ["REPEAT UNTIL", "Repeats its block until the condition is true (it runs while the condition is false)."], ["multiplayer", "A game with more than one player, each with their own controls, sprite, and score."], ["tile map", "A scene built from a grid of tiles; some tiles (such as walls) can block sprites."], ["list (array)", "An ordered sequence of values. Each value is an element with its own index."], ["element", "One value in a list."], ["index", "The position of an element in a list. AP exam lists start at 1; MakeCode lists start at 0."], ["data abstraction", "Using a list to treat many related values as one named thing, which manages complexity."], ["traversal", "Visiting the elements of a list. Complete: all of them. Partial: only some."], ["FOR EACH", "Gives item each value of a list, in order. It gives values, not indexes."], ["APPEND / INSERT / REMOVE", "Add to the end / add at an index and shift the rest right / delete at an index and shift the rest left."], ["linear search", "Checks each element in order until the value is found or every element has been checked."], ["binary search", "On sorted data, checks the middle and eliminates half; repeats until found or nothing is left."], ["sorting", "Putting data in order. Bubble, selection, and insertion sort do this in different ways."], ["efficiency", "An estimate of the computing resources an algorithm uses, usually as a function of the input size."], ["reasonable time", "Polynomial efficiency or lower (constant, linear, square, cube, and so on)."], ["unreasonable time", "Exponential or factorial efficiency."], ["decision problem", "A problem with a yes/no answer."], ["optimization problem", "A problem that looks for the best solution among many."], ["heuristic", "An approach that finds a good solution when the best is impractical, but may not be the best."], ["problem vs instance", "A problem is a general task (sorting). An instance is one specific input (sorting 2, 3, 1, 7)."], ["simulation", "A representation that uses varying values to reflect the changing state of a phenomenon."], ["undecidable problem", "A problem for which no algorithm can always give a correct yes-or-no answer."], ["repository", "The shared place on GitHub where a project’s files and history are kept."], ["commit / push / pull", "Save a snapshot of changes / upload commits to the shared repository / download a partner’s changes."]];
+  var deck=document.getElementById('deck');
+  function buildDeck(list){
+    deck.innerHTML='';
+    list.forEach(function(pair){
+      var c=document.createElement('div'); c.className='card'; c.tabIndex=0; c.textContent=pair[0];
+      function flip(){ c.classList.toggle('flip'); c.textContent=c.classList.contains('flip')?pair[1]:pair[0]; }
+      c.addEventListener('click',flip);
+      c.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); flip(); } });
+      deck.appendChild(c);
+    });
+  }
+  buildDeck(vocab);
+  document.getElementById('shuffle').addEventListener('click',function(){
+    var a=vocab.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=a[i]; a[i]=a[j]; a[j]=tmp; } buildDeck(a);
+  });
+
+  // ---------- quiz ----------
+  var Q=[{"t": "Procedures", "s": "What is displayed?", "o": ["5", "50", "55", "110"], "a": 2, "w": "The call returns 50 + (50 × 0.1) = 55. The 5 is only the tax, and 50 is the price without it.", "c": "PROCEDURE addTax(price)\n{\n    RETURN(price + (price * 0.1))\n}\nDISPLAY(addTax(50))"}, {"t": "Procedures", "s": "In `PROCEDURE area(width, height)`, which are the parameters?", "o": ["width and height", "the values passed when area is called", "the number that area returns", "area"], "a": 0, "w": "Parameters are the input variables named in the definition. The values passed in a call are arguments."}, {"t": "Procedures", "s": "What is displayed?", "o": ["2 4 8 1", "4 8 1 2", "1 2 4 8", "1 4 8 2"], "a": 3, "w": "The main program shows 1, then the call to show runs (it shows 4 and 8), and the program continues with 2.", "c": "PROCEDURE show(n)\n{\n    DISPLAY(n)\n    DISPLAY(n * 2)\n}\nDISPLAY(1)\nshow(4)\nDISPLAY(2)"}, {"t": "Procedures", "s": "Which is a benefit of procedural abstraction?", "o": ["The procedure always runs faster", "A programmer can use a procedure by knowing what it does without knowing how it works", "The program no longer needs any variables", "A procedure can never contain errors"], "a": 1, "w": "Procedural abstraction gives a process a name, so it can be used without knowing the details inside. It also makes code easier to read and reuse."}, {"t": "Libraries", "s": "What does an application program interface (API) specify?", "o": ["The color theme of a library", "The number of people who use a library", "How fast a computer runs", "How the procedures in a library behave and how to use them"], "a": 3, "w": "An API describes how procedures behave and how other programs can use them, which is what you read to learn the parameters and return values."}, {"t": "Logic", "s": "What is displayed?", "o": ["true", "false", "a", "an error"], "a": 0, "w": "NOT a is NOT false, which is true. true AND b (true) is true.", "c": "a ← false\nb ← true\nDISPLAY((NOT a) AND b)"}, {"t": "Logic", "s": "Which expression is equivalent to `NOT (a OR b)`?", "o": ["(NOT a) OR (NOT b)", "(NOT a) AND (NOT b)", "a AND b", "NOT a"], "a": 1, "w": "De Morgan’s law: negate each part and switch OR to AND.", "m": 1}, {"t": "Logic", "s": "What is displayed?", "o": ["10", "15", "20", "30"], "a": 2, "w": "After two passes score is 20 and lives is 1. The condition score ≥ 20 is true, so the loop stops even though lives is not 0.", "c": "lives ← 3\nscore ← 0\nREPEAT UNTIL ((lives = 0) OR (score ≥ 20))\n{\n    score ← score + 10\n    lives ← lives - 1\n}\nDISPLAY(score)"}, {"t": "Lists", "s": "What is displayed?", "o": ["20 4", "40 4", "40 3", "30 4"], "a": 1, "w": "aList[2] gets the value of aList[4], which is 40. The length does not change.", "c": "aList ← [10, 20, 30, 40]\naList[2] ← aList[4]\nDISPLAY(aList[2])\nDISPLAY(LENGTH(aList))"}, {"t": "Lists", "s": "What is displayed?", "o": ["2", "3", "9", "an error"], "a": 0, "w": "INSERT makes [1, 9, 2, 3]. REMOVE at 4 removes the 3, leaving [1, 9, 2]. Index 3 holds 2.", "c": "aList ← [1, 2, 3]\nINSERT(aList, 2, 9)\nREMOVE(aList, 4)\nDISPLAY(aList[3])"}, {"t": "Lists", "s": "What happens when this runs?", "o": ["It displays 7", "It displays 5", "The program stops with an error", "It displays 0"], "a": 2, "w": "LENGTH(aList) + 1 is 4, which is past the end of a 3-element list. An index above LENGTH makes the program stop with an error.", "c": "aList ← [5, 6, 7]\nDISPLAY(aList[LENGTH(aList) + 1])"}, {"t": "List algorithms", "s": "What is displayed?", "o": ["80", "85", "90", "340"], "a": 1, "w": "FOR EACH adds the scores to get 340. Dividing by LENGTH (4) gives 85.", "c": "scores ← [70, 80, 90, 100]\ntotal ← 0\nFOR EACH s IN scores\n{\n    total ← total + s\n}\nDISPLAY(total / LENGTH(scores))"}, {"t": "List algorithms", "s": "What is displayed?", "o": ["-8", "-3", "-1", "0"], "a": 3, "w": "max starts at 0, and no element in the list is greater than 0, so the code reports 0, which is not even in the list. It should start with the first element.", "c": "nums ← [-3, -8, -1]\nmax ← 0\nFOR EACH n IN nums\n{\n    IF (n > max)\n    {\n        max ← n\n    }\n}\nDISPLAY(max)"}, {"t": "Sorting", "s": "Which algorithm repeatedly compares neighboring values and swaps them when they are out of order?", "o": ["Selection sort", "Insertion sort", "Bubble sort", "Binary search"], "a": 2, "w": "That describes bubble sort. Selection sort picks the smallest remaining value, and insertion sort inserts each value into a sorted part."}, {"t": "Searching", "s": "Which is required before a binary search can be used?", "o": ["The list is sorted", "The list has an even number of values", "The list contains no repeated values", "The list is stored in a variable named list"], "a": 0, "w": "Binary search eliminates half of the data each step based on comparing with the middle value, which only works when the data is in order."}, {"t": "Searching", "s": "A sorted list has 15 values. At most how many values does a binary search check?", "o": ["3", "4", "8", "15"], "a": 1, "w": "Each check halves the remaining values: 15, 7, 3, 1. That is at most 4 checks."}, {"t": "Searching", "s": "A sorted list has 1000 values. At most how many values does a binary search check?", "o": ["10", "100", "500", "1000"], "a": 0, "w": "Halving 1000 repeatedly gets to 1 in about 10 steps (2 to the 10th power is 1024). A linear search could need up to 1000 checks."}, {"t": "Efficiency", "s": "Which algorithm runs in an unreasonable amount of time?", "o": ["One that takes about n steps", "One that takes about n² steps", "One that takes about 2ⁿ steps", "One that takes about n³ steps"], "a": 2, "w": "Exponential growth (such as 2ⁿ) and factorial growth are unreasonable. Polynomial growth (n, n², n³) is reasonable."}, {"t": "Efficiency", "s": "What is a heuristic?", "o": ["An approach that is guaranteed to find the best solution", "A problem with a yes/no answer", "A collection of procedures in a library", "An approach that finds a good solution when the best is impractical to find, but is not guaranteed to be the best"], "a": 3, "w": "Heuristics trade a guarantee of the best answer for a good answer in a reasonable amount of time."}, {"t": "Simulations", "s": "Which situation is the best reason to use a simulation?", "o": ["Studying a volcanic eruption, where real experiments would be too dangerous", "Adding two small numbers", "Printing a document", "Sorting a short list"], "a": 0, "w": "Simulations are most useful when real-world events are impractical for experiments, for example too big, too small, too fast, too slow, too expensive, or too dangerous."}, {"t": "Undecidable problems", "s": "An undecidable problem is one for which…", "o": ["an algorithm exists but it takes too long", "no algorithm can always give a correct yes-or-no answer", "the answer is always no", "the data is too large to store"], "a": 1, "w": "For an undecidable problem, no algorithm can be built that is always correct for every instance. Some instances may still be solvable."}, {"t": "Efficiency", "s": "“Is there a path from A to B?” is an example of what kind of problem?", "o": ["an optimization problem", "an instance", "a decision problem", "a heuristic"], "a": 2, "w": "A decision problem has a yes/no answer. An optimization problem would ask for the best path, such as the shortest one."}, {"t": "Project", "s": "Which action uploads your commits to a shared GitHub repository so your partner can get them?", "o": ["pull", "commit", "delete", "push"], "a": 3, "w": "Commit saves a snapshot of your changes. Push uploads your commits. Pull downloads your partner’s changes."}, {"t": "Lists", "s": "A MakeCode list is `[10, 20, 30]`. Which expression gets the 20?", "o": ["list[0]", "list[2]", "list[20]", "list[1]"], "a": 3, "w": "MakeCode lists start at index 0, so the second element is list[1]. (On the AP exam, the same element is aList[2].)", "m": 1}];
+  var box=document.getElementById('quizbox'), picks={};
+  document.getElementById('qintro').textContent=Q.length+' questions in AP style. Pick an answer to see the reasoning; your best score saves.';
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+  function fmt(s){ return esc(s).replace(/`([^`]+)`/g,'<code>$1</code>'); }
+  function buildQuiz(){
+    box.innerHTML=''; picks={};
+    Q.forEach(function(q,i){
+      var d=document.createElement('div'); d.className='qz'+(q.m?' mono':'');
+      var h='<div class="stem">'+(i+1)+'. '+fmt(q.s)+'</div>';
+      if(q.c) h+='<pre class="ap">'+q.c.split('\n').map(apHl).join('\n')+'</pre>';
+      q.o.forEach(function(o,j){ h+='<label class="opt"><input type="radio" name="q'+i+'" value="'+j+'"><span><b>'+'ABCD'.charAt(j)+'.</b> '+fmt(o)+'</span></label>'; });
+      h+='<div class="why">'+fmt(q.w)+'</div>';
+      d.innerHTML=h;
+      d.querySelectorAll('input').forEach(function(r){
+        r.addEventListener('change',function(){
+          var j=parseInt(r.value,10); picks[i]=j;
+          d.querySelectorAll('.opt').forEach(function(o,k){ o.classList.remove('right','wrong'); if(k===q.a) o.classList.add('right'); else if(k===j) o.classList.add('wrong'); });
+          d.querySelector('.why').classList.add('show');
+          d.querySelectorAll('input').forEach(function(x){ x.disabled=true; });
+        });
+      });
+      box.appendChild(d);
+    });
+    document.getElementById('scorebox').style.display='none';
+  }
+  buildQuiz();
+  document.getElementById('grade').addEventListener('click',function(){
+    var n=0, byTopic={};
+    Q.forEach(function(q,i){ byTopic[q.t]=byTopic[q.t]||{n:0,c:0}; byTopic[q.t].n++; if(picks[i]===q.a){ n++; byTopic[q.t].c++; } });
+    var sb=document.getElementById('scorebox'), answered=Object.keys(picks).length;
+    var h='<b>'+n+' of '+Q.length+' correct</b>'+(answered<Q.length?' <span class="sub">('+(Q.length-answered)+' unanswered)</span>':'');
+    Object.keys(byTopic).forEach(function(t){ var b=byTopic[t]; h+='<div class="topicbar"><span>'+t+'</span><div class="bar"><i style="width:'+(100*b.c/b.n)+'%"></i></div><span style="width:40px">'+b.c+'/'+b.n+'</span></div>'; });
+    sb.innerHTML=h; sb.style.display='block';
+    if(state.best==null||n>state.best){ state.best=n; save(state); }
+    document.getElementById('pq').textContent=state.best+'/'+Q.length;
+  });
+  document.getElementById('requiz').addEventListener('click',buildQuiz);
+  updateProg();
+
+  // ---------- nav ----------
+  var links=document.querySelectorAll('#nav a'), secs=document.querySelectorAll('main>section');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ links.forEach(function(l){ l.classList.toggle('on', l.getAttribute('href')==='#'+e.target.id); }); } }); },{rootMargin:'-20% 0px -70% 0px'});
+    secs.forEach(function(s){ io.observe(s); });
+  }
+  if(location.hash){ var el=document.getElementById(location.hash.slice(1)); if(el) el.scrollIntoView(); }
+})();
+
+</script>
+</body>
+</html>
